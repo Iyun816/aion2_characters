@@ -1,73 +1,334 @@
-# React + TypeScript + Vite
+# 椿夏军团官网
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![AION2](https://img.shields.io/badge/AION2-天族-6b9fd8)
+![React](https://img.shields.io/badge/React-19.0-61dafb)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178c6)
+![Vite](https://img.shields.io/badge/Vite-6.0-646cff)
 
-Currently, two official plugins are available:
+> 愿如椿树常青，共度盛夏时光
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+AION2 天族 · 希埃尔服务器「椿夏」军团官方网站。一个温暖的 PVE 休闲军团，专注于副本开荒、日常陪伴、团结互助。
 
-## React Compiler
+## ✨ 项目特性
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 🎮 **军团展示** - 军团信息、成员展示、角色数据卡片
+- 📷 **军团相册** - 支持用户上传，管理员审核机制
+- 👥 **成员管理** - 军团长/精英/成员分层展示
+- 🔐 **管理后台** - 军团长管理面板，相册审核功能
+- 📱 **响应式设计** - 支持桌面端和移动端访问
+- 🎨 **天族主题** - 采用天族蓝色调设计风格
 
-## Expanding the ESLint configuration
+## 🛠 技术栈
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **前端框架**: React 19
+- **语言**: TypeScript
+- **构建工具**: Vite 6
+- **路由**: React Router v6
+- **样式**: 原生 CSS + CSS 变量
+- **数据存储**: localStorage
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📦 本地开发
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 环境要求
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js >= 18.0
+- npm >= 9.0
+
+### 安装依赖
+
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 启动开发服务器
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+开发服务器将在 `http://localhost:5173` 启动。
+
+**局域网访问**：开发服务器已配置 `host: '0.0.0.0'`，可通过局域网 IP 访问（如 `http://192.168.31.90:5173`）。
+
+### 构建生产版本
+
+```bash
+npm run build
+```
+
+构建产物将输出到 `dist` 目录。
+
+### 预览生产版本
+
+```bash
+npm run preview
+```
+
+## 🚀 部署教程（宝塔面板）
+
+### 方式一：静态文件部署（推荐）
+
+#### 1. 安装 Node.js 环境
+
+1. 登录宝塔面板
+2. 进入「软件商店」
+3. 搜索并安装「PM2管理器」（会自动安装 Node.js）
+4. 或者直接安装「Node.js 版本管理器」
+
+#### 2. 准备项目文件
+
+**方式 A：通过 Git（推荐）**
+
+```bash
+# SSH 登录服务器后
+cd /www/wwwroot/
+git clone <你的仓库地址> chunxia-legion
+cd chunxia-legion
+```
+
+**方式 B：通过 FTP 上传**
+
+1. 使用 FTP 工具连接服务器
+2. 上传整个项目文件夹到 `/www/wwwroot/chunxia-legion`
+
+#### 3. 安装依赖并构建
+
+```bash
+cd /www/wwwroot/chunxia-legion
+
+# 如果 npm 下载慢，可以使用国内镜像
+npm config set registry https://registry.npmmirror.com
+
+# 安装依赖
+npm install
+
+# 构建生产版本
+npm run build
+```
+
+#### 4. 配置 Nginx
+
+1. 进入宝塔面板「网站」
+2. 点击「添加站点」
+   - 域名：填写你的域名（如 `chunxia.example.com`）
+   - 根目录：选择 `/www/wwwroot/chunxia-legion/dist`
+   - PHP 版本：选择「纯静态」
+3. 点击站点设置 → 「伪静态」，添加以下规则：
+
+```nginx
+location / {
+    try_files $uri $uri/ /index.html;
+}
+```
+
+4. 保存配置
+
+#### 5. 配置 SSL 证书（可选但推荐）
+
+1. 在站点设置中点击「SSL」
+2. 选择「Let's Encrypt」免费证书
+3. 填写邮箱，勾选域名
+4. 点击「申请」
+5. 申请成功后，开启「强制 HTTPS」
+
+#### 6. 访问网站
+
+直接通过域名访问即可：`https://chunxia.example.com`
+
+### 方式二：PM2 进程管理（不推荐）
+
+> **注意**：本项目是纯静态站点，使用 Nginx 托管即可，不需要 PM2。仅在有特殊需求时使用此方式。
+
+#### 1. 安装并配置 PM2
+
+```bash
+cd /www/wwwroot/chunxia-legion
+
+# 安装依赖
+npm install
+
+# 使用 PM2 启动 Vite 预览服务器
+pm2 start npm --name "chunxia-legion" -- run preview
+
+# 保存 PM2 配置
+pm2 save
+
+# 设置开机自启
+pm2 startup
+```
+
+#### 2. 配置 Nginx 反向代理
+
+在宝塔面板的站点设置 → 「反向代理」中添加：
+
+- 代理名称：chunxia-legion
+- 目标 URL：`http://127.0.0.1:4173`
+- 发送域名：`$host`
+
+### 🔄 更新部署
+
+当代码更新后，重新部署：
+
+```bash
+cd /www/wwwroot/chunxia-legion
+
+# 拉取最新代码
+git pull
+
+# 安装新依赖（如果有）
+npm install
+
+# 重新构建
+npm run build
+
+# 如果是静态部署，到此结束
+# 如果是 PM2 方式，需要重启
+pm2 restart chunxia-legion
+```
+
+### ⚠️ 常见问题
+
+#### 1. npm install 失败
+
+**原因**：网络问题或依赖冲突
+
+**解决方案**：
+```bash
+# 使用国内镜像
+npm config set registry https://registry.npmmirror.com
+
+# 清理缓存重试
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+#### 2. 构建后页面空白
+
+**原因**：路由配置或资源路径问题
+
+**解决方案**：
+- 确认 Nginx 已配置 `try_files` 规则
+- 检查浏览器控制台是否有报错
+- 确认 `dist` 目录下文件完整
+
+#### 3. 刷新页面 404
+
+**原因**：Nginx 未配置 SPA 路由规则
+
+**解决方案**：
+在站点伪静态中添加：
+```nginx
+location / {
+    try_files $uri $uri/ /index.html;
+}
+```
+
+#### 4. 图片上传后刷新消失
+
+**原因**：localStorage 数据存储在浏览器端
+
+**说明**：
+- 目前图片存储在 localStorage（浏览器本地存储）
+- 不同设备或浏览器之间数据不共享
+- 如需多端同步，需要对接后端 API
+
+## 📁 项目结构
+
+```
+chunxia-legion/
+├── public/                 # 静态资源
+│   ├── images/            # 图片资源
+│   │   ├── hero-bg.png   # 首页背景
+│   │   └── legion-logo.jpg # 军团徽章
+│   └── data/              # 成员数据
+│       ├── members.json   # 成员配置
+│       └── [角色ID]/
+│           └── character_info.json  # 角色详情
+├── src/
+│   ├── components/        # 组件
+│   │   ├── Header.tsx/css        # 导航栏
+│   │   ├── Hero.tsx/css          # 首页英雄区
+│   │   ├── Footer.tsx/css        # 页脚
+│   │   └── admin/                # 管理后台组件
+│   │       ├── AdminPanel.tsx/css
+│   │       └── GalleryManager.tsx/css
+│   ├── pages/             # 页面
+│   │   ├── HomePage.tsx/css      # 首页
+│   │   ├── LegionPage.tsx/css    # 军团页面
+│   │   └── MemberDetailPage.tsx/css # 成员详情
+│   ├── data/              # 数据类型定义
+│   │   └── memberTypes.ts # 成员类型
+│   ├── App.tsx            # 主应用组件
+│   ├── main.tsx           # 入口文件
+│   └── index.css          # 全局样式
+├── vite.config.ts         # Vite 配置
+├── tsconfig.json          # TypeScript 配置
+└── package.json           # 项目依赖
+```
+
+## 🎨 主题配置
+
+主题色系统使用 CSS 变量定义在 [src/index.css](src/index.css:6-10) 中：
+
+```css
+:root {
+  /* 主色调 - 淡雅天族蓝 */
+  --color-primary: #6b9fd8;
+  --color-primary-light: #8fb9e5;
+  --color-primary-dark: #4a7db3;
+}
+```
+
+如需修改主题色，编辑这些变量即可全局生效。
+
+## 👥 数据管理
+
+### 添加新成员
+
+1. 在 `/public/data/members.json` 中添加成员配置：
+
+```json
+{
+  "id": "角色ID",
+  "role": "leader|elite|member",
+  "joinDate": "2024-12-01"
+}
+```
+
+2. 创建角色数据文件 `/public/data/[角色ID]/character_info.json`：
+
+```json
+{
+  "profile": {
+    "characterName": "角色名",
+    "className": "职业名",
+    "characterLevel": 60,
+    "profileImage": "https://..."
+  }
+}
+```
+
+### 相册管理
+
+- **用户上传**：访问「军团页面」→「军团相册」→「上传图片」
+- **管理审核**：访问管理后台（点击右上角 Admin）→「相册管理」
+- **首页展示**：审核通过后，可标记为「首页展示」，将在首页「成员风采」区域显示
+
+## 🔐 管理员登录
+
+默认密码：`chunxia2024`
+
+修改密码位置：[src/components/Header.tsx](src/components/Header.tsx:31)
+
+```typescript
+const ADMIN_PASSWORD = 'chunxia2024'; // 修改此处
+```
+
+## 📄 许可证
+
+MIT License
+
+---
+
+**椿夏军团** - 愿如椿树常青，共度盛夏时光 🌳☀️
