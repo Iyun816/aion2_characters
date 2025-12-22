@@ -77,8 +77,33 @@ function ensureDir(dirPath) {
  * 保存 JSON 文件
  */
 function saveJson(filePath, data) {
-  const json = JSON.stringify(data, null, 2);
-  fs.writeFileSync(filePath, json, 'utf-8');
+  try {
+    console.log(`    [DEBUG] 准备保存文件: ${filePath}`);
+
+    // 确保目录存在
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      console.log(`    [DEBUG] 目录不存在，创建: ${dir}`);
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    const json = JSON.stringify(data, null, 2);
+    console.log(`    [DEBUG] JSON 数据大小: ${json.length} 字符`);
+
+    fs.writeFileSync(filePath, json, 'utf-8');
+
+    // 验证文件是否真的被写入
+    if (fs.existsSync(filePath)) {
+      const stats = fs.statSync(filePath);
+      console.log(`    [DEBUG] ✓ 文件已保存，大小: ${stats.size} 字节`);
+    } else {
+      console.error(`    [DEBUG] ✗ 文件保存失败: 文件不存在`);
+    }
+  } catch (error) {
+    console.error(`    [ERROR] 保存文件失败: ${error.message}`);
+    console.error(`    [ERROR] 文件路径: ${filePath}`);
+    throw error;
+  }
 }
 
 /**
@@ -185,13 +210,18 @@ async function syncMemberData(member) {
   console.log(`开始同步成员: ${member.name} (${member.id})`);
   console.log('='.repeat(60));
 
+  // 先创建成员文件夹（即使没有配置 API）
+  const memberDir = path.join(DATA_DIR, member.id);
+  ensureDir(memberDir);
+  console.log(`  ✓ 成员文件夹已创建: ${memberDir}`);
+
   // 检查是否配置了 API 参数
   const hasNewFormat = member.characterInfoUrl && member.characterEquipmentUrl;
   const hasOldFormat = member.characterId && member.serverId !== undefined;
 
   if (!hasNewFormat && !hasOldFormat) {
-    console.log(`  ✗ 跳过: 未配置 API URL`);
-    return { success: false, reason: '未配置 API URL' };
+    console.log(`  ⚠ 未配置 API URL，跳过数据同步`);
+    return { success: true, reason: '未配置 API URL，仅创建文件夹' };
   }
 
   try {
@@ -205,10 +235,7 @@ async function syncMemberData(member) {
     await delay(REQUEST_DELAY);
     console.log(`  ✓ 装备列表获取成功`);
 
-    // 保存基础数据
-    const memberDir = path.join(DATA_DIR, member.id);
-    ensureDir(memberDir);
-
+    // 保存基础数据（文件夹已在开始时创建）
     const characterFile = path.join(memberDir, 'character_info.json');
     saveJson(characterFile, characterInfo);
     console.log(`  ✓ 角色信息已保存到: ${characterFile}`);

@@ -313,14 +313,12 @@ const MemberDetailPage = () => {
               className={`member-tabs__btn ${activeTab === 'equipment' ? 'member-tabs__btn--active' : ''}`}
               onClick={() => setActiveTab('equipment')}
             >
-              <span className="member-tabs__icon">⚔️</span>
               装备
             </button>
             <button
               className={`member-tabs__btn ${activeTab === 'skills' ? 'member-tabs__btn--active' : ''}`}
               onClick={() => setActiveTab('skills')}
             >
-              <span className="member-tabs__icon">✨</span>
               技能
             </button>
           </div>
@@ -330,10 +328,7 @@ const MemberDetailPage = () => {
             <div className="equipment-panel">
               {/* 主装备 */}
               <section className="equip-section">
-                <h4 className="equip-section__title">
-                  <span className="equip-section__icon">🗡️</span>
-                  装备
-                </h4>
+                <h4 className="equip-section__title">武器/防具/首饰</h4>
                 <div className="equip-section__grid">
                   {gearEquipment.map(renderEquipItem)}
                 </div>
@@ -342,10 +337,7 @@ const MemberDetailPage = () => {
               {/* 阿尔卡那 */}
               {arcanaEquipment.length > 0 && (
                 <section className="equip-section">
-                  <h4 className="equip-section__title">
-                    <span className="equip-section__icon">🔮</span>
-                    阿尔卡那
-                  </h4>
+                  <h4 className="equip-section__title">阿尔卡那</h4>
                   <div className="equip-section__grid">
                     {arcanaEquipment.map(renderEquipItem)}
                   </div>

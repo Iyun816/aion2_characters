@@ -748,3 +748,89 @@
     max-width: none;
   }
 }
+
+/* 语音频道 */
+.legion-voice {
+  padding: var(--spacing-xl) var(--spacing-md);
+  min-height: 50vh;
+}
+
+.legion-voice__container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.legion-voice__content {
+  text-align: center;
+  padding: var(--spacing-xl);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.legion-voice__icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-md);
+  display: block;
+}
+
+.legion-voice__title {
+  font-size: 1.8rem;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.legion-voice__description {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+.legion-voice__button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(123, 97, 255, 0.3);
+}
+
+.legion-voice__button:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(123, 97, 255, 0.4);
+}
+
+.legion-voice__button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.legion-voice__empty {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--color-text-muted);
+}
+
+.legion-voice__empty-icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+}
+
+.legion-voice__empty p:first-of-type {
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.legion-voice__empty p:last-of-type {
+  font-size: 0.9rem;
+}
+

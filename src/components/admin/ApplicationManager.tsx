@@ -52,64 +52,86 @@ const ApplicationManager: React.FC = () => {
 
     try {
       // 更新申请状态
-      const updatedApps = reviewApplication(
-        applications,
+      await reviewApplication(
         applicationId,
         'approved',
         reviewNote || undefined
       );
-      setApplications(updatedApps);
 
       // 如果选择创建成员
       if (createMember) {
-        const memberData = createMemberFromApplication(application);
+        let memberData = createMemberFromApplication(application);
+
+        // 检查 ID 是否重复，如果重复则添加数字后缀
+        let finalId = memberData.id;
+        let counter = 1;
+        while (members.some(m => m.id === finalId)) {
+          finalId = `${memberData.id}_${counter}`;
+          counter++;
+        }
+
         const fullMemberData: MemberConfig = {
           ...memberData,
+          id: finalId, // 使用去重后的 ID
           characterId: undefined,
           serverId: undefined,
         };
-        const updatedMembers = addMember(members, fullMemberData);
-        setMembers(updatedMembers);
-        alert(`申请已通过,成员 "${application.characterName}" 已创建`);
+
+        try {
+          await addMember(members, fullMemberData);
+          alert(`申请已通过,成员 "${application.characterName}" 已创建\nID: ${finalId}`);
+        } catch (error: any) {
+          // 如果还是重复（并发问题），给出明确提示
+          if (error.message.includes('已存在')) {
+            alert(`成员 ID 冲突，请手动在成员管理中添加\n建议 ID: ${finalId}_${Date.now()}`);
+          } else {
+            throw error;
+          }
+        }
       } else {
         alert('申请已通过');
       }
 
       setReviewingApp(null);
       setReviewNote('');
+
+      // 重新加载数据
+      loadData();
     } catch (error: any) {
       alert(error.message || '操作失败');
     }
   };
 
   // 拒绝申请
-  const handleReject = (applicationId: string) => {
+  const handleReject = async (applicationId: string) => {
     try {
-      const updatedApps = reviewApplication(
-        applications,
+      await reviewApplication(
         applicationId,
         'rejected',
         reviewNote || undefined
       );
-      setApplications(updatedApps);
       alert('申请已拒绝');
       setReviewingApp(null);
       setReviewNote('');
+
+      // 重新加载数据
+      loadData();
     } catch (error: any) {
       alert(error.message || '操作失败');
     }
   };
 
   // 删除申请
-  const handleDelete = (applicationId: string) => {
+  const handleDelete = async (applicationId: string) => {
     const application = applications.find(a => a.id === applicationId);
     if (!confirm(`确定要删除 "${application?.characterName}" 的申请吗?`)) {
       return;
     }
 
     try {
-      const updatedApps = deleteApplication(applications, applicationId);
-      setApplications(updatedApps);
+      await deleteApplication(applicationId);
+      // 重新加载数据
+      loadData();
     } catch (error: any) {
       alert(error.message || '删除失败');
     }

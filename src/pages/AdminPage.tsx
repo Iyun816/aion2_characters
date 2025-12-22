@@ -7,9 +7,10 @@ import MemberManager from '../components/admin/MemberManager';
 import ApplicationManager from '../components/admin/ApplicationManager';
 import DataSyncPanel from '../components/admin/DataSyncPanel';
 import GalleryManager from '../components/admin/GalleryManager';
+import ConfigManager from '../components/admin/ConfigManager';
 import './AdminPage.css';
 
-type TabType = 'members' | 'applications' | 'sync' | 'gallery';
+type TabType = 'members' | 'applications' | 'sync' | 'gallery' | 'config';
 
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();
@@ -68,6 +69,12 @@ const AdminPage: React.FC = () => {
         >
           数据同步
         </button>
+        <button
+          className={`admin-tabs__tab ${activeTab === 'config' ? 'admin-tabs__tab--active' : ''}`}
+          onClick={() => setActiveTab('config')}
+        >
+          全局配置
+        </button>
       </div>
 
       <div className="admin-content">
@@ -75,6 +82,7 @@ const AdminPage: React.FC = () => {
         {activeTab === 'applications' && <ApplicationManager />}
         {activeTab === 'gallery' && <GalleryManager />}
         {activeTab === 'sync' && <DataSyncPanel />}
+        {activeTab === 'config' && <ConfigManager />}
       </div>
     </div>
   );

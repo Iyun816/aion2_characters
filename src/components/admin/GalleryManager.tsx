@@ -1,59 +1,71 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './GalleryManager.css';
 
 interface GalleryImage {
   id: string;
-  src: string;
-  name: string;
+  filename: string;
+  originalName: string;
+  url: string;
   showOnHome: boolean;
-  approved: boolean;  // 审核状态：true=已审核通过, false=待审核
-  uploadTime?: string; // 上传时间
+  approved: boolean;
+  uploadTime?: string;
 }
 
-// 从 localStorage 读取相册数据
-const loadGalleryImages = (): GalleryImage[] => {
-  try {
-    const saved = localStorage.getItem('legion_gallery');
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
-};
-
-// 保存相册数据到 localStorage
-const saveGalleryImages = (images: GalleryImage[]) => {
-  localStorage.setItem('legion_gallery', JSON.stringify(images));
-};
-
 const GalleryManager = () => {
-  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(loadGalleryImages);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 处理图片上传
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 组件加载时获取图片列表
+  useEffect(() => {
+    loadGalleryImages();
+  }, []);
+
+  // 从后端加载所有图片（包括待审核）
+  const loadGalleryImages = async () => {
+    try {
+      const response = await fetch('/api/gallery/list');
+      const data = await response.json();
+      if (data.success) {
+        setGalleryImages(data.data);
+      }
+    } catch (error) {
+      console.error('加载相册失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 处理图片上传（管理员上传）
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const newImage: GalleryImage = {
-          id: Date.now().toString() + Math.random().toString(36).substring(2, 11),
-          src: event.target?.result as string,
-          name: file.name,
-          showOnHome: false,
-          approved: true, // 管理员上传默认审核通过
-          uploadTime: new Date().toISOString()
-        };
-        setGalleryImages(prev => {
-          const updated = [...prev, newImage];
-          saveGalleryImages(updated);
-          return updated;
+    for (const file of Array.from(files)) {
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('isAdmin', 'true'); // 管理员上传默认通过
+
+        const response = await fetch('/api/gallery/upload', {
+          method: 'POST',
+          body: formData
         });
-      };
-      reader.readAsDataURL(file);
-    });
+
+        const data = await response.json();
+
+        if (data.success) {
+          console.log('上传成功:', data.data);
+          // 重新加载图片列表
+          loadGalleryImages();
+        } else {
+          console.error('上传失败:', data.error);
+        }
+      } catch (error) {
+        console.error('上传错误:', error);
+      }
+    }
 
     // 清空 input 以便再次选择相同文件
     if (fileInputRef.current) {
@@ -62,48 +74,110 @@ const GalleryManager = () => {
   };
 
   // 切换首页展示
-  const toggleShowOnHome = (id: string) => {
-    setGalleryImages(prev => {
-      const updated = prev.map(img =>
-        img.id === id ? { ...img, showOnHome: !img.showOnHome } : img
-      );
-      saveGalleryImages(updated);
-      return updated;
-    });
+  const toggleShowOnHome = async (id: string) => {
+    try {
+      const response = await fetch(`/api/gallery/toggle-home/${id}`, {
+        method: 'POST'
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 更新本地状态
+        setGalleryImages(prev =>
+          prev.map(img =>
+            img.id === id ? { ...img, showOnHome: !img.showOnHome } : img
+          )
+        );
+      } else {
+        console.error('设置失败:', data.error);
+      }
+    } catch (error) {
+      console.error('设置失败:', error);
+    }
   };
 
   // 审核通过
-  const approveImage = (id: string) => {
-    setGalleryImages(prev => {
-      const updated = prev.map(img =>
-        img.id === id ? { ...img, approved: true } : img
-      );
-      saveGalleryImages(updated);
-      return updated;
-    });
+  const approveImage = async (id: string) => {
+    try {
+      const response = await fetch(`/api/gallery/approve/${id}`, {
+        method: 'POST'
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 更新本地状态
+        setGalleryImages(prev =>
+          prev.map(img =>
+            img.id === id ? { ...img, approved: true } : img
+          )
+        );
+      } else {
+        console.error('审核失败:', data.error);
+      }
+    } catch (error) {
+      console.error('审核失败:', error);
+    }
   };
 
   // 拒绝审核（删除图片）
-  const rejectImage = (id: string) => {
-    if (confirm('确定要拒绝这张图片吗？图片将被删除。')) {
-      setGalleryImages(prev => {
-        const updated = prev.filter(img => img.id !== id);
-        saveGalleryImages(updated);
-        return updated;
+  const rejectImage = async (id: string) => {
+    if (!confirm('确定要拒绝这张图片吗？图片将被删除。')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/gallery/${id}`, {
+        method: 'DELETE'
       });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 从本地状态移除
+        setGalleryImages(prev => prev.filter(img => img.id !== id));
+      } else {
+        console.error('删除失败:', data.error);
+      }
+    } catch (error) {
+      console.error('删除失败:', error);
     }
   };
 
   // 删除图片
-  const deleteImage = (id: string) => {
-    if (confirm('确定要删除这张图片吗？')) {
-      setGalleryImages(prev => {
-        const updated = prev.filter(img => img.id !== id);
-        saveGalleryImages(updated);
-        return updated;
+  const deleteImage = async (id: string) => {
+    if (!confirm('确定要删除这张图片吗？')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/gallery/${id}`, {
+        method: 'DELETE'
       });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 从本地状态移除
+        setGalleryImages(prev => prev.filter(img => img.id !== id));
+      } else {
+        console.error('删除失败:', data.error);
+      }
+    } catch (error) {
+      console.error('删除失败:', error);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="gallery-manager">
+        <div className="gallery-manager__loading">
+          <p>加载中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="gallery-manager">
@@ -154,9 +228,9 @@ const GalleryManager = () => {
             <div key={img.id} className={`gallery-manager__item ${!img.approved ? 'gallery-manager__item--pending' : ''}`}>
               <div className="gallery-manager__item-image">
                 <img
-                  src={img.src}
-                  alt={img.name}
-                  onClick={() => setSelectedImage(img.src)}
+                  src={img.url}
+                  alt={img.originalName}
+                  onClick={() => setSelectedImage(img.url)}
                 />
                 {!img.approved && (
                   <div className="gallery-manager__item-badge gallery-manager__item-badge--pending">
@@ -172,8 +246,8 @@ const GalleryManager = () => {
                 )}
               </div>
               <div className="gallery-manager__item-info">
-                <span className="gallery-manager__item-name" title={img.name}>
-                  {img.name}
+                <span className="gallery-manager__item-name" title={img.originalName}>
+                  {img.originalName}
                 </span>
               </div>
               <div className="gallery-manager__item-actions">

@@ -18,35 +18,30 @@ interface MemberWithProfile extends MemberConfig {
 
 interface GalleryImage {
   id: string;
-  src: string;
-  name: string;
+  filename: string;
+  originalName: string;
+  url: string;
   showOnHome: boolean;
-  approved: boolean;  // 审核状态：true=已审核通过, false=待审核
-  uploadTime?: string; // 上传时间
+  approved: boolean;
+  uploadTime?: string;
 }
-
-// 从 localStorage 读取相册数据
-const loadGalleryImages = (): GalleryImage[] => {
-  try {
-    const saved = localStorage.getItem('legion_gallery');
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
-};
-
-// 保存相册数据到 localStorage
-const saveGalleryImages = (images: GalleryImage[]) => {
-  localStorage.setItem('legion_gallery', JSON.stringify(images));
-};
 
 const LegionPage = () => {
   const [membersData, setMembersData] = useState<MemberWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'members' | 'gallery'>('members');
-  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(loadGalleryImages);
+  const [activeTab, setActiveTab] = useState<'members' | 'gallery' | 'voice'>('members');
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showNotification, setShowNotification] = useState(false);
+  const [voiceConfig, setVoiceConfig] = useState<{
+    voiceChannelUrl: string;
+    voiceChannelName: string;
+    voiceChannelDescription: string;
+  }>({
+    voiceChannelUrl: '',
+    voiceChannelName: '军团语音',
+    voiceChannelDescription: '点击加入我们的语音频道'
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -87,32 +82,71 @@ const LegionPage = () => {
     loadMembers();
   }, []);
 
+  // 加载语音配置
+  useEffect(() => {
+    const loadVoiceConfig = async () => {
+      try {
+        const response = await fetch('/api/config');
+        const data = await response.json();
+        if (data.success) {
+          setVoiceConfig(data.data);
+        }
+      } catch (error) {
+        console.error('加载语音配置失败:', error);
+      }
+    };
+    loadVoiceConfig();
+  }, []);
+
+  // 加载相册图片（切换到相册标签时）
+  useEffect(() => {
+    if (activeTab === 'gallery') {
+      loadGalleryImages();
+    }
+  }, [activeTab]);
+
+  // 从后端加载相册图片
+  const loadGalleryImages = async () => {
+    try {
+      const response = await fetch('/api/gallery/list?approved=true');
+      const data = await response.json();
+      if (data.success) {
+        setGalleryImages(data.data);
+      }
+    } catch (error) {
+      console.error('加载相册失败:', error);
+    }
+  };
+
   const groupByRole = (role: MemberRole) => membersData.filter(m => m.role === role);
 
-  // 处理图片上传
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 处理图片上传（对接后端 API）
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const newImage: GalleryImage = {
-          id: Date.now().toString() + Math.random().toString(36).substring(2, 11),
-          src: event.target?.result as string,
-          name: file.name,
-          showOnHome: false,
-          approved: false, // 默认待审核
-          uploadTime: new Date().toISOString()
-        };
-        setGalleryImages(prev => {
-          const updated = [...prev, newImage];
-          saveGalleryImages(updated);
-          return updated;
+    for (const file of Array.from(files)) {
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('isAdmin', 'false'); // 普通用户上传
+
+        const response = await fetch('/api/gallery/upload', {
+          method: 'POST',
+          body: formData
         });
-      };
-      reader.readAsDataURL(file);
-    });
+
+        const data = await response.json();
+
+        if (data.success) {
+          console.log('上传成功:', data.data);
+        } else {
+          console.error('上传失败:', data.error);
+        }
+      } catch (error) {
+        console.error('上传错误:', error);
+      }
+    }
 
     // 显示上传成功提示
     setShowNotification(true);
@@ -227,6 +261,13 @@ const LegionPage = () => {
           <span className="legion-tabs__icon">📷</span>
           军团相册
         </button>
+        <button
+          className={`legion-tabs__btn ${activeTab === 'voice' ? 'legion-tabs__btn--active' : ''}`}
+          onClick={() => setActiveTab('voice')}
+        >
+          <span className="legion-tabs__icon">🎤</span>
+          军团语音
+        </button>
       </div>
 
       {/* 成员展示 */}
@@ -315,9 +356,9 @@ const LegionPage = () => {
                 {galleryImages.filter(img => img.approved).map(img => (
                   <div key={img.id} className="legion-gallery__item">
                     <img
-                      src={img.src}
-                      alt={img.name}
-                      onClick={() => setSelectedImage(img.src)}
+                      src={img.url}
+                      alt={img.originalName}
+                      onClick={() => setSelectedImage(img.url)}
                     />
                   </div>
                 ))}
@@ -326,6 +367,40 @@ const LegionPage = () => {
               <div className="legion-gallery__empty">
                 <p>📷 还没有上传任何图片</p>
                 <p>点击上方按钮上传军团的精彩瞬间吧！</p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* 语音频道展示 */}
+      {activeTab === 'voice' && (
+        <section className="legion-voice">
+          <div className="legion-voice__container">
+            {voiceConfig.voiceChannelUrl ? (
+              <div className="legion-voice__content">
+                <div className="legion-voice__icon">🎤</div>
+                <h3 className="legion-voice__title">{voiceConfig.voiceChannelName}</h3>
+                <p className="legion-voice__description">{voiceConfig.voiceChannelDescription}</p>
+                <a
+                  href={voiceConfig.voiceChannelUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="legion-voice__button"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                  加入语音频道
+                </a>
+              </div>
+            ) : (
+              <div className="legion-voice__empty">
+                <div className="legion-voice__empty-icon">🎤</div>
+                <p>暂未配置语音频道</p>
+                <p>请联系管理员在后台配置语音频道链接</p>
               </div>
             )}
           </div>

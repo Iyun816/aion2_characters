@@ -4,13 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:server": "node server.js",
-    "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
+    "dev": "concurrently \"vite\" \"node server/index.js\"",
+    "dev:frontend": "vite",
+    "dev:backend": "node server/index.js",
+    "sync": "node scripts/sync-data.cjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "node server.js"
+    "start": "node server/index.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -24,8 +24,53 @@ const MemberEditModal: React.FC<MemberEditModalProps> = ({
     setFormData(member);
   }, [member]);
 
+  /**
+   * 生成安全的成员 ID
+   * 处理中文、特殊字符、数字等情况
+   */
+  const generateSafeMemberId = (input: string): string => {
+    // 移除所有空格
+    let id = input.trim().replace(/\s+/g, '');
+
+    // 如果是纯数字，添加前缀
+    if (/^\d+$/.test(id)) {
+      id = 'member_' + id;
+    }
+
+    // 保留字母数字，其他字符用下划线替换
+    id = id.replace(/[^a-zA-Z0-9]/g, '_');
+
+    // 转为小写
+    id = id.toLowerCase();
+
+    // 如果 ID 为空或只有下划线，使用时间戳
+    if (!id || /^_+$/.test(id)) {
+      id = 'member_' + Date.now();
+    }
+
+    // 确保 ID 不以数字开头
+    if (/^\d/.test(id)) {
+      id = 'm_' + id;
+    }
+
+    // 限制长度
+    if (id.length > 50) {
+      id = id.substring(0, 50);
+    }
+
+    return id;
+  };
+
   const handleChange = (field: keyof MemberConfig, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    let updatedValue = value;
+
+    // 如果是 ID 字段且正在创建，自动标准化
+    if (field === 'id' && isCreating && typeof value === 'string') {
+      updatedValue = generateSafeMemberId(value);
+    }
+
+    setFormData((prev) => ({ ...prev, [field]: updatedValue }));
+
     // 清除该字段的错误
     if (errors[field]) {
       setErrors((prev) => {
@@ -128,12 +173,13 @@ const MemberEditModal: React.FC<MemberEditModalProps> = ({
                   value={formData.id}
                   onChange={(e) => handleChange('id', e.target.value)}
                   disabled={!isCreating}
-                  placeholder="例如: player_001"
+                  placeholder="例如: player_001 或输入任何文本（自动转换）"
                 />
                 {errors.id && <span className="form-error">{errors.id}</span>}
                 <span className="form-hint">
-                  用于文件夹名称,只能包含小写字母、数字、下划线和连字符
-                  {!isCreating && ' (不可修改)'}
+                  {isCreating
+                    ? '支持输入中文、数字、特殊字符，系统会自动转换为安全的 ID 格式（小写字母、数字、下划线）'
+                    : '用于文件夹名称 (不可修改)'}
                 </span>
               </div>
 

@@ -15,79 +15,86 @@ const STORAGE_KEYS = {
 
 /**
  * 加载成员列表
- * 优先从 localStorage 加载(管理员修改的数据),如果没有则从 public/data/members.json 加载
+ * 从后端 API 加载，实现跨设备同步
  */
 export async function loadMembers(): Promise<MemberConfig[]> {
-  // 优先从 localStorage 加载
-  const stored = localStorage.getItem(STORAGE_KEYS.MEMBERS);
-  if (stored) {
-    try {
-      const data = JSON.parse(stored);
-      console.log('从 localStorage 加载成员列表:', data.length, '名成员');
-      return data;
-    } catch {
-      console.error('解析本地成员数据失败');
-    }
-  }
-
-  // 如果 localStorage 没有数据,从服务器加载初始数据
   try {
-    console.log('从服务器加载初始成员列表...');
-    const response = await fetch('/data/members.json');
+    console.log('从后端 API 加载成员列表...');
+    const response = await fetch('/api/members');
     if (response.ok) {
-      const data = await response.json();
-      // 同步到 localStorage
-      localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(data));
-      console.log('初始数据已加载:', data.length, '名成员');
-      return data;
+      const result = await response.json();
+      if (result.success) {
+        console.log('成功加载成员列表:', result.data.length, '名成员');
+        return result.data;
+      }
     }
   } catch (e) {
-    console.warn('从服务器加载成员列表失败', e);
+    console.error('从后端加载成员列表失败:', e);
   }
 
   return [];
 }
 
 /**
- * 保存成员列表到 localStorage
+ * 保存成员列表到后端
  */
-export function saveMembers(members: MemberConfig[]): void {
-  localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
+export async function saveMembers(members: MemberConfig[]): Promise<boolean> {
+  try {
+    const response = await fetch('/api/members', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(members),
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      console.log('成员列表保存成功');
+      return true;
+    } else {
+      console.error('保存失败:', result.error);
+      return false;
+    }
+  } catch (e) {
+    console.error('保存成员列表失败:', e);
+    return false;
+  }
 }
 
 /**
  * 添加成员
  */
-export function addMember(members: MemberConfig[], newMember: MemberConfig): MemberConfig[] {
+export async function addMember(members: MemberConfig[], newMember: MemberConfig): Promise<MemberConfig[]> {
   // 检查 ID 是否重复
   if (members.some(m => m.id === newMember.id)) {
     throw new Error(`成员 ID "${newMember.id}" 已存在`);
   }
   const updated = [...members, newMember];
-  saveMembers(updated);
+  await saveMembers(updated);
   return updated;
 }
 
 /**
  * 更新成员
  */
-export function updateMember(members: MemberConfig[], updatedMember: MemberConfig): MemberConfig[] {
+export async function updateMember(members: MemberConfig[], updatedMember: MemberConfig): Promise<MemberConfig[]> {
   const index = members.findIndex(m => m.id === updatedMember.id);
   if (index === -1) {
     throw new Error(`成员 "${updatedMember.id}" 不存在`);
   }
   const updated = [...members];
   updated[index] = updatedMember;
-  saveMembers(updated);
+  await saveMembers(updated);
   return updated;
 }
 
 /**
  * 删除成员
  */
-export function deleteMember(members: MemberConfig[], memberId: string): MemberConfig[] {
+export async function deleteMember(members: MemberConfig[], memberId: string): Promise<MemberConfig[]> {
   const updated = members.filter(m => m.id !== memberId);
-  saveMembers(updated);
+  await saveMembers(updated);
   return updated;
 }
 
@@ -103,91 +110,142 @@ export function exportMembersToFile(members: MemberConfig[]): void {
 
 /**
  * 加载申请列表
+ * 从后端 API 加载，实现跨设备同步
  */
 export async function loadApplications(): Promise<JoinApplication[]> {
   try {
-    // 尝试从服务器加载
-    const response = await fetch('/data/applications.json');
+    console.log('从后端 API 加载申请列表...');
+    const response = await fetch('/api/applications');
     if (response.ok) {
-      const data = await response.json();
-      // 同步到 localStorage
-      localStorage.setItem(STORAGE_KEYS.APPLICATIONS, JSON.stringify(data));
-      return data;
+      const result = await response.json();
+      if (result.success) {
+        console.log('成功加载申请列表:', result.data.length, '条申请');
+        return result.data;
+      }
     }
   } catch (e) {
-    console.warn('从服务器加载申请列表失败，尝试从本地存储加载', e);
-  }
-
-  // 从 localStorage 加载
-  const stored = localStorage.getItem(STORAGE_KEYS.APPLICATIONS);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch {
-      console.error('解析本地申请数据失败');
-    }
+    console.error('从后端加载申请列表失败:', e);
   }
 
   return [];
 }
 
 /**
- * 保存申请列表到 localStorage
- */
-export function saveApplications(applications: JoinApplication[]): void {
-  localStorage.setItem(STORAGE_KEYS.APPLICATIONS, JSON.stringify(applications));
-}
-
-/**
  * 添加新申请
  */
-export function addApplication(
-  applications: JoinApplication[],
+export async function addApplication(
   newApp: Omit<JoinApplication, 'id' | 'submittedAt' | 'status'>
-): JoinApplication[] {
-  const application: JoinApplication = {
-    ...newApp,
-    id: generateUUID(),
-    submittedAt: new Date().toISOString(),
-    status: 'pending',
-  };
-  const updated = [...applications, application];
-  saveApplications(updated);
-  return updated;
+): Promise<JoinApplication> {
+  try {
+    const response = await fetch('/api/applications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newApp),
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      console.log('申请提交成功');
+      return result.data;
+    } else {
+      throw new Error(result.error || '提交失败');
+    }
+  } catch (e) {
+    console.error('提交申请失败:', e);
+    throw e;
+  }
 }
 
 /**
  * 审批申请
  */
-export function reviewApplication(
-  applications: JoinApplication[],
+export async function reviewApplication(
   applicationId: string,
   status: 'approved' | 'rejected',
   reviewNote?: string
-): JoinApplication[] {
-  const index = applications.findIndex(a => a.id === applicationId);
-  if (index === -1) {
-    throw new Error(`申请 "${applicationId}" 不存在`);
-  }
+): Promise<JoinApplication> {
+  try {
+    const response = await fetch(`/api/applications/${applicationId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status, reviewNote }),
+    });
 
-  const updated = [...applications];
-  updated[index] = {
-    ...updated[index],
-    status,
-    reviewedAt: new Date().toISOString(),
-    reviewNote,
-  };
-  saveApplications(updated);
-  return updated;
+    const result = await response.json();
+    if (result.success) {
+      console.log('申请审核成功');
+      return result.data;
+    } else {
+      throw new Error(result.error || '审核失败');
+    }
+  } catch (e) {
+    console.error('审核申请失败:', e);
+    throw e;
+  }
 }
 
 /**
  * 删除申请
  */
-export function deleteApplication(applications: JoinApplication[], applicationId: string): JoinApplication[] {
-  const updated = applications.filter(a => a.id !== applicationId);
-  saveApplications(updated);
-  return updated;
+export async function deleteApplication(applicationId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`/api/applications/${applicationId}`, {
+      method: 'DELETE',
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      console.log('申请删除成功');
+      return true;
+    } else {
+      throw new Error(result.error || '删除失败');
+    }
+  } catch (e) {
+    console.error('删除申请失败:', e);
+    throw e;
+  }
+}
+
+/**
+ * 生成安全的成员 ID
+ * 处理中文、特殊字符、数字等情况
+ */
+function generateSafeMemberId(name: string): string {
+  // 移除所有空格
+  let id = name.trim().replace(/\s+/g, '');
+
+  // 如果是纯数字，添加前缀
+  if (/^\d+$/.test(id)) {
+    id = 'member_' + id;
+  }
+
+  // 如果包含中文或特殊字符，转换为拼音或使用时间戳
+  // 这里使用简单的方案：保留字母数字，其他字符用下划线替换
+  id = id.replace(/[^a-zA-Z0-9]/g, '_');
+
+  // 转为小写
+  id = id.toLowerCase();
+
+  // 如果 ID 为空或只有下划线，使用时间戳
+  if (!id || /^_+$/.test(id)) {
+    id = 'member_' + Date.now();
+  }
+
+  // 确保 ID 不以数字开头（某些系统可能有此要求）
+  if (/^\d/.test(id)) {
+    id = 'm_' + id;
+  }
+
+  // 限制长度
+  if (id.length > 50) {
+    id = id.substring(0, 50);
+  }
+
+  return id;
 }
 
 /**
@@ -195,7 +253,7 @@ export function deleteApplication(applications: JoinApplication[], applicationId
  */
 export function createMemberFromApplication(application: JoinApplication): Omit<MemberConfig, 'characterId' | 'serverId'> {
   return {
-    id: application.characterName.toLowerCase().replace(/\s+/g, '_'),
+    id: generateSafeMemberId(application.characterName),
     name: application.characterName,
     role: 'member',
     joinDate: new Date().toISOString().split('T')[0],

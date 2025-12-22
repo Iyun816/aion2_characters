@@ -1,1 +1,35 @@
-[]
+[
+  {
+    "characterName": "1",
+    "className": "弓星",
+    "level": 1,
+    "contact": "1",
+    "message": "1",
+    "id": "1766395813066p33fzrzvs",
+    "submittedAt": "2025-12-22T09:30:13.066Z",
+    "status": "approved",
+    "reviewedAt": "2025-12-22T09:30:26.743Z"
+  },
+  {
+    "characterName": "2",
+    "className": "殺星",
+    "level": 2,
+    "contact": "2",
+    "message": "2",
+    "id": "17663959884584322i45y9",
+    "submittedAt": "2025-12-22T09:33:08.458Z",
+    "status": "approved",
+    "reviewedAt": "2025-12-22T09:33:51.400Z"
+  },
+  {
+    "characterName": "里面",
+    "className": "守護星",
+    "level": 45,
+    "contact": "1",
+    "message": "萨沙击杀看啥看啥凯撒凯撒",
+    "id": "17663964722573b6g8hjfi",
+    "submittedAt": "2025-12-22T09:41:12.257Z",
+    "status": "approved",
+    "reviewedAt": "2025-12-22T09:41:22.029Z"
+  }
+]

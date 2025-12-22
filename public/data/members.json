@@ -1,8 +1,16 @@
 [
   {
     "id": "wenhe",
-    "name": "温禾",
+    "name": "肆",
     "role": "leader",
     "joinDate": "创团成员"
+  },
+  {
+    "id": "erimia",
+    "name": "Erimia",
+    "role": "elite",
+    "joinDate": "2025-12-22",
+    "characterInfoUrl": "https://tw.ncsoft.com/aion2/api/character/info?lang=zh&characterId=A1pIWbd0UKoTYJ2XbL_Cw0VdSx_UlJ-2sv_dtkIvlnM%3D&serverId=1001",
+    "characterEquipmentUrl": "https://tw.ncsoft.com/aion2/api/character/equipment?lang=zh&characterId=A1pIWbd0UKoTYJ2XbL_Cw0VdSx_UlJ-2sv_dtkIvlnM%3D&serverId=1001"
   }
 ]

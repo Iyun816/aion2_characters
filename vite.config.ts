@@ -15,6 +15,31 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/aion2/, '/aion2/api'),
         secure: false,
       },
+      // 代理军团相册 API 请求到后端服务器
+      '/api/gallery': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      // 代理成员配置 API 请求到后端服务器
+      '/api/members': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      // 代理申请管理 API 请求到后端服务器
+      '/api/applications': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      // 代理全局配置 API 请求到后端服务器
+      '/api/config': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      // 代理上传的图片请求
+      '/uploads': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
     },
   },
 })

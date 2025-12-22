@@ -4,37 +4,33 @@ import './Members.css';
 
 interface GalleryImage {
   id: string;
-  src: string;
-  name: string;
+  filename: string;
+  originalName: string;
+  url: string;
   showOnHome: boolean;
+  approved: boolean;
 }
-
-// 从 localStorage 读取标记为首页展示的图片
-const getHomeGalleryImages = (): GalleryImage[] => {
-  try {
-    const saved = localStorage.getItem('legion_gallery');
-    if (!saved) return [];
-    const all: GalleryImage[] = JSON.parse(saved);
-    return all.filter(img => img.showOnHome);
-  } catch {
-    return [];
-  }
-};
 
 const Members = () => {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
-    setGalleryImages(getHomeGalleryImages());
-
-    // 监听 storage 变化以便实时更新
-    const handleStorageChange = () => {
-      setGalleryImages(getHomeGalleryImages());
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    loadHomeGalleryImages();
   }, []);
+
+  // 从后端加载首页展示的图片
+  const loadHomeGalleryImages = async () => {
+    try {
+      const response = await fetch('/api/gallery/list?showOnHome=true');
+      const data = await response.json();
+      if (data.success) {
+        setGalleryImages(data.data);
+      }
+    } catch (error) {
+      console.error('加载首页相册失败:', error);
+    }
+  };
 
   return (
     <section id="members" className="members">
@@ -54,9 +50,9 @@ const Members = () => {
               <div
                 key={img.id}
                 className="members__gallery-item"
-                onClick={() => setSelectedImage(img.src)}
+                onClick={() => setSelectedImage(img.url)}
               >
-                <img src={img.src} alt={img.name} loading="lazy" />
+                <img src={img.url} alt={img.originalName} loading="lazy" />
               </div>
             ))}
           </div>

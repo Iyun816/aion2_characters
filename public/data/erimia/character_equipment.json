@@ -1,0 +1,677 @@
+{
+  "equipment": {
+    "equipmentList": [
+      {
+        "id": 110530051,
+        "name": "憤怒的克羅梅德魔法書",
+        "enchantLevel": 15,
+        "exceedLevel": 2,
+        "grade": "Unique",
+        "slotPos": 1,
+        "slotPosName": "MainHand",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Equip_WP_L_MB_0041_T06.png"
+      },
+      {
+        "id": 115030053,
+        "name": "努亞庫臂甲",
+        "enchantLevel": 15,
+        "exceedLevel": 1,
+        "grade": "Unique",
+        "slotPos": 2,
+        "slotPosName": "SubHand",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Weapon_Guarder_L_012.png"
+      },
+      {
+        "id": 210130052,
+        "name": "巴克隆胸甲",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 5,
+        "slotPosName": "Torso",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Equip_AR_L_0028_T05_Torso.png"
+      },
+      {
+        "id": 210230052,
+        "name": "巴克隆腿甲",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 6,
+        "slotPosName": "Pants",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Equip_AR_L_0028_T05_Pants.png"
+      },
+      {
+        "id": 210330052,
+        "name": "巴克隆頭盔",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 3,
+        "slotPosName": "Helmet",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Equip_AR_L_0028_T05_Helmet.png"
+      },
+      {
+        "id": 210420011,
+        "name": "古代精靈肩甲",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Epic",
+        "slotPos": 4,
+        "slotPosName": "Shoulder",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0050_T05_Shoulder.png"
+      },
+      {
+        "id": 210530053,
+        "name": "努亞庫手套",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 7,
+        "slotPosName": "Gloves",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Equip_AR_L_Idris_01_Gloves.png"
+      },
+      {
+        "id": 210630038,
+        "name": "巴卡爾摩長靴",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 8,
+        "slotPosName": "Boots",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0059_T05_Boots.png"
+      },
+      {
+        "id": 210720011,
+        "name": "古代精靈披風",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Epic",
+        "slotPos": 19,
+        "slotPosName": "Cape",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0050_T05_Cape.png"
+      },
+      {
+        "id": 215230001,
+        "name": "高潔腰帶",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 17,
+        "slotPosName": "Belt",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Acc_Belt_C_022.png"
+      },
+      {
+        "id": 310130051,
+        "name": "憤怒的克羅梅德項鍊",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 10,
+        "slotPosName": "Necklace",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_ACC_NL_0053.png"
+      },
+      {
+        "id": 310230053,
+        "name": "憤怒的克羅梅德耳環",
+        "enchantLevel": 13,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 12,
+        "slotPosName": "Earring2",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_ACC_ER_0053.png"
+      },
+      {
+        "id": 310230053,
+        "name": "憤怒的克羅梅德耳環",
+        "enchantLevel": 13,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 11,
+        "slotPosName": "Earring1",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_ACC_ER_0053.png"
+      },
+      {
+        "id": 310330052,
+        "name": "奧拉姆斯戒指",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 14,
+        "slotPosName": "Ring2",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_ACC_Ring_0072.png"
+      },
+      {
+        "id": 310330052,
+        "name": "奧拉姆斯戒指",
+        "enchantLevel": 12,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 13,
+        "slotPosName": "Ring1",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_ACC_Ring_0072.png"
+      },
+      {
+        "id": 310430046,
+        "name": "覺醒手鐲",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 16,
+        "slotPosName": "Bracelet2",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Acc_Bracelet_R_027.png"
+      },
+      {
+        "id": 310440017,
+        "name": "朝聖者手鐲",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Legend",
+        "slotPos": 15,
+        "slotPosName": "Bracelet1",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_ACC_Bracelet_0071.png"
+      },
+      {
+        "id": 310900001,
+        "name": "激戰古文石",
+        "enchantLevel": 5,
+        "exceedLevel": 0,
+        "grade": "Special",
+        "slotPos": 23,
+        "slotPosName": "Rune1",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Acc_Rune_R_002.png"
+      },
+      {
+        "id": 310900001,
+        "name": "激戰古文石",
+        "enchantLevel": 5,
+        "exceedLevel": 0,
+        "grade": "Special",
+        "slotPos": 24,
+        "slotPosName": "Rune2",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Acc_Rune_R_002.png"
+      },
+      {
+        "id": 311030001,
+        "name": "啟示護身符",
+        "enchantLevel": 10,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 22,
+        "slotPosName": "Amulet",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Craft_Conversion_Crystal_L_lv5_01.png"
+      },
+      {
+        "id": 810130001,
+        "name": "活力聖杯",
+        "enchantLevel": 3,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 41,
+        "slotPosName": "Arcana1",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Arcana_Card_Grail_u_PveSet2.png"
+      },
+      {
+        "id": 810230001,
+        "name": "活力羊皮紙",
+        "enchantLevel": 4,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 42,
+        "slotPosName": "Arcana2",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Arcana_Card_Parchment_u_PveSet2.png"
+      },
+      {
+        "id": 810330001,
+        "name": "活力指南針",
+        "enchantLevel": 3,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 43,
+        "slotPosName": "Arcana3",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Arcana_Card_Compass_u_PveSet2.png"
+      },
+      {
+        "id": 810430001,
+        "name": "活力鐘",
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 44,
+        "slotPosName": "Arcana4",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Arcana_Card_Bell_u_PveSet2.png"
+      },
+      {
+        "id": 810530002,
+        "name": "魔力鏡子",
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 45,
+        "slotPosName": "Arcana5",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Arcana_Card_Mirror_u_DefenceSet2.png"
+      }
+    ],
+    "skinList": [
+      {
+        "id": 40029105,
+        "name": "生命之光(手套)",
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 5,
+        "slotPosName": "Gloves",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_Grisilla_01_Gloves.png"
+      },
+      {
+        "id": 40048106,
+        "name": "皮短版套裝(長靴)",
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Special",
+        "slotPos": 6,
+        "slotPosName": "Boots",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GF_Idol_03_Boots.png"
+      },
+      {
+        "id": 30060102,
+        "name": "龍之加護(腿甲)",
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 4,
+        "slotPosName": "Pants",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0060_T06_Pants.png"
+      },
+      {
+        "id": 40061103,
+        "name": "搗蛋鬼樹古(頭盔)",
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Special",
+        "slotPos": 1,
+        "slotPosName": "Helmet",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_Shugo_01_Helmet.png"
+      },
+      {
+        "id": 10078105,
+        "name": "黃金誓約(法書)",
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Unique",
+        "slotPos": 17,
+        "slotPosName": "MagicBook",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_WP_MB_0078_T05.png"
+      },
+      {
+        "id": 40071101,
+        "name": "白色聖誕節(胸甲)",
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Special",
+        "slotPos": 3,
+        "slotPosName": "Torso",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GF_Xmas_03_Torso.png"
+      }
+    ]
+  },
+  "petwing": {
+    "pet": {
+      "id": 1052,
+      "name": "大葉格拉比",
+      "level": 4,
+      "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Gravi_03.png"
+    },
+    "wing": {
+      "id": 30101000,
+      "name": "森林精靈翅膀",
+      "enchantLevel": 0,
+      "grade": "Unique",
+      "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_WingA_010.png"
+    }
+  },
+  "skill": {
+    "skillList": [
+      {
+        "id": 15210000,
+        "name": "火花箭",
+        "needLevel": 1,
+        "skillLevel": 16,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_020.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 15090000,
+        "name": "冰凍鎖鏈",
+        "needLevel": 1,
+        "skillLevel": 16,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_009.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 15040000,
+        "name": "火花叉",
+        "needLevel": 1,
+        "skillLevel": 18,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_004.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 15280000,
+        "name": "酷寒之風",
+        "needLevel": 3,
+        "skillLevel": 16,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_025.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 15050000,
+        "name": "火花爆炸",
+        "needLevel": 4,
+        "skillLevel": 20,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_005.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15010000,
+        "name": "火焰掃射",
+        "needLevel": 5,
+        "skillLevel": 18,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_001.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 15150000,
+        "name": "冰結",
+        "needLevel": 7,
+        "skillLevel": 12,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_015.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15110000,
+        "name": "寒冬束縛",
+        "needLevel": 8,
+        "skillLevel": 2,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_011.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 15220000,
+        "name": "冰結爆炸",
+        "needLevel": 10,
+        "skillLevel": 15,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_022.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 15310000,
+        "name": "集中祈願",
+        "needLevel": 12,
+        "skillLevel": 18,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_028.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15060000,
+        "name": "地獄火焰",
+        "needLevel": 14,
+        "skillLevel": 16,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_006.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 15240000,
+        "name": "衝擊解除",
+        "needLevel": 16,
+        "skillLevel": 15,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_002.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15710000,
+        "name": "火之標識",
+        "needLevel": 1,
+        "skillLevel": 16,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_Passive_002.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15720000,
+        "name": "大地長袍",
+        "needLevel": 6,
+        "skillLevel": 7,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_Passive_006.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15730000,
+        "name": "召喚冷氣",
+        "needLevel": 9,
+        "skillLevel": 17,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_Passive_003.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15740000,
+        "name": "火花長袍",
+        "needLevel": 11,
+        "skillLevel": 20,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_Passive_004.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15760000,
+        "name": "精氣吸收",
+        "needLevel": 13,
+        "skillLevel": 17,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_Passive_001.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15770000,
+        "name": "抵抗恩惠",
+        "needLevel": 15,
+        "skillLevel": 8,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_038.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15750000,
+        "name": "冷氣長袍",
+        "needLevel": 17,
+        "skillLevel": 7,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_Passive_005.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15780000,
+        "name": "強化恩惠",
+        "needLevel": 21,
+        "skillLevel": 11,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_Passive_007.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15790000,
+        "name": "回生契約",
+        "needLevel": 23,
+        "skillLevel": 14,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_009.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15800000,
+        "name": "活力蒸發",
+        "needLevel": 25,
+        "skillLevel": 15,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_Passive_008.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15360000,
+        "name": "神聖爆炸",
+        "needLevel": 22,
+        "skillLevel": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_036.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 15160000,
+        "name": "鋼鐵屏障",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_016.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15400000,
+        "name": "元素強化",
+        "needLevel": 22,
+        "skillLevel": 15,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_040.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 15140000,
+        "name": "詛咒：樹",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_014.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15230000,
+        "name": "冰雪甲冑",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_021.png",
+        "category": "Dp",
+        "acquired": 0,
+        "equip": 0
+      },
+      {
+        "id": 15130000,
+        "name": "靈魂凍結",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_013.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15200000,
+        "name": "冷氣暴風",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_019.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15390000,
+        "name": "火之障壁",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_039.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15300000,
+        "name": "露梅爾空間",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_027.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 15320000,
+        "name": "延遲爆炸",
+        "needLevel": 22,
+        "skillLevel": 10,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_032.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 15120000,
+        "name": "冰河強擊",
+        "needLevel": 22,
+        "skillLevel": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_SO_SKILL_012.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 15700000,
+        "name": "強襲轟炸",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_003.png",
+        "category": "Dp",
+        "acquired": 0,
+        "equip": 0
+      }
+    ]
+  }
+}

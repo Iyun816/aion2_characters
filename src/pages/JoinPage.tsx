@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { loadApplications, addApplication } from '../services/dataService';
+import { loadMembers, addApplication } from '../services/dataService';
 import './JoinPage.css';
 
 const JoinPage = () => {
@@ -12,6 +12,23 @@ const JoinPage = () => {
     message: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [leaderName, setLeaderName] = useState('温禾'); // 默认值
+
+  // 加载军团长名称
+  useEffect(() => {
+    const loadLeader = async () => {
+      try {
+        const members = await loadMembers();
+        // 第一个成员永远是军团长
+        if (members.length > 0) {
+          setLeaderName(members[0].name);
+        }
+      } catch (error) {
+        console.error('加载军团长名称失败:', error);
+      }
+    };
+    loadLeader();
+  }, []);
 
   const classes = [
     '劍星', '守護星', '魔道星', '精靈星',
@@ -23,11 +40,8 @@ const JoinPage = () => {
     e.preventDefault();
 
     try {
-      // 加载现有申请列表
-      const applications = await loadApplications();
-
-      // 添加新申请
-      addApplication(applications, {
+      // 直接提交申请到后端
+      await addApplication({
         characterName: formData.characterName,
         className: formData.className,
         level: formData.level ? Number(formData.level) : undefined,
@@ -35,10 +49,10 @@ const JoinPage = () => {
         message: formData.message || undefined,
       });
 
-      console.log('申请已保存:', formData);
+      console.log('申请已提交:', formData);
       setSubmitted(true);
     } catch (error) {
-      console.error('保存申请失败:', error);
+      console.error('提交申请失败:', error);
       alert('提交失败,请稍后重试');
     }
   };
@@ -88,13 +102,22 @@ const JoinPage = () => {
               <li>有语音条件更佳</li>
             </ul>
 
+            <h2>重要提示</h2>
+            <div className="join-page__notice">
+              <span className="join-page__notice-icon">ℹ️</span>
+              <div className="join-page__notice-content">
+                <p>填写申请表单不代表加入军团，该表单仅用于获取游戏角色信息并展示在本网站。</p>
+                <p>如需申请加入军团，请在游戏内搜索「椿夏」申请即可。</p>
+              </div>
+            </div>
+
             <h2>联系方式</h2>
             <div className="join-page__contact">
               <div className="join-page__contact-item">
                 <span className="join-page__contact-icon">🎮</span>
                 <div>
                   <strong>游戏内联系</strong>
-                  <p>私聊军团长「温禾」</p>
+                  <p>私聊军团长「{leaderName}」</p>
                 </div>
               </div>
             </div>

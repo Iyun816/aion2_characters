@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import type { MemberConfig } from '../../types/admin';
 import {
   loadMembers,
+  saveMembers,
   addMember,
   updateMember,
   deleteMember,
@@ -56,13 +57,13 @@ const MemberManager: React.FC = () => {
   };
 
   // 保存成员
-  const handleSave = (memberData: MemberConfig) => {
+  const handleSave = async (memberData: MemberConfig) => {
     try {
       if (isCreating) {
-        const updated = addMember(members, memberData);
+        const updated = await addMember(members, memberData);
         setMembers(updated);
       } else {
-        const updated = updateMember(members, memberData);
+        const updated = await updateMember(members, memberData);
         setMembers(updated);
       }
       setEditingMember(null);
@@ -73,16 +74,30 @@ const MemberManager: React.FC = () => {
   };
 
   // 删除成员
-  const handleDelete = (memberId: string) => {
-    if (!confirm(`确定要删除成员 "${members.find(m => m.id === memberId)?.name}" 吗?`)) {
+  const handleDelete = async (memberId: string) => {
+    const member = members.find(m => m.id === memberId);
+    if (!member) return;
+
+    // 二次确认对话框
+    const confirmMessage = `⚠️ 危险操作：删除成员\n\n` +
+      `即将删除成员: ${member.name} (${member.id})\n\n` +
+      `此操作将会:\n` +
+      `• 从成员列表中移除该成员\n` +
+      `• 删除 data/${member.id}/ 文件夹及所有数据\n` +
+      `• 包括角色信息、装备数据等所有文件\n\n` +
+      `⚠️ 此操作不可恢复！\n\n` +
+      `确定要继续删除吗？`;
+
+    if (!confirm(confirmMessage)) {
       return;
     }
 
     try {
-      const updated = deleteMember(members, memberId);
+      const updated = await deleteMember(members, memberId);
       setMembers(updated);
+      alert(`✓ 成员 "${member.name}" 已删除`);
     } catch (error: any) {
-      alert(error.message || '删除失败');
+      alert(`✗ 删除失败: ${error.message || '未知错误'}`);
     }
   };
 
@@ -98,6 +113,8 @@ const MemberManager: React.FC = () => {
 
     try {
       const data = await importJsonFile<MemberConfig[]>(file);
+      // 保存到后端
+      await saveMembers(data);
       setMembers(data);
       alert('导入成功');
     } catch (error: any) {

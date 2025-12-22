@@ -240,3 +240,33 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* 重要提示 */
+.join-page__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.join-page__notice-icon {
+  font-size: 1.5rem;
+}
+
+.join-page__notice-content {
+  flex: 1;
+}
+
+.join-page__notice-content p {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.join-page__notice-content p:last-child {
+  margin-bottom: 0;
+}
