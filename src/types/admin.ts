@@ -41,6 +41,9 @@ export interface EquipmentStat {
   name: string;
   value: string;
   tooltip?: string;
+  minValue?: string;     // 最小值
+  extra?: string;        // 突破加成
+  exceed?: boolean;      // 是否为突破属性
 }
 
 // 魔石属性
@@ -67,6 +70,21 @@ export interface EquipmentSkill {
   icon: string;
 }
 
+// 套装效果
+export interface SetBonus {
+  degree: number;           // 件数要求 (2件套、4件套等)
+  descriptions: string[];   // 效果描述列表
+}
+
+// 套装信息
+export interface SetInfo {
+  id: string;               // 套装ID
+  name: string;             // 套装名称
+  equippedCount: number;    // 已装备数量
+  items?: any[];            // 套装包含的物品
+  bonuses: SetBonus[];      // 套装效果
+}
+
 // 装备详情数据（来自 tw.ncsoft.com API）
 export interface EquipmentDetail {
   id: number;
@@ -90,6 +108,10 @@ export interface EquipmentDetail {
   subSkills?: EquipmentSkill[];
   magicStoneStat?: MagicStoneStat[];
   godStoneStat?: GodStoneStat[];
+  // 套装信息 (阿尔卡那)
+  set?: SetInfo;
+  // 套装效果 (阿尔卡那) - 兼容旧格式
+  bonuses?: SetBonus[];
   // 来源
   sources?: string[];
 }

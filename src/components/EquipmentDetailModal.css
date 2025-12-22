@@ -62,6 +62,14 @@
   min-width: 0;
 }
 
+.equipment-modal__header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
 .equipment-modal__icon {
   width: 64px;
   height: 64px;
@@ -106,9 +114,49 @@
   box-shadow: 0 2px 6px rgba(79, 195, 247, 0.2);
 }
 
+.equipment-modal__grade-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
 .equipment-modal__grade {
   font-size: 14px;
   color: #666;
+  font-weight: 500;
+}
+
+.equipment-modal__source {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  padding: 2px 8px;
+  background: rgba(79, 195, 247, 0.08);
+  border-radius: 4px;
+  border: 1px solid rgba(79, 195, 247, 0.15);
+}
+
+.equipment-modal__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+  font-size: 12px;
+}
+
+.meta-item {
+  color: #666;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.equipment-modal__classes {
+  font-size: 12px;
+  color: #888;
   margin-top: var(--spacing-xs);
   font-weight: 500;
 }
@@ -230,7 +278,40 @@
 }
 
 .stat-row--main .stat-value {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* 固有能力基础值 - 黑色 */
+.stat-base {
+  color: #1a1a1a;
+}
+
+/* 范围值(minValue) - 黑色 */
+.stat-range {
+  color: #1a1a1a;
+}
+
+/* 强化加成 - 蓝色 */
+.stat-enhancement {
   color: #0277bd;
+  font-weight: 700;
+}
+
+/* 突破附加能力 - 蓝色 */
+.stat-row--exceed {
+  font-weight: 600;
+  background: rgba(33, 150, 243, 0.05);
+}
+
+.stat-row--exceed .stat-name {
+  color: #2196f3;
+}
+
+.stat-row--exceed .stat-value {
+  color: #2196f3;
   font-weight: 700;
   font-size: 14px;
 }
@@ -337,6 +418,66 @@
   color: #666;
   font-size: 12px;
   font-weight: 600;
+}
+
+/* 套装效果 */
+.set-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #7b1fa2;
+  margin-bottom: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(171, 71, 188, 0.1);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.set-bonus {
+  padding: var(--spacing-sm);
+  border-radius: 6px;
+  background: linear-gradient(135deg, rgba(171, 71, 188, 0.08), rgba(171, 71, 188, 0.04));
+  border: 1px solid rgba(171, 71, 188, 0.2);
+  margin-bottom: var(--spacing-xs);
+}
+
+.set-bonus__header {
+  font-size: 13px;
+  font-weight: 700;
+  color: #7b1fa2;
+  margin-bottom: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid rgba(171, 71, 188, 0.15);
+}
+
+.set-bonus__effects {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.set-bonus__effect {
+  font-size: 12px;
+  color: #555;
+  line-height: 1.5;
+  padding-left: var(--spacing-sm);
+  position: relative;
+}
+
+.set-bonus__effect::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #7b1fa2;
+  font-weight: 700;
+}
+
+.set-bonus-empty {
+  padding: var(--spacing-md);
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+  font-weight: 500;
+  font-style: italic;
 }
 
 /* 底部信息 */

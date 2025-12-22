@@ -39,85 +39,120 @@ const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
                   </span>
                 )}
               </div>
-              <div className="equipment-modal__grade">{equipmentDetail.gradeName || equipmentDetail.grade}</div>
+              <div className="equipment-modal__grade-row">
+                <span className="equipment-modal__grade">{equipmentDetail.gradeName || equipmentDetail.grade}</span>
+                {/* 来源信息 */}
+                {equipmentDetail.sources && equipmentDetail.sources.length > 0 && (
+                  <span className="equipment-modal__source">
+                    来源: {equipmentDetail.sources.join(', ')}
+                  </span>
+                )}
+              </div>
+
+              {/* 基础信息紧凑显示 */}
+              <div className="equipment-modal__meta">
+                {equipmentDetail.categoryName && <span className="meta-item">{equipmentDetail.categoryName}</span>}
+                {equipmentDetail.level && <span className="meta-item">Lv.{equipmentDetail.level}</span>}
+                {equipmentDetail.equipLevel && <span className="meta-item">装备等级 {equipmentDetail.equipLevel}</span>}
+                {equipmentDetail.raceName && <span className="meta-item">{equipmentDetail.raceName}</span>}
+              </div>
+              {equipmentDetail.classNames && equipmentDetail.classNames.length > 0 && (
+                <div className="equipment-modal__classes">{equipmentDetail.classNames.join(' · ')}</div>
+              )}
             </div>
           </div>
-          <button className="equipment-modal__close" onClick={onClose}>
-            ×
-          </button>
+          <div className="equipment-modal__header-right">
+            <button className="equipment-modal__close" onClick={onClose}>
+              ×
+            </button>
+          </div>
         </div>
 
         {/* 装备信息主体 - 使用两栏布局 */}
         <div className="equipment-modal__body">
-          {/* 左栏 - 基础信息 */}
+          {/* 左栏 - 附加能力和灵魂刻印 */}
           <div className="equipment-modal__column">
-            {/* 基础信息 */}
-            <div className="equipment-modal__info">
-              {equipmentDetail.categoryName && (
-                <div className="info-row">
-                  <span className="info-label">类型</span>
-                  <span className="info-value">{equipmentDetail.categoryName}</span>
-                </div>
-              )}
-              {equipmentDetail.level && (
-                <div className="info-row">
-                  <span className="info-label">等级</span>
-                  <span className="info-value">{equipmentDetail.level}</span>
-                </div>
-              )}
-              {equipmentDetail.equipLevel && (
-                <div className="info-row">
-                  <span className="info-label">装备等级</span>
-                  <span className="info-value">{equipmentDetail.equipLevel}</span>
-                </div>
-              )}
-              {equipmentDetail.raceName && (
-                <div className="info-row">
-                  <span className="info-label">阵营</span>
-                  <span className="info-value">{equipmentDetail.raceName}</span>
-                </div>
-              )}
-              {equipmentDetail.classNames && equipmentDetail.classNames.length > 0 && (
-                <div className="info-row info-row--full">
-                  <span className="info-label">职业</span>
-                  <span className="info-value">{equipmentDetail.classNames.join(', ')}</span>
-                </div>
-              )}
-            </div>
 
-            {/* 主属性 */}
+            {/* 附加能力 */}
             {equipmentDetail.mainStats && equipmentDetail.mainStats.length > 0 && (
               <div className="equipment-modal__section">
-                <div className="section-title">主属性</div>
-                {equipmentDetail.mainStats.map((stat, index) => (
-                  <div key={index} className="stat-row stat-row--main">
-                    <span className="stat-name">{stat.name}</span>
-                    <span className="stat-value">{stat.value}</span>
-                  </div>
-                ))}
+                <div className="section-title">附加能力</div>
+                {equipmentDetail.mainStats.map((stat, index) => {
+                  // 固有附加能力: value 有数值
+                  const hasValue = stat.value && stat.value !== '0' && stat.value !== '0%';
+                  // 突破附加能力: extra 有数值且 exceed 为 true
+                  const hasExtra = stat.extra && stat.extra !== '0' && stat.extra !== '0%' && stat.exceed;
+                  // 强化加成: extra 有数值且 exceed 为 false
+                  const hasEnhancement = stat.extra && stat.extra !== '0' && stat.extra !== '0%' && !stat.exceed;
+
+                  if (!hasValue && !hasExtra) return null;
+
+                  return (
+                    <div key={index}>
+                      {/* 固有附加能力(带强化加成) */}
+                      {hasValue && (
+                        <div className="stat-row stat-row--main">
+                          <span className="stat-name">{stat.name}</span>
+                          <span className="stat-value">
+                            {stat.minValue && <span className="stat-range">{stat.minValue} ~ </span>}
+                            <span className="stat-base">{stat.value}</span>
+                            {hasEnhancement && <span className="stat-enhancement"> (+{stat.extra})</span>}
+                          </span>
+                        </div>
+                      )}
+                      {/* 突破附加能力 */}
+                      {hasExtra && (
+                        <div className="stat-row stat-row--exceed">
+                          <span className="stat-name">{stat.name}</span>
+                          <span className="stat-value">{stat.extra}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
 
-            {/* 副属性 */}
-            {equipmentDetail.subStats && equipmentDetail.subStats.length > 0 && (
+            {/* 灵魂刻印 (副属性 + 副技能) */}
+            {((equipmentDetail.subStats && equipmentDetail.subStats.length > 0) ||
+              (equipmentDetail.subSkills && equipmentDetail.subSkills.length > 0)) && (
               <div className="equipment-modal__section">
-                <div className="section-title">副属性</div>
-                {equipmentDetail.subStats.map((stat, index) => (
-                  <div key={index} className="stat-row stat-row--sub">
-                    <span className="stat-name">{stat.name}</span>
-                    <span className="stat-value">{stat.value}</span>
-                  </div>
-                ))}
+                <div className="section-title">灵魂刻印</div>
+
+                {/* 副属性 */}
+                {equipmentDetail.subStats && equipmentDetail.subStats.length > 0 && (
+                  <>
+                    {equipmentDetail.subStats.map((stat, index) => (
+                      <div key={index} className="stat-row stat-row--sub">
+                        <span className="stat-name">{stat.name}</span>
+                        <span className="stat-value">{stat.value}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {/* 副技能 */}
+                {equipmentDetail.subSkills && equipmentDetail.subSkills.length > 0 && (
+                  <>
+                    {equipmentDetail.subSkills.map((skill, index) => (
+                      <div key={index} className="skill-row">
+                        {skill.icon && <img src={skill.icon} alt={skill.name} className="skill-icon" />}
+                        <span className="skill-name">{skill.name}</span>
+                        {skill.level && <span className="skill-level">Lv.{skill.level}</span>}
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             )}
           </div>
 
-          {/* 右栏 - 魔法石、神石、技能 */}
+          {/* 右栏 - 魔法石、神石、套装效果 */}
           <div className="equipment-modal__column">
-            {/* 魔法石 */}
+            {/* 魔石 */}
             {equipmentDetail.magicStoneStat && equipmentDetail.magicStoneStat.length > 0 && (
               <div className="equipment-modal__section">
-                <div className="section-title">魔法石</div>
+                <div className="section-title">魔石</div>
                 {equipmentDetail.magicStoneStat.map((stone, index) => (
                   <div key={index} className="stone-row" style={{ color: gradeColors[stone.grade] || '#9d9d9d' }}>
                     <span className="stone-name">{stone.name}</span>
@@ -140,27 +175,30 @@ const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
               </div>
             )}
 
-            {/* 副技能 */}
-            {equipmentDetail.subSkills && equipmentDetail.subSkills.length > 0 && (
-              <div className="equipment-modal__section">
-                <div className="section-title">副技能</div>
-                {equipmentDetail.subSkills.map((skill, index) => (
-                  <div key={index} className="skill-row">
-                    {skill.icon && <img src={skill.icon} alt={skill.name} className="skill-icon" />}
-                    <span className="skill-name">{skill.name}</span>
-                    {skill.level && <span className="skill-level">Lv.{skill.level}</span>}
+            {/* 套装效果 */}
+            <div className="equipment-modal__section">
+              <div className="section-title">套装效果</div>
+              {equipmentDetail.set?.name && (
+                <div className="set-name">
+                  {equipmentDetail.set.name} ({equipmentDetail.set.equippedCount}件)
+                </div>
+              )}
+              {((equipmentDetail.set?.bonuses && equipmentDetail.set.bonuses.length > 0) ||
+                (equipmentDetail.bonuses && equipmentDetail.bonuses.length > 0)) ? (
+                (equipmentDetail.set?.bonuses || equipmentDetail.bonuses || []).map((bonus, index) => (
+                  <div key={index} className="set-bonus">
+                    <div className="set-bonus__header">{bonus.degree}件套</div>
+                    <div className="set-bonus__effects">
+                      {bonus.descriptions.map((desc, descIndex) => (
+                        <div key={descIndex} className="set-bonus__effect">{desc}</div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* 来源 */}
-            {equipmentDetail.sources && equipmentDetail.sources.length > 0 && (
-              <div className="equipment-modal__footer">
-                <span className="footer-label">来源:</span>
-                <span className="footer-value">{equipmentDetail.sources.join(', ')}</span>
-              </div>
-            )}
+                ))
+              ) : (
+                <div className="set-bonus-empty">無</div>
+              )}
+            </div>
           </div>
         </div>
       </div>

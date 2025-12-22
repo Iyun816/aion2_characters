@@ -141,10 +141,10 @@ export const getRoleName = (role: MemberRole): string => {
 
 // 装备品质颜色
 export const gradeColors: Record<string, string> = {
-  'Common': '#9d9d9d',
-  'Rare': '#4fc3f7',      // 蓝色
-  'Unique': '#ff9800',    // 金色
-  'Legend': '#ab47bc',    // 紫色
+  'Common': '#9d9d9d',    // 灰色
+  'Rare': '#4caf50',      // 绿色 (稀有 - 镜子)
+  'Unique': '#ff9800',    // 金色 (独特)
+  'Legend': '#2196f3',    // 蓝色 (传承 - 指南针)
   'Special': '#26a69a',   // 青绿色
 };
 
