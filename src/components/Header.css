@@ -25,6 +25,25 @@
   justify-content: space-between;
 }
 
+/* 左侧：游戏Logo + 导航 */
+.header__left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.header__game-logo {
+  height: 32px;
+  flex-shrink: 0;
+}
+
+/* 右侧：军团Logo + 管理员按钮 */
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
 .header__logo {
   display: flex;
   align-items: center;

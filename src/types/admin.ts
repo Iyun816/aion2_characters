@@ -60,6 +60,8 @@ export interface GodStoneStat {
   name: string;
   desc: string;
   grade?: string;
+  icon?: string;
+  slotPos?: number;
 }
 
 // 技能信息
@@ -102,6 +104,7 @@ export interface EquipmentDetail {
   equipLevel?: number;
   magicStoneSlotCount?: number;
   godStoneSlotCount?: number;
+  soulBindRate?: string;        // 灵魂刻印进度(百分比)
   // 属性
   mainStats?: EquipmentStat[];
   subStats?: EquipmentStat[];

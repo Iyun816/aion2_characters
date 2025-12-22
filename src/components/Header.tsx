@@ -48,6 +48,12 @@ const Header = () => {
     }
   }, [location, isHome]);
 
+  // 滚动到顶部
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsMobileMenuOpen(false);
+  };
+
   // 平滑滚动到锚点
   const scrollToSection = (sectionId: string) => {
     if (!isHome) {
@@ -73,50 +79,66 @@ const Header = () => {
   return (
     <header className={`header ${isScrolled ? 'header--scrolled' : ''}`}>
       <div className="header__container">
-        {/* Logo - 点击进入军团介绍页 */}
-        <Link to="/legion" className="header__logo">
-          <div className="header__logo-icon">
-            <img src="/images/legion-logo.jpg" alt="椿夏军团" />
-          </div>
-          <div className="header__logo-text">
-            <span className="header__logo-name">椿夏</span>
-            <span className="header__logo-sub">AION2 · 天族希埃尔</span>
-          </div>
-        </Link>
-
-        <nav className={`header__nav ${isMobileMenuOpen ? 'header__nav--open' : ''}`}>
-          <Link
-            to="/"
-            className={`header__nav-link ${isNavActive('home') ? 'header__nav-link--active' : ''}`}
-          >
-            首页
-          </Link>
-          <button
-            onClick={() => scrollToSection('about')}
-            className={`header__nav-link header__nav-link--btn ${isNavActive('about') ? 'header__nav-link--active' : ''}`}
-          >
-            关于我们
-          </button>
-          <button
-            onClick={() => scrollToSection('members')}
-            className={`header__nav-link header__nav-link--btn ${isNavActive('members') ? 'header__nav-link--active' : ''}`}
-          >
-            成员风采
-          </button>
-          <Link
-            to="/join"
-            className={`header__nav-link ${location.pathname === '/join' ? 'header__nav-link--active' : ''}`}
-          >
-            加入军团
-          </Link>
-          {isAdmin && (
+        {/* 左侧：游戏Logo + 导航链接 */}
+        <div className="header__left">
+          <img
+            src="https://fizz-download.playnccdn.com/download/v2/buckets/conti-upload/files/196c7011305-f0c28862-ef32-4a1f-9d47-529292b0c46b"
+            alt="AION2"
+            className="header__game-logo"
+            onClick={() => {
+              if (isHome) {
+                scrollToTop();
+              } else {
+                navigate('/');
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+          />
+          <nav className={`header__nav ${isMobileMenuOpen ? 'header__nav--open' : ''}`}>
             <Link
-              to="/admin"
-              className={`header__nav-link ${location.pathname === '/admin' ? 'header__nav-link--active' : ''}`}
+              to="/"
+              onClick={(e) => {
+                if (isHome) {
+                  e.preventDefault();
+                  scrollToTop();
+                }
+              }}
+              className={`header__nav-link ${isNavActive('home') ? 'header__nav-link--active' : ''}`}
             >
-              管理后台
+              首页
             </Link>
-          )}
+            <button
+              onClick={() => scrollToSection('about')}
+              className={`header__nav-link header__nav-link--btn ${isNavActive('about') ? 'header__nav-link--active' : ''}`}
+            >
+              关于我们
+            </button>
+            <button
+              onClick={() => scrollToSection('members')}
+              className={`header__nav-link header__nav-link--btn ${isNavActive('members') ? 'header__nav-link--active' : ''}`}
+            >
+              成员风采
+            </button>
+            <Link
+              to="/join"
+              className={`header__nav-link ${location.pathname === '/join' ? 'header__nav-link--active' : ''}`}
+            >
+              加入军团
+            </Link>
+          </nav>
+        </div>
+
+        {/* 右侧：军团Logo + 管理员按钮 */}
+        <div className="header__right">
+          <Link to="/legion" className="header__logo">
+            <div className="header__logo-icon">
+              <img src="/images/legion-logo.jpg" alt="椿夏军团" />
+            </div>
+            <div className="header__logo-text">
+              <span className="header__logo-name">椿夏</span>
+              <span className="header__logo-sub">AION2 · 天族希埃尔</span>
+            </div>
+          </Link>
           <button
             onClick={() => setShowLoginModal(true)}
             className={`header__admin-btn ${isAdmin ? 'header__admin-btn--active' : ''}`}
@@ -127,7 +149,7 @@ const Header = () => {
               <circle cx="12" cy="7" r="4" />
             </svg>
           </button>
-        </nav>
+        </div>
 
         <button
           className={`header__mobile-toggle ${isMobileMenuOpen ? 'header__mobile-toggle--open' : ''}`}

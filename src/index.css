@@ -1,15 +1,15 @@
 /* 椿夏军团 - 主题色彩系统
- * 设计理念：椿树的沉稳绿意 + 夏日的温暖阳光
+ * 设计理念：天族的神圣蓝光 + 优雅圣洁
  * 天族优雅、PVE休闲、团结互助
  */
 
 :root {
-  /* 主色调 - 椿叶绿 */
-  --color-primary: #5d8a66;
-  --color-primary-light: #7eb88a;
-  --color-primary-dark: #3d5c45;
+  /* 主色调 - 淡雅天族蓝 */
+  --color-primary: #6b9fd8;
+  --color-primary-light: #8fb9e5;
+  --color-primary-dark: #4a7db3;
 
-  /* 辅助色 - 夏日暖阳 */
+  /* 辅助色 - 圣洁金 */
   --color-accent: #d4a855;
   --color-accent-light: #e8c078;
   --color-accent-dark: #b8923d;

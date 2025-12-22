@@ -1,0 +1,79 @@
+/* 突破等级显示样式 */
+
+/* ============= 紧凑版 - 单个菱形+数字 ============= */
+
+.exceed-compact {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.exceed-compact__icon {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  color: #2196f3;
+  filter: drop-shadow(0 0 4px rgba(33, 150, 243, 0.6));
+}
+
+.exceed-compact__diamond {
+  /* fill="currentColor" 已在 TSX 中设置 */
+}
+
+.exceed-compact__number {
+  position: relative;
+  z-index: 1;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  line-height: 1;
+}
+
+/* ============= 完整版 - 5个菱形进度条 ============= */
+
+.exceed-full {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--spacing-sm) 0;
+}
+
+.exceed-full__diamond {
+  width: 24px;
+  height: 24px;
+  transition: all 0.3s ease;
+}
+
+.exceed-full__diamond-fill {
+  fill: rgba(158, 158, 158, 0.2);
+  transition: all 0.3s ease;
+}
+
+/* 已激活的菱形 - 实心蓝色发光 */
+.exceed-full__diamond--active .exceed-full__diamond-fill {
+  fill: #2196f3;
+  filter: drop-shadow(0 0 6px rgba(33, 150, 243, 0.8));
+  animation: exceed-pulse 2s ease-in-out infinite;
+}
+
+@keyframes exceed-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(33, 150, 243, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(33, 150, 243, 1));
+  }
+}
+
+/* 悬停效果 */
+.exceed-full__diamond--active:hover {
+  transform: scale(1.1);
+}
+
+.exceed-full__diamond--active:hover .exceed-full__diamond-fill {
+  filter: drop-shadow(0 0 10px rgba(33, 150, 243, 1));
+}

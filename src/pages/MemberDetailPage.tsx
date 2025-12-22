@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getRoleName, gradeColors, classIcons } from '../data/memberTypes';
+import { gradeColors, classIcons } from '../data/memberTypes';
 import type { CharacterInfo, CharacterEquipment, EquipmentItem, TitleItem } from '../data/memberTypes';
 import EquipmentTooltip from '../components/EquipmentTooltip';
 import EquipmentDetailModal from '../components/EquipmentDetailModal';
+import ExceedLevel from '../components/ExceedLevel';
 import { useEquipmentTooltip } from '../hooks/useEquipmentTooltip';
 import './MemberDetailPage.css';
 
@@ -19,6 +20,13 @@ const titleCategoryNames: Record<string, string> = {
   'Attack': '攻擊系列',
   'Defense': '防禦系列',
   'Etc': '其他系列'
+};
+
+// 称号分类图标
+const titleCategoryIcons: Record<string, string> = {
+  'Attack': 'https://assets.playnccdn.com/static-aion2/characters/img/info/title_icon_attack.png',
+  'Defense': 'https://assets.playnccdn.com/static-aion2/characters/img/info/title_icon_defense.png',
+  'Etc': 'https://assets.playnccdn.com/static-aion2/characters/img/info/title_icon_etc.png'
 };
 
 // 守护力颜色映射（基于ID）
@@ -118,9 +126,6 @@ const MemberDetailPage = () => {
   // 装备等级
   const itemLevel = stats.find(s => s.type === 'ItemLevel')?.value || 0;
 
-  // 当前装备的称号（从 titleList 第一个获取，因为它通常是装备中的）
-  const equippedTitle = charInfo.title.titleList?.[0];
-
   // 称号按分类分组
   const titlesByCategory = charInfo.title.titleList.reduce((acc, title) => {
     const category = title.equipCategory;
@@ -158,10 +163,10 @@ const MemberDetailPage = () => {
         <span className="equip-card__name" style={{ color: gradeColors[item.grade] || '#9d9d9d' }}>
           {item.name}
         </span>
-        <span className="equip-card__level">
+        <div className="equip-card__level">
           +{item.enchantLevel}
-          {item.exceedLevel > 0 && <span className="equip-card__exceed">突破{item.exceedLevel}</span>}
-        </span>
+          {item.exceedLevel > 0 && <ExceedLevel level={item.exceedLevel} variant="compact" />}
+        </div>
       </div>
     </div>
   );
@@ -182,32 +187,32 @@ const MemberDetailPage = () => {
           <div className="member-hero__profile">
             <div className="member-hero__avatar">
               <img src={profile.profileImage} alt={profile.characterName} />
-              {memberConfig && (
-                <span className={`member-hero__role member-hero__role--${memberConfig.role}`}>
-                  {getRoleName(memberConfig.role)}
-                </span>
-              )}
+              <div className="member-hero__item-level">
+                <span className="member-hero__il-label">装备等级</span>
+                <span className="member-hero__il-value">{itemLevel}</span>
+              </div>
             </div>
             <div className="member-hero__info">
               <h1 className="member-hero__name">
                 {profile.characterName}
-                {equippedTitle && (
-                  <span className={`member-hero__title member-hero__title--${equippedTitle.grade.toLowerCase()}`}>
-                    「{equippedTitle.name}」
+                {profile.titleName && (
+                  <span className={`member-hero__title member-hero__title--${profile.titleGrade.toLowerCase()}`}>
+                    「{profile.titleName}」
                   </span>
                 )}
               </h1>
               <div className="member-hero__meta">
-                <span className="member-hero__class">
-                  {classIcons[profile.className] || '✨'} {profile.className}
-                </span>
                 <span className="member-hero__level">Lv.{profile.characterLevel}</span>
                 <span className="member-hero__server">{profile.raceName} · {profile.serverName}</span>
+                <span className="member-hero__region">{profile.regionName}</span>
               </div>
             </div>
-            <div className="member-hero__item-level">
-              <span className="member-hero__il-label">装备等级</span>
-              <span className="member-hero__il-value">{itemLevel}</span>
+            <div className="member-hero__class-wrapper">
+              <img
+                src={classIcons[profile.className] || classIcons['劍星']}
+                alt={profile.className}
+                className="member-hero__class-icon"
+              />
             </div>
           </div>
         </div>
@@ -421,17 +426,22 @@ const MemberDetailPage = () => {
               <div className="ranking-panel__list">
                 {rankings.map((rank, idx) => (
                   <div key={idx} className="ranking-item">
-                    <div className="ranking-item__left">
-                      {rank.gradeIcon && (
-                        <img src={rank.gradeIcon} alt={rank.gradeName || ''} className="ranking-item__icon" />
-                      )}
-                      <div className="ranking-item__info">
-                        <span className="ranking-item__name">{rank.rankingContentsName}</span>
-                        <span className="ranking-item__grade">{rank.gradeName}</span>
-                      </div>
+                    {rank.gradeIcon && (
+                      <img src={rank.gradeIcon} alt={rank.gradeName || ''} className="ranking-item__icon" />
+                    )}
+                    <div className="ranking-item__info">
+                      <span className="ranking-item__name">{rank.rankingContentsName}</span>
+                      <span className="ranking-item__grade">{rank.gradeName}</span>
                     </div>
-                    <div className="ranking-item__rank">
-                      #{rank.rank?.toLocaleString()}
+                    <div className="ranking-item__stats">
+                      <div className="ranking-item__rank">
+                        第{rank.rank?.toLocaleString() || '-'}名
+                      </div>
+                      {rank.point !== null && rank.point !== undefined && (
+                        <div className="ranking-item__point">
+                          {rank.point.toLocaleString()}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -450,14 +460,22 @@ const MemberDetailPage = () => {
                 {['Attack', 'Defense', 'Etc'].map((category) => {
                   const title = titlesByCategory[category]?.[0];
                   if (!title) return null;
+                  const titleColor = gradeColors[title.grade] || '#9d9d9d';
                   return (
                     <div key={category} className="title-category">
                       <div className="title-category__header">
-                        <span className="title-category__name">{titleCategoryNames[category]}</span>
+                        <div className="title-category__header-left">
+                          <img
+                            src={titleCategoryIcons[category]}
+                            alt={titleCategoryNames[category]}
+                            className="title-category__icon"
+                          />
+                          <span className="title-category__name">{titleCategoryNames[category]}</span>
+                        </div>
                         <span className="title-category__progress">{title.ownedCount}/{title.totalCount}</span>
                       </div>
-                      <div className={`title-category__card title-category__card--${title.grade.toLowerCase()}`}>
-                        <span className="title-category__title-name">{title.name}</span>
+                      <div className="title-category__card" style={{ borderColor: titleColor }}>
+                        <span className="title-category__title-name" style={{ color: titleColor }}>{title.name}</span>
                         <div className="title-category__stats">
                           {title.equipStatList.map((stat, i) => (
                             <span key={i} className="title-category__stat">{stat.desc}</span>

@@ -41,14 +41,10 @@
   z-index: 1;
 }
 
-.hero__game-logo {
-  height: 50px;
-  margin-bottom: var(--spacing-md);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-}
-
 .hero__badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
   padding: var(--spacing-xs) var(--spacing-md);
   background: rgba(201, 169, 98, 0.15);
   border: 1px solid var(--color-elyos);
@@ -57,6 +53,13 @@
   color: var(--color-accent-dark);
   letter-spacing: 0.1em;
   margin-bottom: var(--spacing-md);
+}
+
+.hero__badge-icon {
+  height: 24px;
+  width: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  object-fit: contain;
 }
 
 .hero__logos {
@@ -104,11 +107,11 @@
 .hero__title {
   font-size: clamp(3.5rem, 12vw, 6rem);
   font-weight: 700;
-  letter-spacing: 0.3em;
+  letter-spacing: 0;
   margin-bottom: var(--spacing-sm);
   display: flex;
   justify-content: center;
-  gap: 0.1em;
+  gap: 0.15em;
 }
 
 .hero__title-char {
@@ -164,30 +167,47 @@
   font-weight: 500;
   transition: all var(--transition-normal);
   text-decoration: none;
+  border: none;
+  cursor: pointer;
 }
 
 .hero__btn--primary {
   background: var(--color-primary);
   color: white;
-  box-shadow: 0 4px 14px rgba(93, 138, 102, 0.3);
+  box-shadow: 0 4px 14px rgba(107, 159, 216, 0.3);
+  border: none;
 }
 
 .hero__btn--primary:hover {
   background: var(--color-primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(93, 138, 102, 0.4);
+  box-shadow: 0 6px 20px rgba(107, 159, 216, 0.4);
 }
 
 .hero__btn--secondary {
-  background: rgba(255, 255, 255, 0.8);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  backdrop-filter: blur(4px);
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 4px 14px rgba(107, 159, 216, 0.3);
+  border: none;
 }
 
 .hero__btn--secondary:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107, 159, 216, 0.4);
+}
+
+.hero__btn--outline {
   background: var(--color-primary);
   color: white;
+  box-shadow: 0 4px 14px rgba(107, 159, 216, 0.3);
+  border: none;
+}
+
+.hero__btn--outline:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107, 159, 216, 0.4);
 }
 
 .hero__scroll-hint {
@@ -237,7 +257,8 @@
     height: 65px;
   }
 
-  .hero__game-logo {
-    height: 40px;
+  .hero__badge-icon {
+    height: 20px;
+    width: 20px;
   }
 }

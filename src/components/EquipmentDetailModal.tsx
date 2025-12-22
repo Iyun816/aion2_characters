@@ -4,6 +4,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import type { EquipmentDetail } from '../types/admin';
 import { gradeColors } from '../data/memberTypes';
+import ExceedLevel from './ExceedLevel';
 import './EquipmentDetailModal.css';
 
 interface EquipmentDetailModalProps {
@@ -33,10 +34,19 @@ const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
             <div className="equipment-modal__title">
               <div className="equipment-modal__name" style={{ color: gradeColor }}>
                 {equipmentDetail.name}
+                {/* 显示最大强化等级 +15 */}
                 {equipmentDetail.enchantLevel > 0 && (
                   <span className="equipment-modal__enchant">
-                    +{equipmentDetail.enchantLevel}
+                    +{Math.min(equipmentDetail.enchantLevel, equipmentDetail.maxEnchantLevel || 15)}
                   </span>
+                )}
+                {/* 突破等级紧凑显示在标题行 */}
+                {equipmentDetail.maxExceedEnchantLevel && equipmentDetail.maxExceedEnchantLevel > 0 &&
+                 equipmentDetail.enchantLevel > (equipmentDetail.maxEnchantLevel || 15) && (
+                  <ExceedLevel
+                    level={equipmentDetail.enchantLevel - (equipmentDetail.maxEnchantLevel || 15)}
+                    variant="compact"
+                  />
                 )}
               </div>
               <div className="equipment-modal__grade-row">
@@ -55,10 +65,10 @@ const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
                 {equipmentDetail.level && <span className="meta-item">Lv.{equipmentDetail.level}</span>}
                 {equipmentDetail.equipLevel && <span className="meta-item">装备等级 {equipmentDetail.equipLevel}</span>}
                 {equipmentDetail.raceName && <span className="meta-item">{equipmentDetail.raceName}</span>}
+                {equipmentDetail.classNames && equipmentDetail.classNames.length > 0 && (
+                  <span className="meta-item">{equipmentDetail.classNames.join(' · ')}</span>
+                )}
               </div>
-              {equipmentDetail.classNames && equipmentDetail.classNames.length > 0 && (
-                <div className="equipment-modal__classes">{equipmentDetail.classNames.join(' · ')}</div>
-              )}
             </div>
           </div>
           <div className="equipment-modal__header-right">
@@ -117,7 +127,21 @@ const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
             {((equipmentDetail.subStats && equipmentDetail.subStats.length > 0) ||
               (equipmentDetail.subSkills && equipmentDetail.subSkills.length > 0)) && (
               <div className="equipment-modal__section">
-                <div className="section-title">灵魂刻印</div>
+                <div className="section-title-row">
+                  <div className="section-title">灵魂刻印</div>
+                  {/* 灵魂刻印进度 */}
+                  {equipmentDetail.soulBindRate && (
+                    <div className="soul-bind-progress">
+                      <div className="soul-bind-progress__bar">
+                        <div
+                          className="soul-bind-progress__fill"
+                          style={{ width: `${equipmentDetail.soulBindRate}%` }}
+                        ></div>
+                      </div>
+                      <span className="soul-bind-progress__text">{equipmentDetail.soulBindRate}%</span>
+                    </div>
+                  )}
+                </div>
 
                 {/* 副属性 */}
                 {equipmentDetail.subStats && equipmentDetail.subStats.length > 0 && (
@@ -137,7 +161,7 @@ const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
                     {equipmentDetail.subSkills.map((skill, index) => (
                       <div key={index} className="skill-row">
                         {skill.icon && <img src={skill.icon} alt={skill.name} className="skill-icon" />}
-                        <span className="skill-name">{skill.name}</span>
+                        <span className="skill-name skill-name--sub">{skill.name}</span>
                         {skill.level && <span className="skill-level">Lv.{skill.level}</span>}
                       </div>
                     ))}
@@ -165,11 +189,20 @@ const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
             {/* 神石 */}
             {equipmentDetail.godStoneStat && equipmentDetail.godStoneStat.length > 0 && (
               <div className="equipment-modal__section">
-                <div className="section-title">神石</div>
+                <div className="section-title-row">
+                  <div className="section-title">神石</div>
+                  <div className="godstone-icons">
+                    {equipmentDetail.godStoneStat.map((stone, index) => (
+                      stone.icon && <img key={index} src={stone.icon} alt={stone.name} className="godstone-icon-small" />
+                    ))}
+                  </div>
+                </div>
                 {equipmentDetail.godStoneStat.map((stone, index) => (
-                  <div key={index} className="godstone-row" style={{ color: gradeColors[stone.grade] || '#9d9d9d' }}>
-                    <div className="godstone-name">{stone.name}</div>
-                    {stone.desc && <div className="godstone-desc">{stone.desc}</div>}
+                  <div key={index} className="godstone-row" style={{ color: gradeColors[stone.grade || ''] || '#9d9d9d' }}>
+                    <div className="godstone-info">
+                      <div className="godstone-name">{stone.name}</div>
+                      {stone.desc && <div className="godstone-desc">{stone.desc}</div>}
+                    </div>
                   </div>
                 ))}
               </div>

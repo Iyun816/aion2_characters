@@ -5,6 +5,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: '0.0.0.0', // 允许局域网访问
+    port: 5173,
     proxy: {
       // 代理 AION2 API 请求,绕过 CORS 限制
       '/api/aion2': {

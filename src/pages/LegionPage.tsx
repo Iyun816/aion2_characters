@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { getRoleName, classIcons } from '../data/memberTypes';
+import { getRoleName, classIconsSmall } from '../data/memberTypes';
 import type { CharacterInfo, MemberRole } from '../data/memberTypes';
-import { isAdminLoggedIn } from '../services/dataService';
 import './LegionPage.css';
 
 // 成员配置
@@ -22,6 +21,8 @@ interface GalleryImage {
   src: string;
   name: string;
   showOnHome: boolean;
+  approved: boolean;  // 审核状态：true=已审核通过, false=待审核
+  uploadTime?: string; // 上传时间
 }
 
 // 从 localStorage 读取相册数据
@@ -45,13 +46,8 @@ const LegionPage = () => {
   const [activeTab, setActiveTab] = useState<'members' | 'gallery'>('members');
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(loadGalleryImages);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // 检查管理员状态
-  useEffect(() => {
-    setIsAdmin(isAdminLoggedIn());
-  }, []);
 
   useEffect(() => {
     const loadMembers = async () => {
@@ -102,10 +98,12 @@ const LegionPage = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         const newImage: GalleryImage = {
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          id: Date.now().toString() + Math.random().toString(36).substring(2, 11),
           src: event.target?.result as string,
           name: file.name,
-          showOnHome: false
+          showOnHome: false,
+          approved: false, // 默认待审核
+          uploadTime: new Date().toISOString()
         };
         setGalleryImages(prev => {
           const updated = [...prev, newImage];
@@ -116,32 +114,17 @@ const LegionPage = () => {
       reader.readAsDataURL(file);
     });
 
+    // 显示上传成功提示
+    setShowNotification(true);
+
+    // 5秒后自动关闭提示
+    setTimeout(() => {
+      setShowNotification(false);
+    }, 5000);
+
     // 清空 input 以便再次选择相同文件
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
-    }
-  };
-
-  // 切换首页展示（仅管理员）
-  const toggleShowOnHome = (id: string) => {
-    if (!isAdmin) return;
-    setGalleryImages(prev => {
-      const updated = prev.map(img =>
-        img.id === id ? { ...img, showOnHome: !img.showOnHome } : img
-      );
-      saveGalleryImages(updated);
-      return updated;
-    });
-  };
-
-  // 删除图片
-  const deleteImage = (id: string) => {
-    if (confirm('确定要删除这张图片吗？')) {
-      setGalleryImages(prev => {
-        const updated = prev.filter(img => img.id !== id);
-        saveGalleryImages(updated);
-        return updated;
-      });
     }
   };
 
@@ -165,7 +148,12 @@ const LegionPage = () => {
           {member.profile && (
             <>
               <span className="legion-member-card__class">
-                {classIcons[member.profile.className] || '✨'} {member.profile.className}
+                <img
+                  src={classIconsSmall[member.profile.className] || classIconsSmall['劍星']}
+                  alt={member.profile.className}
+                  className="legion-member-card__class-icon"
+                />
+                {member.profile.className}
               </span>
               <span className="legion-member-card__level">Lv.{member.profile.characterLevel}</span>
             </>
@@ -189,26 +177,6 @@ const LegionPage = () => {
 
   return (
     <div className="legion-page">
-      {/* 顶部背景图 */}
-      <div className="legion-banner">
-        <img
-          src="https://assets.playnccdn.com/uikit/cnb/3.2.0/img/header/header-aion2-2025.jpg"
-          alt=""
-          className="legion-banner__bg"
-        />
-        <div className="legion-banner__overlay"></div>
-        <div className="legion-banner__content">
-          <div className="legion-banner__emblem">
-            <img
-              src="https://assets.playnccdn.com/uikit/ncui/1.7.20/img/official/service/aion2/profile_1.png"
-              alt="军团标志"
-            />
-          </div>
-          <h1 className="legion-banner__title">椿夏军团</h1>
-          <p className="legion-banner__subtitle">AION2 · 天族 · 希埃尔</p>
-        </div>
-      </div>
-
       {/* 军团介绍 */}
       <section className="legion-intro">
         <div className="legion-intro__container">
@@ -318,11 +286,9 @@ const LegionPage = () => {
         <section className="legion-gallery">
           <div className="legion-gallery__container">
             <div className="legion-gallery__header">
-              {isAdmin && (
-                <p className="legion-gallery__hint">
-                  管理员模式：带有 ⭐ 标记的图片会展示在首页的「成员风采」区域
-                </p>
-              )}
+              <p className="legion-gallery__hint">
+                上传军团的精彩瞬间
+              </p>
               <button
                 className="legion-gallery__upload-btn"
                 onClick={() => fileInputRef.current?.click()}
@@ -346,33 +312,13 @@ const LegionPage = () => {
 
             {galleryImages.length > 0 ? (
               <div className="legion-gallery__grid">
-                {galleryImages.map(img => (
+                {galleryImages.filter(img => img.approved).map(img => (
                   <div key={img.id} className="legion-gallery__item">
                     <img
                       src={img.src}
                       alt={img.name}
                       onClick={() => setSelectedImage(img.src)}
                     />
-                    <div className="legion-gallery__item-actions">
-                      {isAdmin && (
-                        <button
-                          className={`legion-gallery__star-btn ${img.showOnHome ? 'legion-gallery__star-btn--active' : ''}`}
-                          onClick={() => toggleShowOnHome(img.id)}
-                          title={img.showOnHome ? '取消首页展示' : '设为首页展示'}
-                        >
-                          {img.showOnHome ? '⭐' : '☆'}
-                        </button>
-                      )}
-                      <button
-                        className="legion-gallery__delete-btn"
-                        onClick={() => deleteImage(img.id)}
-                        title="删除图片"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        </svg>
-                      </button>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -395,6 +341,28 @@ const LegionPage = () => {
             </svg>
           </button>
           <img src={selectedImage} alt="预览" />
+        </div>
+      )}
+
+      {/* 上传成功通知 */}
+      {showNotification && (
+        <div className="legion-notification">
+          <div className="legion-notification__content">
+            <div className="legion-notification__icon">⏳</div>
+            <div className="legion-notification__text">
+              <strong>上传成功！</strong>
+              <p>上传的图片正在审核，审核通过即可在军团相册查看。如过长时间未通过请联系军团长。</p>
+            </div>
+            <button
+              className="legion-notification__close"
+              onClick={() => setShowNotification(false)}
+              aria-label="关闭"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
     </div>

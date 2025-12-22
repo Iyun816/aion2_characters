@@ -64,15 +64,15 @@ const Members = () => {
           <div className="members__empty-gallery">
             <p>📷 精彩瞬间即将上传...</p>
             <p className="members__empty-hint">
-              在<Link to="/legion">军团相册</Link>中上传图片并标记为首页展示
+              想了解军团的详细信息?
             </p>
           </div>
         )}
 
         <div className="members__cta">
-          <p>想了解军团成员的详细信息？</p>
+          <p>想了解军团的详细信息？</p>
           <Link to="/legion" className="members__cta-btn">
-            查看军团成员
+            查看军团信息
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>

@@ -6,9 +6,10 @@ import { useAdmin } from '../contexts/AdminContext';
 import MemberManager from '../components/admin/MemberManager';
 import ApplicationManager from '../components/admin/ApplicationManager';
 import DataSyncPanel from '../components/admin/DataSyncPanel';
+import GalleryManager from '../components/admin/GalleryManager';
 import './AdminPage.css';
 
-type TabType = 'members' | 'applications' | 'sync';
+type TabType = 'members' | 'applications' | 'sync' | 'gallery';
 
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();
@@ -56,6 +57,12 @@ const AdminPage: React.FC = () => {
           申请审批
         </button>
         <button
+          className={`admin-tabs__tab ${activeTab === 'gallery' ? 'admin-tabs__tab--active' : ''}`}
+          onClick={() => setActiveTab('gallery')}
+        >
+          相册管理
+        </button>
+        <button
           className={`admin-tabs__tab ${activeTab === 'sync' ? 'admin-tabs__tab--active' : ''}`}
           onClick={() => setActiveTab('sync')}
         >
@@ -66,6 +73,7 @@ const AdminPage: React.FC = () => {
       <div className="admin-content">
         {activeTab === 'members' && <MemberManager />}
         {activeTab === 'applications' && <ApplicationManager />}
+        {activeTab === 'gallery' && <GalleryManager />}
         {activeTab === 'sync' && <DataSyncPanel />}
       </div>
     </div>

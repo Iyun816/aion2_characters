@@ -335,11 +335,20 @@
 }
 
 .legion-member-card__class {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.85rem;
   color: var(--color-text-secondary);
   background: var(--color-bg-secondary);
   padding: 2px 10px;
   border-radius: 20px;
+}
+
+.legion-member-card__class-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .legion-member-card__level {
@@ -643,5 +652,99 @@
   .legion-tabs__btn {
     padding: var(--spacing-xs) var(--spacing-md);
     font-size: 0.9rem;
+  }
+}
+
+/* 上传成功通知 */
+.legion-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  animation: fadeInScale 0.3s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.legion-notification__content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  max-width: 400px;
+  border-left: 4px solid #ff9800;
+}
+
+.legion-notification__icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.legion-notification__text {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+}
+
+.legion-notification__text strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  color: var(--color-text-primary);
+}
+
+.legion-notification__text p {
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.legion-notification__close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+}
+
+.legion-notification__close:hover {
+  color: var(--color-text-primary);
+}
+
+.legion-notification__close svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 768px) {
+  .legion-notification {
+    left: var(--spacing-md);
+    right: var(--spacing-md);
+    transform: translate(0, -50%);
+    top: 50%;
+  }
+
+  .legion-notification__content {
+    max-width: none;
   }
 }

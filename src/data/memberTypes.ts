@@ -139,28 +139,47 @@ export const getRoleName = (role: MemberRole): string => {
   }
 };
 
-// 装备品质颜色
+// 装备品质颜色 - 从低到高: 白 → 绿 → 蓝 → 金 → 青绿 → 红
 export const gradeColors: Record<string, string> = {
-  'Common': '#9d9d9d',    // 灰色
-  'Rare': '#4caf50',      // 绿色 (稀有 - 镜子)
-  'Unique': '#ff9800',    // 金色 (独特)
-  'Legend': '#2196f3',    // 蓝色 (传承 - 指南针)
+  'Common': '#9d9d9d',    // 灰白色
+  'Rare': '#4caf50',      // 绿色
+  'Legend': '#2196f3',    // 蓝色
+  'Unique': '#ff9800',    // 金色
   'Special': '#26a69a',   // 青绿色
+  'Epic': '#f44336',      // 红色
 };
 
-// 职业图标
+// 职业图标 - 带职业名字（用于成员详情页面右上角大图标）
 export const classIcons: Record<string, string> = {
-  '劍星': '⚔️',
-  '守護星': '🛡️',
-  '魔道星': '🔮',
-  '精靈星': '🏹',
-  '治癒星': '💚',
-  '護法星': '📿',
-  '弓星': '🎯',
-  '殺星': '🗡️',
-  '吟遊星': '🎵',
-  '槍星': '🔱',
-  '機甲星': '⚙️',
-  '畫師': '🎨',
-  '默认': '✨'
+  '劍星': 'https://download.plaync.com.tw/AION2/teaser/4th/class-icon-1-hover.webp',
+  '守護星': 'https://download.plaync.com.tw/AION2/teaser/4th/class-icon-2-hover.webp',
+  '殺星': 'https://download.plaync.com.tw/AION2/teaser/4th/class-icon-3-hover.webp',
+  '弓星': 'https://download.plaync.com.tw/AION2/teaser/4th/class-icon-4-hover.webp',
+  '護法星': 'https://download.plaync.com.tw/AION2/teaser/4th/class-icon-5-hover.webp',
+  '治癒星': 'https://download.plaync.com.tw/AION2/teaser/4th/class-icon-6-hover.webp',
+  '魔道星': 'https://download.plaync.com.tw/AION2/teaser/4th/class-icon-7-hover.webp',
+  '精靈星': 'https://download.plaync.com.tw/AION2/teaser/4th/class-icon-8-hover.webp',
+  // 其他职业使用默认图标
+  '吟遊星': 'https://download.plaync.com.tw/AION2/teaser/4th/class-icon-1-hover.webp',
+  '槍星': 'https://download.plaync.com.tw/AION2/teaser/4th/class-icon-1-hover.webp',
+  '機甲星': 'https://download.plaync.com.tw/AION2/teaser/4th/class-icon-1-hover.webp',
+  '畫師': 'https://download.plaync.com.tw/AION2/teaser/4th/class-icon-1-hover.webp'
 };
+
+// 职业小图标 - 不带职业名字（用于管理页面成员卡片）
+export const classIconsSmall: Record<string, string> = {
+  '劍星': 'https://assets.playnccdn.com/static-aion2/characters/img/class/class_icon_gladiator.png',
+  '守護星': 'https://assets.playnccdn.com/static-aion2/characters/img/class/class_icon_templar.png',
+  '殺星': 'https://assets.playnccdn.com/static-aion2/characters/img/class/class_icon_assassin.png',
+  '弓星': 'https://assets.playnccdn.com/static-aion2/characters/img/class/class_icon_ranger.png',
+  '護法星': 'https://assets.playnccdn.com/static-aion2/characters/img/class/class_icon_chanter.png',
+  '治癒星': 'https://assets.playnccdn.com/static-aion2/characters/img/class/class_icon_cleric.png',
+  '魔道星': 'https://assets.playnccdn.com/static-aion2/characters/img/class/class_icon_sorcerer.png',
+  '精靈星': 'https://assets.playnccdn.com/static-aion2/characters/img/class/class_icon_elementalist.png',
+  // 其他职业使用默认图标
+  '吟遊星': 'https://assets.playnccdn.com/static-aion2/characters/img/class/class_icon_gladiator.png',
+  '槍星': 'https://assets.playnccdn.com/static-aion2/characters/img/class/class_icon_gladiator.png',
+  '機甲星': 'https://assets.playnccdn.com/static-aion2/characters/img/class/class_icon_gladiator.png',
+  '畫師': 'https://assets.playnccdn.com/static-aion2/characters/img/class/class_icon_gladiator.png'
+};
+
