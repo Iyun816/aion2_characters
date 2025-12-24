@@ -42,7 +42,7 @@ const MemberDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const [charInfo, setCharInfo] = useState<CharacterInfo | null>(null);
   const [charEquip, setCharEquip] = useState<CharacterEquipment | null>(null);
-  const [memberConfig, setMemberConfig] = useState<MemberConfig | null>(null);
+  const [_memberConfig, setMemberConfig] = useState<MemberConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'equipment' | 'skills'>('equipment');
 
@@ -70,7 +70,7 @@ const MemberDetailPage = () => {
         // 加载角色数据
         const [infoRes, equipRes] = await Promise.all([
           fetch(`/data/${id}/character_info.json`),
-          fetch(`/data/${id}/character_equipment.json`)
+          fetch(`/data/${id}/equipment_details.json`)
         ]);
 
         if (infoRes.ok) {
@@ -113,11 +113,13 @@ const MemberDetailPage = () => {
   const profile = charInfo.profile;
   const stats = charInfo.stat.statList;
   const rankings = charInfo.ranking.rankingList.filter(r => r.rank !== null);
-  const equipment = charEquip?.equipment.equipmentList || [];
-  const skins = charEquip?.equipment.skinList || [];
-  const skills = charEquip?.skill.skillList.filter(s => s.acquired === 1) || [];
-  const pet = charEquip?.petwing.pet;
-  const wing = charEquip?.petwing.wing;
+
+  // 兼容旧数据格式(items对象)和新数据格式(equipment/skill/petwing结构)
+  const equipment = charEquip?.equipment?.equipmentList || [];
+  const skins = charEquip?.equipment?.skinList || [];
+  const skills = charEquip?.skill?.skillList?.filter(s => s.acquired === 1) || [];
+  const pet = charEquip?.petwing?.pet;
+  const wing = charEquip?.petwing?.wing;
 
   // 基础属性（前6个）
   const baseStats = stats.slice(0, 6);
@@ -140,8 +142,8 @@ const MemberDetailPage = () => {
   const daevanionBoards = charInfo.daevanion?.boardList || [];
 
   // 装备分类
-  const gearEquipment = equipment.filter(e => !e.slotPosName.startsWith('Arcana'));
-  const arcanaEquipment = equipment.filter(e => e.slotPosName.startsWith('Arcana'));
+  const gearEquipment = equipment.filter(e => e.slotPosName && !e.slotPosName.startsWith('Arcana'));
+  const arcanaEquipment = equipment.filter(e => e.slotPosName && e.slotPosName.startsWith('Arcana'));
 
   // 技能分类
   const activeSkills = skills.filter(s => s.category === 'Active');
@@ -469,7 +471,7 @@ const MemberDetailPage = () => {
                       <div className="title-category__card" style={{ borderColor: titleColor }}>
                         <span className="title-category__title-name" style={{ color: titleColor }}>{title.name}</span>
                         <div className="title-category__stats">
-                          {title.equipStatList.map((stat, i) => (
+                          {(title.equipStatList || []).map((stat, i) => (
                             <span key={i} className="title-category__stat">{stat.desc}</span>
                           ))}
                         </div>

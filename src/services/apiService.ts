@@ -1,6 +1,6 @@
 // API 服务 - 生成 AION2 台湾官方 API 请求 URL
 
-import type { MemberConfig, EquipmentDetail } from '../types/admin';
+import type { MemberConfig } from '../types/admin';
 
 // ============= 常量 =============
 
@@ -51,13 +51,8 @@ export function getEquipmentDetailUrl(
  * 从成员配置生成角色信息 URL
  */
 export function getCharacterUrlFromMember(member: MemberConfig): string | null {
-  // 优先使用完整 URL
-  if (member.characterInfoUrl) {
-    return member.characterInfoUrl;
-  }
-  // 兼容旧格式
   if (member.characterId && member.serverId !== undefined) {
-    return getCharacterInfoUrl(member.characterId as string, member.serverId as number);
+    return getCharacterInfoUrl(member.characterId, member.serverId);
   }
   return null;
 }
@@ -66,13 +61,8 @@ export function getCharacterUrlFromMember(member: MemberConfig): string | null {
  * 从成员配置生成角色装备 URL
  */
 export function getCharacterEquipmentUrlFromMember(member: MemberConfig): string | null {
-  // 优先使用完整 URL
-  if (member.characterEquipmentUrl) {
-    return member.characterEquipmentUrl;
-  }
-  // 兼容旧格式
   if (member.characterId && member.serverId !== undefined) {
-    return getCharacterEquipmentUrl(member.characterId as string, member.serverId as number);
+    return getCharacterEquipmentUrl(member.characterId, member.serverId);
   }
   return null;
 }
@@ -98,6 +88,7 @@ export function parseApiUrl(url: string): { characterId: string; serverId: numbe
     return null;
   }
 }
+
 
 // ============= 装备数据处理 =============
 
@@ -130,45 +121,6 @@ export function getEquipmentParams(equipment: {
   };
 }
 
-// ============= 批量请求辅助 =============
-
-/**
- * 从角色数据中提取所有装备的请求参数
- * @param characterData - 角色数据（包含装备列表）
- * @returns 装备请求参数数组
- */
-export function extractEquipmentParams(characterData: any): Array<{ itemId: number; enchantLevel: number; slot?: string }> {
-  const equipmentList: Array<{ itemId: number; enchantLevel: number; slot?: string }> = [];
-
-  // 假设装备在 characterData.equipment 或类似字段中
-  // 实际结构需要根据 API 返回的数据调整
-  if (!characterData || !characterData.equipment) {
-    return equipmentList;
-  }
-
-  const equipment = characterData.equipment;
-
-  // 遍历装备槽位
-  const slots = [
-    'weapon', 'shield', 'head', 'shoulder', 'chest',
-    'gloves', 'pants', 'shoes', 'earring1', 'earring2',
-    'necklace', 'ring1', 'ring2', 'belt', 'cloak'
-  ];
-
-  for (const slot of slots) {
-    const item = equipment[slot];
-    if (item && item.id) {
-      const params = getEquipmentParams(item);
-      equipmentList.push({
-        ...params,
-        slot,
-      });
-    }
-  }
-
-  return equipmentList;
-}
-
 // ============= 数据验证 =============
 
 /**
@@ -178,15 +130,6 @@ export function validateMemberConfig(member: MemberConfig): {
   valid: boolean;
   message?: string;
 } {
-  // 优先检查新格式 (完整 URL)
-  const hasInfoUrl = member.characterInfoUrl && member.characterInfoUrl.trim();
-  const hasEquipUrl = member.characterEquipmentUrl && member.characterEquipmentUrl.trim();
-
-  if (hasInfoUrl && hasEquipUrl) {
-    return { valid: true };
-  }
-
-  // 检查旧格式 (characterId + serverId)
   const hasCharacterId = member.characterId && member.characterId.trim();
   const hasServerId = member.serverId !== undefined && member.serverId !== null;
 
@@ -194,13 +137,11 @@ export function validateMemberConfig(member: MemberConfig): {
     return { valid: true };
   }
 
-  // 都没配置
-  if (!hasInfoUrl && !hasEquipUrl && !hasCharacterId && !hasServerId) {
-    return { valid: false, message: '未配置 API' };
+  if (!hasCharacterId && !hasServerId) {
+    return { valid: false, message: '未配置角色信息' };
   }
 
-  // 部分配置
-  return { valid: false, message: 'API 配置不完整' };
+  return { valid: false, message: '角色配置不完整' };
 }
 
 /**
@@ -220,13 +161,15 @@ export function isValidApiUrl(url: string): boolean {
 /**
  * API 错误类型
  */
-export enum ApiErrorType {
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  CORS_ERROR = 'CORS_ERROR',
-  NOT_FOUND = 'NOT_FOUND',
-  INVALID_RESPONSE = 'INVALID_RESPONSE',
-  UNKNOWN = 'UNKNOWN',
-}
+export const ApiErrorType = {
+  NETWORK_ERROR: 'NETWORK_ERROR',
+  CORS_ERROR: 'CORS_ERROR',
+  NOT_FOUND: 'NOT_FOUND',
+  INVALID_RESPONSE: 'INVALID_RESPONSE',
+  UNKNOWN: 'UNKNOWN',
+} as const;
+
+export type ApiErrorType = typeof ApiErrorType[keyof typeof ApiErrorType];
 
 /**
  * 解析 API 错误

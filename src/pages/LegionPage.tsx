@@ -7,6 +7,7 @@ import './LegionPage.css';
 // 成员配置
 interface MemberConfig {
   id: string;
+  name: string;
   role: MemberRole;
   joinDate?: string;
 }
@@ -169,7 +170,7 @@ const LegionPage = () => {
           <img src={member.profile.profileImage} alt={member.profile.characterName} />
         ) : (
           <div className="legion-member-card__avatar-placeholder">
-            {member.id.charAt(0).toUpperCase()}
+            {member.name.charAt(0).toUpperCase()}
           </div>
         )}
         <span className={`legion-member-card__role legion-member-card__role--${member.role}`}>
@@ -177,7 +178,7 @@ const LegionPage = () => {
         </span>
       </div>
       <div className="legion-member-card__info">
-        <h3 className="legion-member-card__name">{member.profile?.characterName || member.id}</h3>
+        <h3 className="legion-member-card__name">{member.profile?.characterName || member.name}</h3>
         <div className="legion-member-card__details">
           {member.profile && (
             <>

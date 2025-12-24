@@ -1,7 +1,6 @@
 // 数据同步服务 - 通过代理调用 AION2 API
 
 import type { MemberConfig } from '../types/admin';
-import { parseApiUrl } from './apiService';
 
 // 开发环境使用代理,生产环境需要后端支持
 const API_PROXY_PREFIX = '/api/aion2';
@@ -53,24 +52,37 @@ async function fetchWithProxy(url: string): Promise<any> {
  * 获取角色信息
  */
 async function getCharacterInfo(member: MemberConfig): Promise<any> {
-  if (!member.characterInfoUrl) {
-    throw new Error('未配置角色信息 URL');
+  if (!member.characterId || !member.serverId) {
+    throw new Error('未配置角色信息 (characterId 或 serverId)');
   }
 
   console.log(`[${member.name}] 步骤 1/3: 请求角色信息...`);
-  return await fetchWithProxy(member.characterInfoUrl);
+
+  // 使用后端代理API
+  const response = await fetch(
+    `/api/character/info?characterId=${encodeURIComponent(member.characterId)}&serverId=${member.serverId}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
+
+  return await response.json();
 }
 
 /**
  * 获取角色装备列表
  */
 async function getCharacterEquipment(member: MemberConfig): Promise<any> {
-  if (!member.characterEquipmentUrl) {
-    throw new Error('未配置角色装备 URL');
+  if (!member.characterId || !member.serverId) {
+    throw new Error('未配置角色信息 (characterId 或 serverId)');
   }
 
   console.log(`[${member.name}] 步骤 2/3: 请求装备列表...`);
-  return await fetchWithProxy(member.characterEquipmentUrl);
+
+  // 构建装备列表URL
+  const url = `${API_PROXY_PREFIX}/character/equipment?lang=zh&characterId=${encodeURIComponent(member.characterId)}&serverId=${member.serverId}`;
+  return await fetchWithProxy(url);
 }
 
 /**
@@ -82,20 +94,12 @@ async function getEquipmentDetail(
   slotPos: number,
   member: MemberConfig
 ): Promise<any> {
-  // 从 URL 中提取参数
-  if (!member.characterInfoUrl) {
-    throw new Error('未配置角色信息 URL');
+  if (!member.characterId || !member.serverId) {
+    throw new Error('未配置角色信息 (characterId 或 serverId)');
   }
-
-  const params = parseApiUrl(member.characterInfoUrl);
-  if (!params) {
-    throw new Error('无法从 URL 中提取 characterId 和 serverId');
-  }
-
-  const { characterId, serverId } = params;
 
   // 构建装备详情 URL
-  const url = `/api/aion2/character/equipment/item?id=${itemId}&enchantLevel=${enchantLevel}&characterId=${encodeURIComponent(characterId)}&serverId=${serverId}&slotPos=${slotPos}&lang=zh`;
+  const url = `/api/aion2/character/equipment/item?id=${itemId}&enchantLevel=${enchantLevel}&characterId=${encodeURIComponent(member.characterId)}&serverId=${member.serverId}&slotPos=${slotPos}&lang=zh`;
 
   console.log(`[${member.name}] 请求装备详情: itemId=${itemId}, slotPos=${slotPos}`);
   return await fetchWithProxy(url);
@@ -161,7 +165,14 @@ export async function syncMemberData(
           member
         );
 
-        equipmentDetails.push(detail);
+        // 将原始装备的 slotPos 和 slotPosName 合并到详情中
+        const enrichedDetail = {
+          ...detail,
+          slotPos: equip.slotPos,
+          slotPosName: equip.slotPosName
+        };
+
+        equipmentDetails.push(enrichedDetail);
         log(`✓ ${equip.slotPosName || equip.slotPos}: ${detail.name || equip.name}`, 'success');
         await delay(300);
       } catch (error: any) {
@@ -175,33 +186,43 @@ export async function syncMemberData(
     try {
       log('正在保存到服务器...', 'info');
 
-      // 动态获取后端 URL (开发环境 localhost:3001, 生产环境使用当前域名)
-      const apiUrl = window.location.hostname === 'localhost'
-        ? 'http://localhost:3001/api/save-member-data'
-        : '/api/save-member-data';
-
-      const saveResponse = await fetch(apiUrl, {
+      // 保存角色信息
+      const characterResponse = await fetch(`/api/members/${encodeURIComponent(member.id)}/character`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          memberId: member.id,
-          characterInfo,
-          equipmentData,
-          equipmentDetails,
-        }),
+        body: JSON.stringify(characterInfo),
       });
 
-      if (saveResponse.ok) {
-        const saveResult = await saveResponse.json();
-        log('✓ 数据已保存到服务器文件系统', 'success');
-        console.log('保存结果:', saveResult);
-      } else {
-        log('⚠ 保存到服务器失败,但数据已保存到本地存储', 'info');
+      if (!characterResponse.ok) {
+        throw new Error(`保存角色信息失败: ${characterResponse.statusText}`);
       }
+
+      // 保存装备数据 - 将装备详情合并到 equipmentList 中
+      const enrichedEquipmentData = {
+        ...equipmentData,
+        equipment: {
+          ...equipmentData.equipment,
+          equipmentList: equipmentDetails.length > 0 ? equipmentDetails : equipmentData.equipment.equipmentList
+        }
+      };
+
+      const equipmentResponse = await fetch(`/api/members/${encodeURIComponent(member.id)}/equipment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(enrichedEquipmentData),
+      });
+
+      if (!equipmentResponse.ok) {
+        throw new Error(`保存装备详情失败: ${equipmentResponse.statusText}`);
+      }
+
+      log('✓ 数据已保存到服务器文件系统', 'success');
     } catch (saveError: any) {
-      log('⚠ 无法连接到后端服务,数据已保存到本地存储', 'info');
+      log('⚠ 保存到服务器失败,但数据已保存到本地存储', 'info');
       console.warn('保存到服务器失败:', saveError.message);
     }
 

@@ -8,7 +8,6 @@ import {
   deleteApplication,
   exportApplicationsToFile,
   importJsonFile,
-  createMemberFromApplication,
   addMember,
   loadMembers,
 } from '../../services/dataService';
@@ -60,30 +59,31 @@ const ApplicationManager: React.FC = () => {
 
       // 如果选择创建成员
       if (createMember) {
-        let memberData = createMemberFromApplication(application);
+        // 直接使用 characterId 作为成员ID
+        const memberId = application.characterId;
 
-        // 检查 ID 是否重复，如果重复则添加数字后缀
-        let finalId = memberData.id;
-        let counter = 1;
-        while (members.some(m => m.id === finalId)) {
-          finalId = `${memberData.id}_${counter}`;
-          counter++;
+        // 检查是否已存在
+        if (members.some(m => m.id === memberId)) {
+          alert(`该角色已存在于成员列表中\n角色: ${application.characterName}\nID: ${memberId}`);
+          loadData();
+          return;
         }
 
         const fullMemberData: MemberConfig = {
-          ...memberData,
-          id: finalId, // 使用去重后的 ID
-          characterId: undefined,
-          serverId: undefined,
+          id: memberId,  // 使用 characterId 作为 ID
+          name: application.characterName,
+          role: 'member',
+          joinDate: new Date().toISOString().split('T')[0],
+          serverId: application.serverId,
+          characterId: application.characterId,
         };
 
         try {
           await addMember(members, fullMemberData);
-          alert(`申请已通过,成员 "${application.characterName}" 已创建\nID: ${finalId}`);
+          alert(`申请已通过，成员 "${application.characterName}" 已创建\n服务器: ${application.serverName}\n\n数据文件夹: /data/${memberId}/\n可在数据同步中更新数据`);
         } catch (error: any) {
-          // 如果还是重复（并发问题），给出明确提示
           if (error.message.includes('已存在')) {
-            alert(`成员 ID 冲突，请手动在成员管理中添加\n建议 ID: ${finalId}_${Date.now()}`);
+            alert(`成员已存在: ${memberId}`);
           } else {
             throw error;
           }
@@ -264,7 +264,9 @@ const ApplicationManager: React.FC = () => {
             <div key={app.id} className={`application-card application-card--${app.status}`}>
               <div className="application-card__header">
                 <div className="application-card__title">
-                  <span className="application-card__name">{app.characterName}</span>
+                  <span className="application-card__name">
+                    {app.characterName}
+                  </span>
                   <span className={`status-tag status-tag--${app.status}`}>
                     {getStatusDisplay(app.status)}
                   </span>
@@ -276,30 +278,46 @@ const ApplicationManager: React.FC = () => {
 
               <div className="application-card__body">
                 <div className="application-card__info">
+                  {/* 角色信息 */}
                   <div className="info-item">
-                    <span className="info-label">职业:</span>
-                    <span className="info-value">{app.className}</span>
+                    <span className="info-label">角色名称:</span>
+                    <span className="info-value">{app.characterName}</span>
                   </div>
-                  {app.level && (
-                    <div className="info-item">
-                      <span className="info-label">等级:</span>
-                      <span className="info-value">{app.level}</span>
-                    </div>
-                  )}
-                  {app.contact && (
-                    <div className="info-item">
-                      <span className="info-label">联系方式:</span>
-                      <span className="info-value">{app.contact}</span>
-                    </div>
-                  )}
+                  <div className="info-item">
+                    <span className="info-label">服务器:</span>
+                    <span className="info-value">
+                      {app.serverName} (ID: {app.serverId})
+                    </span>
+                  </div>
+                  {/* 角色链接 */}
+                  <div className="info-item">
+                    <span className="info-label">角色链接:</span>
+                    <a
+                      href={app.characterUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="info-value info-value--link"
+                      style={{
+                        color: 'var(--color-primary)',
+                        textDecoration: 'none',
+                        wordBreak: 'break-all'
+                      }}
+                    >
+                      查看角色详情
+                      <svg
+                        style={{ display: 'inline-block', width: '14px', height: '14px', marginLeft: '4px' }}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                    </a>
+                  </div>
                 </div>
-
-                {app.message && (
-                  <div className="application-card__message">
-                    <div className="info-label">留言:</div>
-                    <div className="message-content">{app.message}</div>
-                  </div>
-                )}
 
                 {app.status !== 'pending' && app.reviewedAt && (
                   <div className="application-card__review">

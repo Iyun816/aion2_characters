@@ -4,16 +4,13 @@
 
 // 成员配置（扩展版，包含API配置）
 export interface MemberConfig {
-  id: string;                    // 成员ID（唯一标识，对应数据文件夹名）
+  id: string;                    // 成员ID（使用 characterId 作为唯一标识）
   name: string;                  // 显示名称
   role: 'leader' | 'elite' | 'member';
   joinDate?: string;             // 入团日期
-  // API 配置 - 使用完整 URL (新格式)
-  characterInfoUrl?: string;     // 角色信息完整 URL (如: https://tw.ncsoft.com/aion2/api/character/info?lang=zh&characterId=...&serverId=...)
-  characterEquipmentUrl?: string; // 角色装备完整 URL (如: https://tw.ncsoft.com/aion2/api/character/equipment?lang=zh&characterId=...&serverId=...)
-  // API 配置 - 旧格式 (兼容性保留)
-  characterId?: string;          // tw.ncsoft.com 角色ID（编码后的字符串）
-  serverId?: number;             // 服务器ID（如 1001 = 希埃爾）
+  // 角色标识
+  characterId: string;           // tw.ncsoft.com 角色ID（Base64编码，作为文件夹名）
+  serverId: number;              // 服务器ID（如 1001 = 希埃爾）
   // 元数据
   lastSyncTime?: string;         // 最后同步时间 (ISO 格式)
 }
@@ -22,11 +19,11 @@ export interface MemberConfig {
 
 export interface JoinApplication {
   id: string;                    // 申请ID (UUID)
-  characterName: string;         // 角色名称
-  className: string;             // 职业
-  level?: number;                // 等级
-  contact?: string;              // 联系方式
-  message?: string;              // 自我介绍
+  characterUrl: string;          // 角色页面URL
+  characterId: string;           // 角色ID (提交时已解析)
+  characterName: string;         // 角色名称 (提交时已解析)
+  serverId: number;              // 服务器ID (提交时已解析)
+  serverName: string;            // 服务器名称 (提交时已解析)
   submittedAt: string;           // 提交时间 (ISO 格式)
   status: 'pending' | 'approved' | 'rejected';
   reviewedAt?: string;           // 审核时间
@@ -122,8 +119,8 @@ export interface EquipmentDetail {
 // 装备详情缓存文件结构
 export interface EquipmentDetailsCache {
   memberId: string;
-  updatedAt: string;
-  items: Record<string, EquipmentDetail>; // key: `${slotPos}_${id}`
+  lastUpdate: string;  // ISO timestamp
+  details: EquipmentDetail[];  // 装备详情数组
 }
 
 // ============= 管理后台状态 =============

@@ -106,12 +106,17 @@
 .header__nav-link::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
   width: 0;
-  height: 2px;
-  background: var(--color-primary);
-  transition: width var(--transition-normal);
+  height: 20px;
+  background-image: url('https://assets.playnccdn.com/static-nc-home/2.8.2/img/aion2/event/banner_deco_pc.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0;
+  transition: all var(--transition-normal);
 }
 
 .header__nav-link:hover {
@@ -119,15 +124,18 @@
 }
 
 .header__nav-link:hover::after {
-  width: 100%;
+  width: 80px;
+  opacity: 0.6;
 }
 
 .header__nav-link--active {
   color: var(--color-primary);
+  font-weight: 600;
 }
 
 .header__nav-link--active::after {
-  width: 100%;
+  width: 80px;
+  opacity: 1;
 }
 
 /* 按钮样式的导航链接 */

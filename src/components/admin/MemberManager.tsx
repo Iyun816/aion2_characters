@@ -47,6 +47,8 @@ const MemberManager: React.FC = () => {
       name: '',
       role: 'member',
       joinDate: new Date().toISOString().split('T')[0],
+      characterId: '',
+      serverId: 1001,
     });
   };
 
@@ -217,7 +219,7 @@ const MemberManager: React.FC = () => {
                     <td>{member.joinDate || '-'}</td>
                     <td>
                       {validation.valid ? (
-                        <span className="status-badge status-badge--success" title={member.characterInfoUrl || `${member.characterId} / ${member.serverId}`}>
+                        <span className="status-badge status-badge--success" title={`${member.characterId} / ${member.serverId}`}>
                           已配置
                         </span>
                       ) : (

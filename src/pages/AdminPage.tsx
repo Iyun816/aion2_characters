@@ -5,12 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../contexts/AdminContext';
 import MemberManager from '../components/admin/MemberManager';
 import ApplicationManager from '../components/admin/ApplicationManager';
-import DataSyncPanel from '../components/admin/DataSyncPanel';
 import GalleryManager from '../components/admin/GalleryManager';
 import ConfigManager from '../components/admin/ConfigManager';
 import './AdminPage.css';
 
-type TabType = 'members' | 'applications' | 'sync' | 'gallery' | 'config';
+type TabType = 'members' | 'applications' | 'gallery' | 'config';
 
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();
@@ -64,12 +63,6 @@ const AdminPage: React.FC = () => {
           相册管理
         </button>
         <button
-          className={`admin-tabs__tab ${activeTab === 'sync' ? 'admin-tabs__tab--active' : ''}`}
-          onClick={() => setActiveTab('sync')}
-        >
-          数据同步
-        </button>
-        <button
           className={`admin-tabs__tab ${activeTab === 'config' ? 'admin-tabs__tab--active' : ''}`}
           onClick={() => setActiveTab('config')}
         >
@@ -81,7 +74,6 @@ const AdminPage: React.FC = () => {
         {activeTab === 'members' && <MemberManager />}
         {activeTab === 'applications' && <ApplicationManager />}
         {activeTab === 'gallery' && <GalleryManager />}
-        {activeTab === 'sync' && <DataSyncPanel />}
         {activeTab === 'config' && <ConfigManager />}
       </div>
     </div>

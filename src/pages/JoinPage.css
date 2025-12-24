@@ -270,3 +270,35 @@
 .join-page__notice-content p:last-child {
   margin-bottom: 0;
 }
+
+/* 表单字段提示 */
+.join-page__field-notice {
+  padding: var(--spacing-sm);
+  background: rgba(76, 175, 80, 0.1);
+  border-left: 3px solid #4caf50;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.join-page__field-notice p {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+.join-page__field-notice p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .join-page__content {
+    grid-template-columns: 1fr;
+  }
+
+  .join-page__field-notice {
+    font-size: 0.8rem;
+  }
+}
+

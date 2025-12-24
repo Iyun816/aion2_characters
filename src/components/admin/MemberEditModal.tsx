@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import type { MemberConfig } from '../../types/admin';
+import ServerSelect from '../ServerSelect';
 import './MemberEditModal.css';
 
 interface MemberEditModalProps {
@@ -19,57 +20,32 @@ const MemberEditModal: React.FC<MemberEditModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<MemberConfig>(member);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [serverList, setServerList] = useState<Array<{
+    serverId: number;
+    serverName: string;
+    raceId: number;
+  }>>([]);
 
   useEffect(() => {
     setFormData(member);
   }, [member]);
 
-  /**
-   * 生成安全的成员 ID
-   * 处理中文、特殊字符、数字等情况
-   */
-  const generateSafeMemberId = (input: string): string => {
-    // 移除所有空格
-    let id = input.trim().replace(/\s+/g, '');
-
-    // 如果是纯数字，添加前缀
-    if (/^\d+$/.test(id)) {
-      id = 'member_' + id;
-    }
-
-    // 保留字母数字，其他字符用下划线替换
-    id = id.replace(/[^a-zA-Z0-9]/g, '_');
-
-    // 转为小写
-    id = id.toLowerCase();
-
-    // 如果 ID 为空或只有下划线，使用时间戳
-    if (!id || /^_+$/.test(id)) {
-      id = 'member_' + Date.now();
-    }
-
-    // 确保 ID 不以数字开头
-    if (/^\d/.test(id)) {
-      id = 'm_' + id;
-    }
-
-    // 限制长度
-    if (id.length > 50) {
-      id = id.substring(0, 50);
-    }
-
-    return id;
-  };
+  // 加载服务器列表
+  useEffect(() => {
+    const loadServers = async () => {
+      try {
+        const response = await fetch('/data/serverId.json');
+        const data = await response.json();
+        setServerList(data.serverList || []);
+      } catch (error) {
+        console.error('加载服务器列表失败:', error);
+      }
+    };
+    loadServers();
+  }, []);
 
   const handleChange = (field: keyof MemberConfig, value: any) => {
-    let updatedValue = value;
-
-    // 如果是 ID 字段且正在创建，自动标准化
-    if (field === 'id' && isCreating && typeof value === 'string') {
-      updatedValue = generateSafeMemberId(value);
-    }
-
-    setFormData((prev) => ({ ...prev, [field]: updatedValue }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
     // 清除该字段的错误
     if (errors[field]) {
@@ -87,40 +63,20 @@ const MemberEditModal: React.FC<MemberEditModalProps> = ({
     // 必填字段验证
     if (!formData.id.trim()) {
       newErrors.id = 'ID 不能为空';
-    } else if (!/^[a-z0-9_-]+$/.test(formData.id)) {
-      newErrors.id = 'ID 只能包含小写字母、数字、下划线和连字符';
     }
 
     if (!formData.name.trim()) {
       newErrors.name = '名称不能为空';
     }
 
-    // URL 验证 - 两个 URL 必须同时配置或同时为空
-    const hasInfoUrl = formData.characterInfoUrl && formData.characterInfoUrl.trim();
-    const hasEquipUrl = formData.characterEquipmentUrl && formData.characterEquipmentUrl.trim();
-
-    if (hasInfoUrl && !hasEquipUrl) {
-      newErrors.characterEquipmentUrl = '配置了角色信息 URL 时必须同时配置装备 URL';
-    }
-    if (!hasInfoUrl && hasEquipUrl) {
-      newErrors.characterInfoUrl = '配置了装备 URL 时必须同时配置角色信息 URL';
+    // Character ID 验证（必填）
+    if (!formData.characterId || !formData.characterId.trim()) {
+      newErrors.characterId = 'Character ID 不能为空';
     }
 
-    // 验证 URL 格式
-    if (hasInfoUrl) {
-      try {
-        new URL(formData.characterInfoUrl!);
-      } catch {
-        newErrors.characterInfoUrl = '请输入有效的 URL';
-      }
-    }
-
-    if (hasEquipUrl) {
-      try {
-        new URL(formData.characterEquipmentUrl!);
-      } catch {
-        newErrors.characterEquipmentUrl = '请输入有效的 URL';
-      }
+    // serverId 验证（必填）
+    if (!formData.serverId) {
+      newErrors.serverId = '请选择服务器';
     }
 
     setErrors(newErrors);
@@ -139,8 +95,8 @@ const MemberEditModal: React.FC<MemberEditModalProps> = ({
       ...formData,
       id: formData.id.trim(),
       name: formData.name.trim(),
-      characterInfoUrl: formData.characterInfoUrl?.trim() || undefined,
-      characterEquipmentUrl: formData.characterEquipmentUrl?.trim() || undefined,
+      characterId: formData.characterId.trim(),
+      serverId: formData.serverId,
     };
 
     onSave(cleanedData);
@@ -173,12 +129,12 @@ const MemberEditModal: React.FC<MemberEditModalProps> = ({
                   value={formData.id}
                   onChange={(e) => handleChange('id', e.target.value)}
                   disabled={!isCreating}
-                  placeholder="例如: player_001 或输入任何文本（自动转换）"
+                  placeholder="例如: A1pIWbd0UKoTYJ2XbL_Cw0VdSx_UlJ-2sv_dtkIvlnM="
                 />
                 {errors.id && <span className="form-error">{errors.id}</span>}
                 <span className="form-hint">
                   {isCreating
-                    ? '支持输入中文、数字、特殊字符，系统会自动转换为安全的 ID 格式（小写字母、数字、下划线）'
+                    ? '成员ID（通常与 Character ID 相同，作为唯一标识）'
                     : '用于文件夹名称 (不可修改)'}
                 </span>
               </div>
@@ -225,43 +181,42 @@ const MemberEditModal: React.FC<MemberEditModalProps> = ({
             <div className="form-section">
               <h3>API 配置</h3>
               <p className="form-section-desc">
-              直接粘贴完整的 API URL。两个 URL 必须同时填写。
-            </p>
+                填写 Character ID 和服务器信息，用于数据同步
+              </p>
 
-            <div className="form-field">
-              <label htmlFor="member-info-url">
-                角色信息 URL <span className="required-badge">包含 /character/info</span>
-              </label>
-              <input
-                id="member-info-url"
-                type="text"
-                value={formData.characterInfoUrl || ''}
-                onChange={(e) => handleChange('characterInfoUrl', e.target.value)}
-                placeholder="https://tw.ncsoft.com/aion2/api/character/info?lang=zh&characterId=...&serverId=..."
-              />
-              {errors.characterInfoUrl && <span className="form-error">{errors.characterInfoUrl}</span>}
-              <span className="form-hint">
-                ⚠️ 注意:URL 路径必须包含 <code>/character/info</code>
-              </span>
-            </div>
+              <div className="form-field">
+                <label htmlFor="member-character-id">
+                  Character ID <span className="required">*</span>
+                </label>
+                <input
+                  id="member-character-id"
+                  type="text"
+                  value={formData.characterId || ''}
+                  onChange={(e) => handleChange('characterId', e.target.value)}
+                  placeholder="例如: A1pIWbd0UKoTYJ2XbL_Cw0VdSx_UlJ-2sv_dtkIvlnM="
+                />
+                {errors.characterId && <span className="form-error">{errors.characterId}</span>}
+                <span className="form-hint">
+                  从角色链接中获取的 Character ID（Base64 编码字符串）
+                </span>
+              </div>
 
-            <div className="form-field">
-              <label htmlFor="member-equip-url">
-                角色装备 URL <span className="required-badge">包含 /character/equipment</span>
-              </label>
-              <input
-                id="member-equip-url"
-                type="text"
-                value={formData.characterEquipmentUrl || ''}
-                onChange={(e) => handleChange('characterEquipmentUrl', e.target.value)}
-                placeholder="https://tw.ncsoft.com/aion2/api/character/equipment?lang=zh&characterId=...&serverId=..."
-              />
-              {errors.characterEquipmentUrl && <span className="form-error">{errors.characterEquipmentUrl}</span>}
-              <span className="form-hint">
-                ⚠️ 注意:URL 路径必须包含 <code>/character/equipment</code>
-              </span>
+              <div className="form-field">
+                <label htmlFor="member-server">
+                  服务器 <span className="required">*</span>
+                </label>
+                <ServerSelect
+                  value={formData.serverId?.toString() || ''}
+                  onChange={(serverId) => handleChange('serverId', serverId)}
+                  serverList={serverList}
+                  placeholder="请选择服务器"
+                />
+                {errors.serverId && <span className="form-error">{errors.serverId}</span>}
+                <span className="form-hint">
+                  成员所在的游戏服务器
+                </span>
+              </div>
             </div>
-          </div>
           </div>
         </form>
 

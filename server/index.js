@@ -6,9 +6,16 @@ const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 
 const app = express();
 const PORT = 3001;
+
+// ============= 定时任务状态管理 =============
+let syncInterval = null;
+let syncIntervalHours = 4; // 默认4小时
+let lastSyncTime = null;
+let isSyncing = false;
 
 // 中间件配置
 app.use(cors());
@@ -534,7 +541,9 @@ const readConfigDB = () => {
   return {
     voiceChannelUrl: '',
     voiceChannelName: '军团语音',
-    voiceChannelDescription: '点击加入我们的语音频道'
+    voiceChannelDescription: '点击加入我们的语音频道',
+    defaultServerId: 1001,  // 默认服务器：希埃尔
+    defaultServerName: '希埃爾'
   };
 };
 
@@ -581,6 +590,503 @@ app.put('/api/config', (req, res) => {
   } catch (error) {
     console.error('更新配置失败:', error);
     res.status(500).json({ error: '更新失败: ' + error.message });
+  }
+});
+
+// ==================== 角色信息代理 API ====================
+
+// 代理角色信息请求(解决CORS问题)
+app.get('/api/character/info', (req, res) => {
+  const { characterId, serverId } = req.query;
+
+  if (!characterId || !serverId) {
+    return res.status(400).json({ error: '缺少必要参数' });
+  }
+
+  const url = `https://tw.ncsoft.com/aion2/api/character/info?lang=zh&characterId=${encodeURIComponent(characterId)}&serverId=${serverId}`;
+
+  https.get(url, (apiRes) => {
+    let data = '';
+
+    apiRes.on('data', (chunk) => {
+      data += chunk;
+    });
+
+    apiRes.on('end', () => {
+      try {
+        const jsonData = JSON.parse(data);
+        res.json(jsonData);
+      } catch (error) {
+        console.error('解析API响应失败:', error);
+        res.status(500).json({ error: '解析数据失败' });
+      }
+    });
+  }).on('error', (error) => {
+    console.error('请求角色API失败:', error);
+    res.status(500).json({ error: '请求失败: ' + error.message });
+  });
+});
+
+// ==================== 成员数据保存 API ====================
+
+// 保存成员角色信息
+app.post('/api/members/:memberId/character', (req, res) => {
+  try {
+    const { memberId } = req.params;
+    const characterData = req.body;
+
+    // 确保成员文件夹存在
+    const memberDir = path.join(__dirname, '../public/data', memberId);
+    if (!fs.existsSync(memberDir)) {
+      fs.mkdirSync(memberDir, { recursive: true });
+    }
+
+    // 保存角色信息
+    const filePath = path.join(memberDir, 'character_info.json');
+    fs.writeFileSync(filePath, JSON.stringify(characterData, null, 2), 'utf-8');
+
+    console.log(`✓ 保存角色信息: ${memberId}`);
+
+    res.json({
+      success: true,
+      message: '角色信息保存成功',
+      path: `/data/${memberId}/character_info.json`
+    });
+  } catch (error) {
+    console.error('保存角色信息失败:', error);
+    res.status(500).json({ error: '保存失败: ' + error.message });
+  }
+});
+
+// 保存成员装备详情
+app.post('/api/members/:memberId/equipment', (req, res) => {
+  try {
+    const { memberId } = req.params;
+    const equipmentData = req.body;
+
+    // 确保成员文件夹存在
+    const memberDir = path.join(__dirname, '../public/data', memberId);
+    if (!fs.existsSync(memberDir)) {
+      fs.mkdirSync(memberDir, { recursive: true });
+    }
+
+    // 保存装备详情
+    const filePath = path.join(memberDir, 'equipment_details.json');
+    fs.writeFileSync(filePath, JSON.stringify(equipmentData, null, 2), 'utf-8');
+
+    console.log(`✓ 保存装备详情: ${memberId}`);
+
+    res.json({
+      success: true,
+      message: '装备详情保存成功',
+      path: `/data/${memberId}/equipment_details.json`
+    });
+  } catch (error) {
+    console.error('保存装备详情失败:', error);
+    res.status(500).json({ error: '保存失败: ' + error.message });
+  }
+});
+
+// ==================== 定时任务管理 API ====================
+
+/**
+ * 解析角色URL，提取serverId和characterId
+ */
+function parseCharacterUrl(url) {
+  try {
+    const match = url.match(/\/characters\/(\d+)\/([^/\s]+)/);
+    if (!match) return null;
+
+    return {
+      serverId: match[1],
+      characterId: decodeURIComponent(match[2])
+    };
+  } catch (error) {
+    console.error('解析URL失败:', error);
+    return null;
+  }
+}
+
+/**
+ * 从API获取角色信息
+ */
+function fetchCharacterInfo(characterId, serverId) {
+  return new Promise((resolve, reject) => {
+    const url = `https://tw.ncsoft.com/aion2/api/character/info?lang=zh&characterId=${encodeURIComponent(characterId)}&serverId=${serverId}`;
+
+    https.get(url, (apiRes) => {
+      let data = '';
+
+      apiRes.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      apiRes.on('end', () => {
+        try {
+          const jsonData = JSON.parse(data);
+          resolve(jsonData);
+        } catch (error) {
+          reject(new Error('解析API响应失败'));
+        }
+      });
+    }).on('error', (error) => {
+      reject(error);
+    });
+  });
+}
+
+/**
+ * 从API获取角色装备列表
+ */
+function fetchCharacterEquipment(characterId, serverId) {
+  return new Promise((resolve, reject) => {
+    const url = `https://tw.ncsoft.com/aion2/api/character/equipment?lang=zh&characterId=${encodeURIComponent(characterId)}&serverId=${serverId}`;
+
+    https.get(url, (apiRes) => {
+      let data = '';
+
+      apiRes.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      apiRes.on('end', () => {
+        try {
+          const jsonData = JSON.parse(data);
+          resolve(jsonData);
+        } catch (error) {
+          reject(new Error('解析装备API响应失败'));
+        }
+      });
+    }).on('error', (error) => {
+      reject(error);
+    });
+  });
+}
+
+/**
+ * 延迟函数
+ */
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * 获取单件装备的详细信息
+ */
+function fetchEquipmentDetail(itemId, enchantLevel, characterId, serverId, slotPos) {
+  return new Promise((resolve, reject) => {
+    const url = `https://tw.ncsoft.com/aion2/api/character/equipment/item?id=${itemId}&enchantLevel=${enchantLevel}&characterId=${encodeURIComponent(characterId)}&serverId=${serverId}&slotPos=${slotPos}&lang=zh`;
+
+    https.get(url, (apiRes) => {
+      let data = '';
+
+      apiRes.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      apiRes.on('end', () => {
+        try {
+          const jsonData = JSON.parse(data);
+          resolve(jsonData);
+        } catch (error) {
+          reject(new Error('解析装备详情API响应失败'));
+        }
+      });
+    }).on('error', (error) => {
+      reject(error);
+    });
+  });
+}
+
+/**
+ * 同步单个成员数据 (完整同步: 角色信息 + 装备列表 + 装备详情)
+ * 与前端 syncService.ts 保持一致的逻辑
+ */
+async function syncMemberData(member) {
+  try {
+    console.log(`同步成员: ${member.name} (${member.id})`);
+
+    // 检查必需的角色配置
+    const characterId = member.characterId;
+    const serverId = member.serverId;
+
+    if (!characterId || !serverId) {
+      console.log(`  ⚠️  成员 ${member.name} 缺少角色配置 (characterId 或 serverId)，跳过同步`);
+      return { success: false, reason: '缺少角色配置' };
+    }
+
+    // 步骤 1/3: 获取角色信息
+    console.log(`  [${member.name}] 步骤 1/3: 请求角色信息...`);
+    const characterInfo = await fetchCharacterInfo(characterId, serverId);
+
+    if (!characterInfo || !characterInfo.profile) {
+      console.log(`  ❌ 获取成员 ${member.name} 角色信息失败`);
+      return { success: false, reason: '获取角色信息失败' };
+    }
+
+    await delay(300);
+    console.log(`  ✓ 角色信息获取成功`);
+
+    // 步骤 2/3: 获取装备列表
+    console.log(`  [${member.name}] 步骤 2/3: 请求装备列表...`);
+    const equipmentData = await fetchCharacterEquipment(characterId, serverId);
+
+    if (!equipmentData) {
+      console.log(`  ⚠️  获取成员 ${member.name} 装备列表失败，仅保存角色信息`);
+
+      // 只保存角色信息
+      const memberDir = path.join(__dirname, '../public/data', member.id);
+      if (!fs.existsSync(memberDir)) {
+        fs.mkdirSync(memberDir, { recursive: true });
+      }
+      const characterFilePath = path.join(memberDir, 'character_info.json');
+      fs.writeFileSync(characterFilePath, JSON.stringify(characterInfo, null, 2), 'utf-8');
+
+      return { success: true };
+    }
+
+    await delay(300);
+    console.log(`  ✓ 装备列表获取成功`);
+
+    // 步骤 3/3: 获取装备详情
+    const equipmentList = equipmentData?.equipment?.equipmentList || [];
+
+    if (equipmentList.length === 0) {
+      console.log(`  [${member.name}] 该角色没有装备`);
+    } else {
+      console.log(`  [${member.name}] 步骤 3/3: 获取装备详情 (共 ${equipmentList.length} 件装备)...`);
+
+      const equipmentDetails = [];
+
+      for (const equip of equipmentList) {
+        try {
+          // 计算总强化等级
+          const totalEnchantLevel = (equip.enchantLevel || 0) + (equip.exceedLevel || 0);
+
+          const detail = await fetchEquipmentDetail(
+            equip.id,
+            totalEnchantLevel,
+            characterId,
+            serverId,
+            equip.slotPos
+          );
+
+          // 将原始装备的 slotPos 和 slotPosName 合并到详情中
+          const enrichedDetail = {
+            ...detail,
+            slotPos: equip.slotPos,
+            slotPosName: equip.slotPosName
+          };
+
+          equipmentDetails.push(enrichedDetail);
+          console.log(`  ✓ ${equip.slotPosName || equip.slotPos}: ${detail.name || equip.name}`);
+          await delay(300);
+        } catch (error) {
+          console.log(`  ✗ ${equip.slotPosName || equip.slotPos}: ${error.message}`);
+        }
+      }
+
+      console.log(`  ✓ 成功获取 ${equipmentDetails.length}/${equipmentList.length} 件装备详情`);
+
+      // 将装备详情合并到 equipmentList 中 (与前端逻辑一致)
+      if (equipmentDetails.length > 0) {
+        equipmentData.equipment.equipmentList = equipmentDetails;
+      }
+    }
+
+    // 创建成员数据文件夹
+    const memberDir = path.join(__dirname, '../public/data', member.id);
+    if (!fs.existsSync(memberDir)) {
+      fs.mkdirSync(memberDir, { recursive: true });
+    }
+
+    // 保存角色信息
+    const characterFilePath = path.join(memberDir, 'character_info.json');
+    fs.writeFileSync(characterFilePath, JSON.stringify(characterInfo, null, 2), 'utf-8');
+    console.log(`  ✓ 角色信息已保存`);
+
+    // 保存装备详情 (包含完整的装备数据)
+    const equipmentFilePath = path.join(memberDir, 'equipment_details.json');
+    fs.writeFileSync(equipmentFilePath, JSON.stringify(equipmentData, null, 2), 'utf-8');
+    console.log(`  ✓ 装备详情已保存`);
+
+    console.log(`  ✓ 成员 ${member.name} 数据同步成功`);
+    return { success: true };
+  } catch (error) {
+    console.error(`  ❌ 同步成员 ${member.name} 失败:`, error.message);
+    return { success: false, reason: error.message };
+  }
+}
+
+/**
+ * 同步所有成员数据
+ */
+async function syncAllMembers() {
+  if (isSyncing) {
+    console.log('⚠️  数据同步正在进行中，跳过本次任务');
+    return { success: false, message: '同步正在进行中' };
+  }
+
+  isSyncing = true;
+  const startTime = Date.now();
+
+  console.log('\n========================================');
+  console.log('🔄 开始同步所有成员数据');
+  console.log(`⏰ 开始时间: ${new Date().toLocaleString('zh-CN')}`);
+  console.log('========================================\n');
+
+  try {
+    const members = readMembersDB();
+    const results = {
+      total: members.length,
+      success: 0,
+      failed: 0,
+      skipped: 0,
+      details: []
+    };
+
+    for (const member of members) {
+      const result = await syncMemberData(member);
+
+      if (result.success) {
+        results.success++;
+      } else if (result.reason === '缺少角色配置') {
+        results.skipped++;
+      } else {
+        results.failed++;
+      }
+
+      results.details.push({
+        memberId: member.id,
+        memberName: member.name,
+        ...result
+      });
+
+      // 避免请求过快，间隔500ms
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    lastSyncTime = new Date().toISOString();
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+
+    console.log('\n========================================');
+    console.log('✅ 数据同步完成');
+    console.log(`⏱️  耗时: ${duration}秒`);
+    console.log(`📊 统计: 总计${results.total} | 成功${results.success} | 失败${results.failed} | 跳过${results.skipped}`);
+    console.log('========================================\n');
+
+    isSyncing = false;
+    return { success: true, results, duration };
+  } catch (error) {
+    console.error('❌ 数据同步失败:', error);
+    isSyncing = false;
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * 启动定时任务
+ */
+function startSyncTask(intervalHours) {
+  // 停止现有任务
+  if (syncInterval) {
+    clearInterval(syncInterval);
+  }
+
+  syncIntervalHours = intervalHours;
+  const intervalMs = intervalHours * 60 * 60 * 1000;
+
+  console.log(`\n⏰ 定时任务已启动: 每 ${intervalHours} 小时同步一次`);
+
+  // 立即执行一次
+  syncAllMembers();
+
+  // 设置定时器
+  syncInterval = setInterval(() => {
+    syncAllMembers();
+  }, intervalMs);
+}
+
+/**
+ * 停止定时任务
+ */
+function stopSyncTask() {
+  if (syncInterval) {
+    clearInterval(syncInterval);
+    syncInterval = null;
+    console.log('\n⏹️  定时任务已停止');
+    return true;
+  }
+  return false;
+}
+
+// 1. 获取定时任务状态
+app.get('/api/sync/status', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      isRunning: syncInterval !== null,
+      isSyncing,
+      intervalHours: syncIntervalHours,
+      lastSyncTime,
+      nextSyncTime: syncInterval && lastSyncTime
+        ? new Date(new Date(lastSyncTime).getTime() + syncIntervalHours * 60 * 60 * 1000).toISOString()
+        : null
+    }
+  });
+});
+
+// 2. 启动定时任务
+app.post('/api/sync/start', (req, res) => {
+  try {
+    const { intervalHours } = req.body;
+
+    if (!intervalHours || intervalHours < 1 || intervalHours > 24) {
+      return res.status(400).json({ error: '间隔时间必须在1-24小时之间' });
+    }
+
+    startSyncTask(intervalHours);
+
+    res.json({
+      success: true,
+      message: `定时任务已启动，间隔：${intervalHours}小时`
+    });
+  } catch (error) {
+    console.error('启动定时任务失败:', error);
+    res.status(500).json({ error: '启动失败: ' + error.message });
+  }
+});
+
+// 3. 停止定时任务
+app.post('/api/sync/stop', (req, res) => {
+  try {
+    const stopped = stopSyncTask();
+
+    if (stopped) {
+      res.json({
+        success: true,
+        message: '定时任务已停止'
+      });
+    } else {
+      res.json({
+        success: false,
+        message: '定时任务未运行'
+      });
+    }
+  } catch (error) {
+    console.error('停止定时任务失败:', error);
+    res.status(500).json({ error: '停止失败: ' + error.message });
+  }
+});
+
+// 4. 立即执行同步（手动触发）
+app.post('/api/sync/now', async (req, res) => {
+  try {
+    const result = await syncAllMembers();
+    res.json(result);
+  } catch (error) {
+    console.error('执行同步失败:', error);
+    res.status(500).json({ error: '同步失败: ' + error.message });
   }
 });
 

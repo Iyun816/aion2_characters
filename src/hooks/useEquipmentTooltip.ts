@@ -62,7 +62,7 @@ export function useEquipmentTooltip(memberId: string): UseEquipmentTooltipReturn
   }, [memberId]);
 
   // 鼠标进入装备 - 显示简单提示
-  const handleMouseEnter = useCallback((event: React.MouseEvent, equipmentId: number) => {
+  const handleMouseEnter = useCallback((event: React.MouseEvent, _equipmentId: number) => {
     // 清除之前的延迟
     if (showTimeoutRef.current) {
       clearTimeout(showTimeoutRef.current);

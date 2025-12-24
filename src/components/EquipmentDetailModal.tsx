@@ -178,7 +178,7 @@ const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
               <div className="equipment-modal__section">
                 <div className="section-title">魔石</div>
                 {equipmentDetail.magicStoneStat.map((stone, index) => (
-                  <div key={index} className="stone-row" style={{ color: gradeColors[stone.grade] || '#9d9d9d' }}>
+                  <div key={index} className="stone-row" style={{ color: stone.grade ? gradeColors[stone.grade] : '#9d9d9d' }}>
                     <span className="stone-name">{stone.name}</span>
                     <span className="stone-value">{stone.value}</span>
                   </div>

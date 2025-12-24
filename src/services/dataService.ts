@@ -277,7 +277,24 @@ export async function getEquipmentCache(memberId: string): Promise<EquipmentDeta
   try {
     const response = await fetch(`/data/${memberId}/equipment_details.json`);
     if (response.ok) {
-      return await response.json();
+      const data = await response.json();
+
+      // 检查数据格式:
+      // 新格式: {equipment: {...}, skill: {...}, petwing: {...}} (API原始格式)
+      // 旧格式: {memberId, lastUpdate, details: [...]} (缓存格式)
+
+      if (data.equipment && data.equipment.equipmentList) {
+        // 新格式(API原始格式) - 转换为缓存格式
+        const cache: EquipmentDetailsCache = {
+          memberId,
+          lastUpdate: new Date().toISOString(),
+          details: data.equipment.equipmentList || []
+        };
+        return cache;
+      } else if (data.details && Array.isArray(data.details)) {
+        // 旧格式(缓存格式) - 直接返回
+        return data;
+      }
     }
   } catch (e) {
     console.warn(`加载成员 ${memberId} 的装备缓存失败`, e);
@@ -350,17 +367,6 @@ export function adminLogout(): void {
 }
 
 // ============= 工具函数 =============
-
-/**
- * 生成 UUID
- */
-function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
 
 /**
  * 下载文件

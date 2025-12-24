@@ -35,6 +35,16 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
       },
+      // 代理角色信息 API 请求到后端服务器
+      '/api/character': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      // 代理数据同步 API 请求到后端服务器
+      '/api/sync': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
       // 代理上传的图片请求
       '/uploads': {
         target: 'http://localhost:3001',
