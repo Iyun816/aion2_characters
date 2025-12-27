@@ -155,7 +155,7 @@ const GalleryManager = () => {
 
   // 确认操作
   const handleConfirm = async () => {
-    const { type, imageId } = confirmDialog;
+    const { imageId } = confirmDialog;
 
     // 关闭对话框
     setConfirmDialog({ visible: false, type: null, imageId: '', imageName: '' });

@@ -86,7 +86,7 @@ const JoinPage = () => {
   };
 
   // 服务器选择变化
-  const handleServerChange = (serverId: number, serverName: string) => {
+  const handleServerChange = (serverId: number) => {
     setFormData(prev => ({ ...prev, serverId }));
     setParsedCharacter(null);
     setShowConfirm(false);
@@ -144,13 +144,15 @@ const JoinPage = () => {
 
     try {
       // 提交申请,包含完整的角色信息
+      // 生成角色URL
+      const characterUrl = `https://tw.ncsoft.com/aion2/profile/character/${parsedCharacter.serverId}/${parsedCharacter.characterId}`;
+
       await addApplication({
         characterName: parsedCharacter.characterName,
         characterId: parsedCharacter.characterId,
         serverId: parsedCharacter.serverId,
         serverName: parsedCharacter.serverName,
-        level: parsedCharacter.level,
-        race: parsedCharacter.race
+        characterUrl: characterUrl
       });
 
       console.log('申请已提交:', parsedCharacter);

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import type { MemberConfig } from '../../types/admin';
 import {
   loadMembers,
-  saveMembers,
   addMember,
   updateMember,
   deleteMember,
