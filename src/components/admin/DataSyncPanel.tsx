@@ -298,7 +298,40 @@ const DataSyncPanel: React.FC = () => {
       return;
     }
 
-    navigator.clipboard.writeText(url).then(
+    // 兼容 HTTP 和 HTTPS 环境的复制方案
+    const copyToClipboard = (text: string): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        // 优先使用现代 Clipboard API (需要 HTTPS)
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(resolve, reject);
+        } else {
+          // HTTP 环境降级方案: 使用传统 document.execCommand
+          const textArea = document.createElement('textarea');
+          textArea.value = text;
+          textArea.style.position = 'fixed';
+          textArea.style.left = '-999999px';
+          textArea.style.top = '-999999px';
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+
+          try {
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            if (successful) {
+              resolve();
+            } else {
+              reject(new Error('复制命令执行失败'));
+            }
+          } catch (err) {
+            document.body.removeChild(textArea);
+            reject(err);
+          }
+        }
+      });
+    };
+
+    copyToClipboard(url).then(
       () => {
         addLog(`已复制 ${member.name} 的 API URL`, 'success');
       },

@@ -4,18 +4,20 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"node server/index.js\"",
+    "dev": "concurrently \"vite\" \"node server/index.cjs\"",
     "dev:frontend": "vite",
-    "dev:backend": "node server/index.js",
+    "dev:backend": "node server/index.cjs",
     "sync": "node scripts/sync-data.cjs",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run postbuild",
+    "postbuild": "node -e \"const fs=require('fs');const path=require('path');['../部署/chunxia-legion/dist/data','../部署/chunxia-legion/dist/images/gallery'].forEach(p=>{const fullPath=path.resolve(p);if(fs.existsSync(fullPath)){fs.rmSync(fullPath,{recursive:true,force:true});console.log('✅ 已删除',fullPath)}})\"",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "node server/index.js"
+    "start": "node server/index.cjs"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.22.1",
+    "multer": "^1.4.5-lts.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.11.0"

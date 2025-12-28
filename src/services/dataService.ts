@@ -256,7 +256,6 @@ export function createMemberFromApplication(application: JoinApplication): Omit<
     id: generateSafeMemberId(application.characterName),
     name: application.characterName,
     role: 'member',
-    joinDate: new Date().toISOString().split('T')[0],
   };
 }
 
@@ -275,7 +274,7 @@ export function exportApplicationsToFile(applications: JoinApplication[]): void 
  */
 export async function getEquipmentCache(memberId: string): Promise<EquipmentDetailsCache | null> {
   try {
-    const response = await fetch(`/data/${memberId}/equipment_details.json`);
+    const response = await fetch(`/data/${memberId}/equipment_details.json?t=${Date.now()}`);
     if (response.ok) {
       const data = await response.json();
 

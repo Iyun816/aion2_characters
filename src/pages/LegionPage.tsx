@@ -9,7 +9,7 @@ interface MemberConfig {
   id: string;
   name: string;
   role: MemberRole;
-  joinDate?: string;
+  title?: string;
 }
 
 // 带有角色信息的成员
@@ -53,32 +53,55 @@ const LegionPage = () => {
   useEffect(() => {
     const loadMembers = async () => {
       try {
-        // 1. 加载成员配置
-        const configRes = await fetch('/data/members.json');
+        // 1. 尝试从缓存加载成员数据
+        const cachedData = sessionStorage.getItem('legion_members_cache');
+        const cacheTime = sessionStorage.getItem('legion_members_cache_time');
+        const now = Date.now();
+
+        // 如果缓存存在且未过期(5分钟内),直接使用缓存
+        if (cachedData && cacheTime && (now - parseInt(cacheTime)) < 5 * 60 * 1000) {
+          const cached = JSON.parse(cachedData);
+          setMembersData(cached);
+          setLoading(false);
+          console.log('✓ 使用缓存的成员数据');
+          return;
+        }
+
+        // 2. 加载成员配置 (添加时间戳防止缓存)
+        const configRes = await fetch(`/data/members.json?t=${Date.now()}`);
         let memberConfigs: MemberConfig[] = [];
 
         if (configRes.ok) {
           memberConfigs = await configRes.json();
         }
 
-        // 2. 为每个成员加载角色数据
+        // 3. 为每个成员加载角色数据 (添加时间戳防止缓存)
         const loaded: MemberWithProfile[] = [];
+        const timestamp = Date.now();
 
         for (const config of memberConfigs) {
           try {
-            const res = await fetch(`/data/${config.id}/character_info.json`);
+            const res = await fetch(`/data/${config.id}/character_info.json?t=${timestamp}`);
             if (res.ok) {
               const data: CharacterInfo = await res.json();
               loaded.push({ ...config, profile: data.profile });
             } else {
+              // 文件不存在,只显示基本信息
               loaded.push(config);
             }
-          } catch {
+          } catch (error) {
+            // 文件不存在或加载失败,只显示基本信息
+            console.warn(`成员 ${config.name} 的详细数据加载失败,将只显示基本信息`);
             loaded.push(config);
           }
         }
 
         setMembersData(loaded);
+
+        // 4. 保存到缓存
+        sessionStorage.setItem('legion_members_cache', JSON.stringify(loaded));
+        sessionStorage.setItem('legion_members_cache_time', now.toString());
+        console.log('✓ 成员数据已缓存');
       } catch (e) {
         console.error('加载成员数据失败', e);
       }
@@ -91,9 +114,36 @@ const LegionPage = () => {
   // 复制兑换码
   const handleCopyRedeemCode = async () => {
     try {
-      await navigator.clipboard.writeText(voiceConfig.redeemCode);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
+      // 优先使用现代 Clipboard API (需要 HTTPS)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(voiceConfig.redeemCode);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      } else {
+        // HTTP 环境降级方案: 使用传统 document.execCommand
+        const textArea = document.createElement('textarea');
+        textArea.value = voiceConfig.redeemCode;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+          const successful = document.execCommand('copy');
+          if (successful) {
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+          } else {
+            console.error('复制命令执行失败');
+          }
+        } catch (err) {
+          console.error('复制失败:', err);
+        } finally {
+          document.body.removeChild(textArea);
+        }
+      }
     } catch (error) {
       console.error('复制失败:', error);
     }
@@ -210,7 +260,7 @@ const LegionPage = () => {
             </>
           )}
         </div>
-        {member.joinDate && <p className="legion-member-card__join">{member.joinDate}</p>}
+        {member.title && <p className="legion-member-card__join">{member.title}</p>}
       </div>
     </Link>
   );

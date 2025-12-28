@@ -14,6 +14,14 @@ import './ApplicationManager.css';
 
 type FilterType = 'all' | 'pending' | 'approved' | 'rejected';
 
+// 消息对话框状态
+interface MessageDialog {
+  visible: boolean;
+  title: string;
+  message: string;
+  type: 'success' | 'warning' | 'error';
+}
+
 const ApplicationManager: React.FC = () => {
   const [applications, setApplications] = useState<JoinApplication[]>([]);
   const [members, setMembers] = useState<MemberConfig[]>([]);
@@ -29,6 +37,12 @@ const ApplicationManager: React.FC = () => {
     visible: false,
     applicationId: '',
     characterName: '',
+  });
+  const [messageDialog, setMessageDialog] = useState<MessageDialog>({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'success'
   });
 
   // 加载数据
@@ -67,37 +81,74 @@ const ApplicationManager: React.FC = () => {
 
       // 如果选择创建成员
       if (createMember) {
-        // 直接使用 characterId 作为成员ID
-        const memberId = application.characterId;
+        // 解码 characterId,将 URL 编码的字符解码 (例如 %3D -> =)
+        const decodedCharacterId = decodeURIComponent(application.characterId);
+        const memberId = decodedCharacterId;
 
         // 检查是否已存在
         if (members.some(m => m.id === memberId)) {
-          alert(`该角色已存在于成员列表中\n角色: ${application.characterName}\nID: ${memberId}`);
+          setMessageDialog({
+            visible: true,
+            title: '成员已存在',
+            message: `该角色已存在于成员列表中\n角色: ${application.characterName}\nID: ${memberId}`,
+            type: 'warning'
+          });
           loadData();
           return;
         }
 
         const fullMemberData: MemberConfig = {
-          id: memberId,  // 使用 characterId 作为 ID
+          id: memberId,  // 使用解码后的 characterId 作为 ID
           name: application.characterName,
           role: 'member',
-          joinDate: new Date().toISOString().split('T')[0],
           serverId: application.serverId,
-          characterId: application.characterId,
+          characterId: decodedCharacterId,
         };
 
         try {
           await addMember(members, fullMemberData);
-          alert(`申请已通过，成员 "${application.characterName}" 已创建\n服务器: ${application.serverName}\n\n数据文件夹: /data/${memberId}/\n可在数据同步中更新数据`);
+
+          // 后台异步同步角色数据,不等待结果
+          fetch('/api/sync/member', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(fullMemberData)
+          }).then(response => {
+            if (response.ok) {
+              console.log(`成员 ${application.characterName} 的角色数据同步成功`);
+            } else {
+              console.warn(`成员 ${application.characterName} 的角色数据同步失败`);
+            }
+          }).catch(error => {
+            console.error(`成员 ${application.characterName} 的角色数据同步失败:`, error);
+          });
+
+          // 立即显示成功提示
+          setMessageDialog({
+            visible: true,
+            title: '审批成功',
+            message: `申请已通过，成员 "${application.characterName}" 已创建\n服务器: ${application.serverName}\n\n角色数据正在后台同步中...`,
+            type: 'success'
+          });
         } catch (error: any) {
           if (error.message.includes('已存在')) {
-            alert(`成员已存在: ${memberId}`);
+            setMessageDialog({
+              visible: true,
+              title: '成员已存在',
+              message: `成员已存在: ${memberId}`,
+              type: 'warning'
+            });
           } else {
             throw error;
           }
         }
       } else {
-        alert('申请已通过');
+        setMessageDialog({
+          visible: true,
+          title: '审批成功',
+          message: '申请已通过',
+          type: 'success'
+        });
       }
 
       setReviewingApp(null);
@@ -106,7 +157,12 @@ const ApplicationManager: React.FC = () => {
       // 重新加载数据
       loadData();
     } catch (error: any) {
-      alert(error.message || '操作失败');
+      setMessageDialog({
+        visible: true,
+        title: '操作失败',
+        message: error.message || '操作失败',
+        type: 'error'
+      });
     }
   };
 
@@ -118,14 +174,24 @@ const ApplicationManager: React.FC = () => {
         'rejected',
         reviewNote || undefined
       );
-      alert('申请已拒绝');
+      setMessageDialog({
+        visible: true,
+        title: '已拒绝',
+        message: '申请已拒绝',
+        type: 'success'
+      });
       setReviewingApp(null);
       setReviewNote('');
 
       // 重新加载数据
       loadData();
     } catch (error: any) {
-      alert(error.message || '操作失败');
+      setMessageDialog({
+        visible: true,
+        title: '操作失败',
+        message: error.message || '操作失败',
+        type: 'error'
+      });
     }
   };
 
@@ -393,6 +459,17 @@ const ApplicationManager: React.FC = () => {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
         danger={true}
+      />
+
+      {/* 消息提示对话框 */}
+      <ConfirmDialog
+        visible={messageDialog.visible}
+        title={messageDialog.title}
+        message={messageDialog.message}
+        confirmText="确定"
+        onConfirm={() => setMessageDialog({ ...messageDialog, visible: false })}
+        onCancel={() => setMessageDialog({ ...messageDialog, visible: false })}
+        danger={messageDialog.type === 'error'}
       />
     </div>
   );

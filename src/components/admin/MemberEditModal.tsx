@@ -34,7 +34,7 @@ const MemberEditModal: React.FC<MemberEditModalProps> = ({
   useEffect(() => {
     const loadServers = async () => {
       try {
-        const response = await fetch('/data/serverId.json');
+        const response = await fetch(`/data/serverId.json?t=${Date.now()}`);
         const data = await response.json();
         setServerList(data.serverList || []);
       } catch (error) {
@@ -190,12 +190,13 @@ const MemberEditModal: React.FC<MemberEditModalProps> = ({
               </div>
 
               <div className="form-field">
-                <label htmlFor="member-joindate">加入日期</label>
+                <label htmlFor="member-title">称号</label>
                 <input
-                  id="member-joindate"
-                  type="date"
-                  value={formData.joinDate || ''}
-                  onChange={(e) => handleChange('joinDate', e.target.value)}
+                  id="member-title"
+                  type="text"
+                  value={formData.title || ''}
+                  onChange={(e) => handleChange('title', e.target.value)}
+                  placeholder="请输入称号 (选填)"
                 />
               </div>
             </div>

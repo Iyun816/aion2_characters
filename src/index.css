@@ -29,7 +29,7 @@
   --color-elyos-glow: rgba(201, 169, 98, 0.15);
 
   /* 字体 */
-  --font-display: 'Noto Serif SC', 'STSong', 'SimSun', serif;
+  --font-display: 'STSong', 'SimSun', 'Microsoft YaHei', serif;
   --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 
   /* 间距 */

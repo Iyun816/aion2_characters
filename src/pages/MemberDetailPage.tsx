@@ -12,7 +12,7 @@ import './MemberDetailPage.css';
 interface MemberConfig {
   id: string;
   role: 'leader' | 'elite' | 'member';
-  joinDate?: string;
+  title?: string;
 }
 
 // 称号分类映射
@@ -88,8 +88,8 @@ const MemberDetailPage = () => {
 
     const loadData = async () => {
       try {
-        // 加载成员配置
-        const configRes = await fetch('/data/members.json');
+        // 加载成员配置 (添加时间戳防止缓存)
+        const configRes = await fetch(`/data/members.json?t=${Date.now()}`);
         if (configRes.ok) {
           const configs: MemberConfig[] = await configRes.json();
           const config = configs.find(c => c.id === id);
@@ -98,10 +98,11 @@ const MemberDetailPage = () => {
           setMemberConfig({ id, role: 'member' });
         }
 
-        // 加载角色数据
+        // 加载角色数据 (添加时间戳防止缓存)
+        const timestamp = Date.now();
         const [infoRes, equipRes] = await Promise.all([
-          fetch(`/data/${id}/character_info.json`),
-          fetch(`/data/${id}/equipment_details.json`)
+          fetch(`/data/${id}/character_info.json?t=${timestamp}`),
+          fetch(`/data/${id}/equipment_details.json?t=${timestamp}`)
         ]);
 
         if (infoRes.ok) {
@@ -217,8 +218,12 @@ const MemberDetailPage = () => {
             {item.name}
           </span>
           <div className="equip-card__level">
-            +{item.enchantLevel}
-            {item.exceedLevel > 0 && <ExceedLevel level={item.exceedLevel} variant="compact" />}
+            {/* 强化等级根据装备的maxEnchantLevel显示(金装15,红装20) */}
+            +{Math.min(item.enchantLevel, item.maxEnchantLevel || 15)}
+            {/* 超过maxEnchantLevel的部分作为突破等级显示 */}
+            {item.enchantLevel > (item.maxEnchantLevel || 15) && (
+              <ExceedLevel level={item.enchantLevel - (item.maxEnchantLevel || 15)} variant="compact" />
+            )}
           </div>
         </div>
       </div>

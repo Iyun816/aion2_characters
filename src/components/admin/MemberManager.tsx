@@ -53,7 +53,6 @@ const MemberManager: React.FC = () => {
       id: '',
       name: '',
       role: 'member',
-      joinDate: new Date().toISOString().split('T')[0],
       characterId: '',
       serverId: 1001,
     });
@@ -71,6 +70,21 @@ const MemberManager: React.FC = () => {
       if (isCreating) {
         const updated = await addMember(members, memberData);
         setMembers(updated);
+
+        // 后台异步同步新成员的角色数据
+        fetch('/api/sync/member', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(memberData)
+        }).then(response => {
+          if (response.ok) {
+            console.log(`成员 ${memberData.name} 的角色数据同步成功`);
+          } else {
+            console.warn(`成员 ${memberData.name} 的角色数据同步失败`);
+          }
+        }).catch(error => {
+          console.error(`成员 ${memberData.name} 的角色数据同步失败:`, error);
+        });
       } else {
         const updated = await updateMember(members, memberData);
         setMembers(updated);
@@ -165,7 +179,7 @@ const MemberManager: React.FC = () => {
             <tr>
               <th>名称</th>
               <th>职位</th>
-              <th>加入日期</th>
+              <th>称号</th>
               <th>API配置</th>
               <th>操作</th>
             </tr>
@@ -190,7 +204,7 @@ const MemberManager: React.FC = () => {
                         {getRoleDisplay(member.role)}
                       </span>
                     </td>
-                    <td>{member.joinDate || '-'}</td>
+                    <td>{member.title || '-'}</td>
                     <td>
                       {validation.valid ? (
                         <span className="status-badge status-badge--success" title={`${member.characterId} / ${member.serverId}`}>

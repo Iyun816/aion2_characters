@@ -61,8 +61,8 @@ const CharacterBDPage = () => {
   useEffect(() => {
     const loadServers = async () => {
       try {
-        // 直接从本地文件加载服务器列表
-        const localResponse = await fetch('/data/serverId.json');
+        // 直接从本地文件加载服务器列表 (添加时间戳防止缓存)
+        const localResponse = await fetch(`/data/serverId.json?t=${Date.now()}`);
         const localData = await localResponse.json();
         const localServers = localData.serverList.map((server: any) => ({
           id: server.serverId,

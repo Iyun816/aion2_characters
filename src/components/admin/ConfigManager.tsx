@@ -152,9 +152,14 @@ const ConfigManager: React.FC = () => {
 
       const data = await response.json();
       if (data.success) {
-        showMessage('success', data.message);
+        showMessage('success', `${data.message}\n首次同步已在后台启动`);
         addLog('success', '定时任务已启动');
-        loadSyncStatus();
+        addLog('info', '首次同步正在后台执行,可以继续浏览其他页面');
+
+        // 刷新状态
+        setTimeout(() => {
+          loadSyncStatus();
+        }, 1000);
       } else {
         showMessage('error', data.error || '启动失败');
         addLog('error', `启动失败: ${data.error}`);
@@ -191,8 +196,7 @@ const ConfigManager: React.FC = () => {
 
   const handleSyncNow = async () => {
     try {
-      addLog('info', '开始手动同步数据...');
-      showMessage('success', '正在同步数据，请稍候...');
+      addLog('info', '正在启动后台同步...');
 
       const response = await fetch('/api/sync/now', {
         method: 'POST'
@@ -200,19 +204,22 @@ const ConfigManager: React.FC = () => {
 
       const data = await response.json();
       if (data.success) {
-        const { results, duration } = data;
-        const logMessage = `同步完成！总计${results.total}名成员，成功${results.success}，失败${results.failed}，跳过${results.skipped}，耗时${duration}秒`;
-        showMessage('success', logMessage);
-        addLog('success', logMessage);
-        loadSyncStatus();
+        showMessage('success', '数据同步已在后台启动,请稍后查看同步状态');
+        addLog('success', '后台同步已启动,可以继续浏览其他页面');
+        addLog('info', '提示: 同步过程会在服务器后台执行,请耐心等待');
+
+        // 刷新状态显示
+        setTimeout(() => {
+          loadSyncStatus();
+        }, 1000);
       } else {
         showMessage('error', data.message || '同步失败');
         addLog('error', `同步失败: ${data.message}`);
       }
     } catch (error) {
-      console.error('手动同步失败:', error);
-      showMessage('error', '同步失败');
-      addLog('error', '同步失败，网络错误');
+      console.error('启动同步失败:', error);
+      showMessage('error', '启动同步失败');
+      addLog('error', '启动同步失败，网络错误');
     }
   };
 

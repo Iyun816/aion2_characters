@@ -1095,7 +1095,21 @@ async function syncServerList() {
 
       res.on('end', () => {
         try {
-          const servers = JSON.parse(data);
+          const response = JSON.parse(data);
+          // 处理可能的数据格式: 可能是数组,也可能是对象包含data字段
+          const servers = Array.isArray(response) ? response : (response.data || response.serverList || []);
+
+          if (!Array.isArray(servers)) {
+            throw new Error('服务器数据格式错误: 不是数组');
+          }
+
+          // 如果API返回空列表,不更新文件,保留现有数据
+          if (servers.length === 0) {
+            console.log('⚠️ API返回空服务器列表,跳过更新以保留现有数据');
+            resolve({ success: false, message: 'API返回空列表', count: 0 });
+            return;
+          }
+
           const serverList = servers.map(server => ({
             raceId: server.raceId || 1,
             serverId: server.id,
@@ -1211,8 +1225,12 @@ function startSyncTask(intervalHours) {
 
   console.log(`\n⏰ 定时任务已启动: 每 ${intervalHours} 小时同步一次`);
 
-  // 立即执行一次
-  syncAllMembers();
+  // 立即执行一次(异步,不阻塞)
+  syncAllMembers().then(result => {
+    console.log('✅ 首次同步完成:', result);
+  }).catch(error => {
+    console.error('❌ 首次同步失败:', error);
+  });
 
   // 设置定时器
   syncInterval = setInterval(() => {
@@ -1292,14 +1310,73 @@ app.post('/api/sync/stop', (req, res) => {
   }
 });
 
-// 4. 立即执行同步（手动触发）
+// 4. 立即执行同步(手动触发) - 异步模式,不阻塞响应
 app.post('/api/sync/now', async (req, res) => {
   try {
-    const result = await syncAllMembers();
-    res.json(result);
+    // 立即返回响应,告诉前端同步已开始
+    res.json({
+      success: true,
+      message: '数据同步已在后台启动,请稍后查看同步状态'
+    });
+
+    // 在后台异步执行同步,不等待结果
+    syncAllMembers().then(result => {
+      console.log('✅ 后台同步完成:', result);
+    }).catch(error => {
+      console.error('❌ 后台同步失败:', error);
+    });
   } catch (error) {
     console.error('执行同步失败:', error);
     res.status(500).json({ error: '同步失败: ' + error.message });
+  }
+});
+
+// 5. 同步单个成员（审批通过或添加成员时自动调用）
+app.post('/api/sync/member', async (req, res) => {
+  try {
+    const memberData = req.body;
+
+    if (!memberData || !memberData.characterId || !memberData.serverId) {
+      return res.status(400).json({
+        success: false,
+        error: '缺少必要参数: characterId 和 serverId'
+      });
+    }
+
+    console.log(`开始同步成员: ${memberData.name} (${memberData.characterId})`);
+
+    const result = await syncMemberData(memberData);
+
+    res.json({
+      success: true,
+      message: `成员 ${memberData.name} 数据同步成功`,
+      data: result
+    });
+  } catch (error) {
+    console.error('同步成员数据失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '同步失败: ' + error.message
+    });
+  }
+});
+
+// ===== 静态文件服务配置 =====
+// 1. /uploads 路径映射到用户上传的图片 (public/images/gallery/)
+app.use('/uploads', express.static(path.join(__dirname, '../public/images/gallery')));
+
+// 2. /data 路径映射到动态数据 (public/data/)
+app.use('/data', express.static(path.join(__dirname, '../public/data')));
+
+// 3. 其他静态资源从 dist/ 提供 (前端构建文件 + 静态图片)
+app.use(express.static(path.join(__dirname, '../dist')));
+
+// 处理客户端路由 - 所有非API和非uploads请求都返回index.html
+// 这样React Router可以处理前端路由
+app.get('*', (req, res) => {
+  // 排除API接口、uploads路径和data路径
+  if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads') && !req.path.startsWith('/data')) {
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
   }
 });
 

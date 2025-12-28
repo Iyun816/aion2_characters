@@ -60,6 +60,8 @@ export interface EquipmentItem {
   name: string;
   enchantLevel: number;
   exceedLevel: number;
+  maxEnchantLevel?: number; // 最大强化等级(金装15,红装20)
+  maxExceedEnchantLevel?: number; // 最大突破等级
   grade: string;
   slotPos: number;
   slotPosName: string;

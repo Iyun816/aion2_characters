@@ -3,16 +3,15 @@
     "id": "A1pIWbd0UKoTYJ2XbL_Cwys5RleNG3EVrZKBibx7Dto=",
     "name": "梧",
     "role": "leader",
-    "joinDate": "创始成员",
+    "title": "创始成员",
     "serverId": 1001,
     "characterId": "A1pIWbd0UKoTYJ2XbL_Cwys5RleNG3EVrZKBibx7Dto="
   },
   {
-    
     "id": "A1pIWbd0UKoTYJ2XbL_Cw0VdSx_UlJ-2sv_dtkIvlnM=",
     "name": "Erimia",
     "role": "elite",
-    "joinDate": "吉祥物",
+    "title": "吉祥物",
     "serverId": 1001,
     "characterId": "A1pIWbd0UKoTYJ2XbL_Cw0VdSx_UlJ-2sv_dtkIvlnM="
   }

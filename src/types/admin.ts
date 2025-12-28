@@ -7,7 +7,7 @@ export interface MemberConfig {
   id: string;                    // 成员ID（使用 characterId 作为唯一标识）
   name: string;                  // 显示名称
   role: 'leader' | 'elite' | 'member';
-  joinDate?: string;             // 入团日期
+  title?: string;                // 称号
   // 角色标识
   characterId: string;           // tw.ncsoft.com 角色ID（Base64编码，作为文件夹名）
   serverId: number;              // 服务器ID（如 1001 = 希埃爾）

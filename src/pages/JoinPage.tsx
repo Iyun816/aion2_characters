@@ -40,7 +40,7 @@ const JoinPage = () => {
   useEffect(() => {
     const loadServers = async () => {
       try {
-        const response = await fetch('/data/serverId.json');
+        const response = await fetch(`/data/serverId.json?t=${Date.now()}`);
         const data = await response.json();
         setServerList(data.serverList || []);
       } catch (error) {
@@ -111,7 +111,8 @@ const JoinPage = () => {
       const data = await response.json();
 
       if (!data.success) {
-        setNameError(data.error || '未找到该角色，请检查角色名和服务器是否正确');
+        const errorMsg = data.error || '未找到该角色';
+        setNameError(`❌ ${errorMsg}\n请核对角色名字和服务器是否正确`);
         setParsing(false);
         return;
       }
@@ -120,9 +121,10 @@ const JoinPage = () => {
       setParsedCharacter(data.character);
       setShowConfirm(true);
       setParsing(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('验证角色失败:', error);
-      setNameError('验证失败，请稍后重试');
+      const errorMsg = error.message || '网络错误，请稍后重试';
+      setNameError(`❌ 验证失败: ${errorMsg}`);
       setParsing(false);
     }
   };
@@ -265,8 +267,8 @@ const JoinPage = () => {
               </span>
             </div>
 
-            {/* 验证按钮 */}
-            {!showConfirm && (
+            {/* 验证/提交按钮 - 根据状态智能切换 */}
+            {!showConfirm ? (
               <button
                 type="button"
                 onClick={handleVerifyCharacter}
@@ -287,9 +289,28 @@ const JoinPage = () => {
               >
                 {parsing ? '验证中...' : '验证角色信息'}
               </button>
+            ) : (
+              <button
+                type="submit"
+                className="join-page__submit"
+                style={{
+                  marginTop: '12px',
+                  padding: '12px 24px',
+                  background: 'var(--color-success)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  width: '100%'
+                }}
+              >
+                ✓ 确认提交申请
+              </button>
             )}
 
-            {/* 角色信息确认 */}
+            {/* 角色信息确认框 */}
             {showConfirm && parsedCharacter && (
               <div style={{
                 marginTop: '16px',
@@ -343,10 +364,6 @@ const JoinPage = () => {
               <p>✓ 天族与魔族均可填写并展示角色信息</p>
               <p>✓ 不涉及账号密码，角色信息均为使用角色名称从官方API请求得到的数据</p>
             </div>
-
-            <button type="submit" className="join-page__submit" disabled={!showConfirm}>
-              {showConfirm ? '确认提交申请' : '请先验证角色信息'}
-            </button>
           </form>
         </div>
       </div>
