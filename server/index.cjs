@@ -882,7 +882,13 @@ function searchCharacter(characterName, serverId, race) {
 
     const url = `https://tw.ncsoft.com/aion2/api/search/aion2tw/search/v2/character?${params}`;
 
-    https.get(url, (apiRes) => {
+    // 设置10秒超时
+    const timeout = setTimeout(() => {
+      req.destroy();
+      reject(new Error('搜索超时(10秒),请稍后重试'));
+    }, 10000);
+
+    const req = https.get(url, (apiRes) => {
       let data = '';
 
       apiRes.on('data', (chunk) => {
@@ -890,6 +896,7 @@ function searchCharacter(characterName, serverId, race) {
       });
 
       apiRes.on('end', () => {
+        clearTimeout(timeout);
         try {
           const jsonData = JSON.parse(data);
 
@@ -923,10 +930,14 @@ function searchCharacter(characterName, serverId, race) {
             pcId: character.pcId
           });
         } catch (error) {
+          clearTimeout(timeout);
           reject(new Error('解析搜索API响应失败'));
         }
       });
-    }).on('error', (error) => {
+    });
+
+    req.on('error', (error) => {
+      clearTimeout(timeout);
       reject(error);
     });
   });

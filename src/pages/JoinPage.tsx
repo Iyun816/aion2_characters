@@ -92,7 +92,7 @@ const JoinPage = () => {
     setShowConfirm(false);
   };
 
-  // 验证角色信息 - 使用新的搜索API
+  // 验证角色信息 - 使用新的搜索API (带超时控制)
   const handleVerifyCharacter = async () => {
     if (!formData.characterName.trim()) {
       alert('请填写角色名称');
@@ -102,29 +102,43 @@ const JoinPage = () => {
     setParsing(true);
     setNameError('');
 
+    // 创建超时控制器 - 10秒超时
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     try {
-      // 调用后端搜索API
+      // 调用后端搜索API (带超时信号)
       const response = await fetch(
-        `/api/character/search?name=${encodeURIComponent(formData.characterName)}&serverId=${formData.serverId}`
+        `/api/character/search?name=${encodeURIComponent(formData.characterName)}&serverId=${formData.serverId}`,
+        { signal: controller.signal }
       );
+
+      clearTimeout(timeoutId);
 
       const data = await response.json();
 
       if (!data.success) {
         const errorMsg = data.error || '未找到该角色';
         setNameError(`❌ ${errorMsg}\n请核对角色名字和服务器是否正确`);
-        setParsing(false);
         return;
       }
 
       // 保存解析结果
       setParsedCharacter(data.character);
       setShowConfirm(true);
-      setParsing(false);
     } catch (error: any) {
+      clearTimeout(timeoutId);
       console.error('验证角色失败:', error);
-      const errorMsg = error.message || '网络错误，请稍后重试';
-      setNameError(`❌ 验证失败: ${errorMsg}`);
+
+      // 区分超时错误和其他错误
+      if (error.name === 'AbortError') {
+        setNameError('❌ 验证超时(10秒),请检查网络连接后重试');
+      } else {
+        const errorMsg = error.message || '网络错误，请稍后重试';
+        setNameError(`❌ 验证失败: ${errorMsg}`);
+      }
+    } finally {
+      // 确保无论何种情况都重置loading状态
       setParsing(false);
     }
   };
