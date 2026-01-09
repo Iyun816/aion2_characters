@@ -1708,8 +1708,8 @@ function fetchFromAPI(url) {
  * 从官方API获取游戏通知(更新+公告)
  */
 async function fetchGameNotices() {
-  const updatesUrl = 'https://api-tw-community.ncsoft.com/aion2_tw/board/update_zh/article/search/moreArticle?isVote=true&moreSize=18&moreDirection=BEFORE&previousArticleId=0';
-  const noticesUrl = 'https://api-tw-community.ncsoft.com/aion2_tw/board/notice_zh/article/search/moreArticle?isVote=true&moreSize=18&moreDirection=BEFORE&previousArticleId=0';
+  const updatesUrl = 'https://api-tw-community.ncsoft.com/aion2_tw/board/update_zh/article/search/moreArticle?isVote=true&moreSize=5&moreDirection=BEFORE&previousArticleId=0';
+  const noticesUrl = 'https://api-tw-community.ncsoft.com/aion2_tw/board/notice_zh/article/search/moreArticle?isVote=true&moreSize=5&moreDirection=BEFORE&previousArticleId=0';
 
   try {
     const [updatesData, noticesData] = await Promise.all([
