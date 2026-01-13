@@ -1,6 +1,6 @@
 // Service Worker - 图片资源缓存
 // 缓存版本号 - 修改此版本号会清除旧缓存
-const CACHE_VERSION = 'image-cache-v1';
+const CACHE_VERSION = 'image-cache-v2';
 const CACHE_NAME = `${CACHE_VERSION}-images`;
 
 // 缓存时长：1天 (毫秒)
@@ -9,7 +9,9 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000;
 // 需要缓存的远程图片域名
 const IMAGE_DOMAINS = [
   'assets.playnccdn.com',
-  'tw.ncsoft.com'
+  'tw.ncsoft.com',
+  'download.plaync.com.tw',
+  'fizz-download.playnccdn.com'
 ];
 
 // 需要缓存的图片扩展名

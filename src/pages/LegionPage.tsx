@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { classIconsSmall } from '../data/memberTypes';
 import type { CharacterInfo, MemberRole } from '../data/memberTypes';
@@ -26,6 +26,10 @@ interface GalleryImage {
   approved: boolean;
   uploadTime?: string;
 }
+
+const MEMBERS_CACHE_KEY = 'legion_members_cache_v2';
+const MEMBERS_CACHE_TIME_KEY = 'legion_members_cache_time_v2';
+const MEMBERS_CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
 
 const LegionPage = () => {
   const location = useLocation();
@@ -62,66 +66,66 @@ const LegionPage = () => {
     }
   }, [location.key]);
 
-  useEffect(() => {
-    const loadMembers = async () => {
-      try {
-        // 1. 尝试从缓存加载成员数据
-        const cachedData = sessionStorage.getItem('legion_members_cache');
-        const cacheTime = sessionStorage.getItem('legion_members_cache_time');
-        const now = Date.now();
+  const getCachedMembers = useCallback(() => {
+    try {
+      const cachedData = localStorage.getItem(MEMBERS_CACHE_KEY);
+      const cacheTime = localStorage.getItem(MEMBERS_CACHE_TIME_KEY);
+      if (!cachedData || !cacheTime) {
+        return null;
+      }
 
-        // 如果缓存存在且未过期(5分钟内),直接使用缓存
-        if (cachedData && cacheTime && (now - parseInt(cacheTime)) < 5 * 60 * 1000) {
-          const cached = JSON.parse(cachedData);
-          setMembersData(cached);
-          setLoading(false);
-          console.log('✓ 使用缓存的成员数据');
-          return;
-        }
+      if (Date.now() - Number(cacheTime) > MEMBERS_CACHE_TTL) {
+        return null;
+      }
 
-        // 2. 加载成员配置 (添加时间戳防止缓存)
-        const configRes = await fetch(`/data/members.json?t=${Date.now()}`);
-        let memberConfigs: MemberConfig[] = [];
+      return JSON.parse(cachedData) as MemberWithProfile[];
+    } catch {
+      return null;
+    }
+  }, []);
 
-        if (configRes.ok) {
-          memberConfigs = await configRes.json();
-        }
+  const loadMembers = useCallback(async () => {
+    try {
+      const cached = getCachedMembers();
+      if (cached) {
+        setMembersData(cached);
+        setLoading(false);
+        return;
+      }
 
-        // 3. 为每个成员加载角色数据 (添加时间戳防止缓存)
-        const loaded: MemberWithProfile[] = [];
-        const timestamp = Date.now();
+      setLoading(true);
 
-        for (const config of memberConfigs) {
+      const configRes = await fetch('/data/members.json');
+      const memberConfigs: MemberConfig[] = configRes.ok ? await configRes.json() : [];
+
+      const loaded = await Promise.all(
+        memberConfigs.map(async (config) => {
           try {
-            const res = await fetch(`/data/${config.id}/character_info.json?t=${timestamp}`);
+            const res = await fetch(`/data/${config.id}/character_info.json`);
             if (res.ok) {
               const data: CharacterInfo = await res.json();
-              loaded.push({ ...config, profile: data.profile });
-            } else {
-              // 文件不存在,只显示基本信息
-              loaded.push(config);
+              return { ...config, profile: data.profile };
             }
           } catch (error) {
-            // 文件不存在或加载失败,只显示基本信息
             console.warn(`成员 ${config.name} 的详细数据加载失败,将只显示基本信息`);
-            loaded.push(config);
           }
-        }
+          return config;
+        })
+      );
 
-        setMembersData(loaded);
-
-        // 4. 保存到缓存
-        sessionStorage.setItem('legion_members_cache', JSON.stringify(loaded));
-        sessionStorage.setItem('legion_members_cache_time', now.toString());
-        console.log('✓ 成员数据已缓存');
-      } catch (e) {
-        console.error('加载成员数据失败', e);
-      }
+      setMembersData(loaded);
+      localStorage.setItem(MEMBERS_CACHE_KEY, JSON.stringify(loaded));
+      localStorage.setItem(MEMBERS_CACHE_TIME_KEY, Date.now().toString());
+    } catch (e) {
+      console.error('加载成员数据失败', e);
+    } finally {
       setLoading(false);
-    };
+    }
+  }, [getCachedMembers]);
 
+  useEffect(() => {
     loadMembers();
-  }, []);
+  }, [loadMembers]);
 
   // 复制兑换码
   const handleCopyRedeemCode = async () => {
@@ -274,16 +278,28 @@ const LegionPage = () => {
     </Link>
   );
 
-  if (loading) {
-    return (
-      <div className="legion-page">
-        <div className="legion-page__loading">
-          <div className="legion-page__spinner"></div>
-          <p>载入军团数据中...</p>
-        </div>
+  // 骨架屏卡片
+  const renderSkeletonCard = (index: number) => (
+    <div key={index} className="legion-member-card legion-member-card--skeleton">
+      <div className="legion-member-card__avatar">
+        <div className="skeleton-avatar"></div>
       </div>
-    );
-  }
+      <div className="legion-member-card__info">
+        <div className="skeleton-text skeleton-text--name"></div>
+        <div className="skeleton-text skeleton-text--details"></div>
+      </div>
+    </div>
+  );
+
+  // 骨架屏成员区域
+  const renderSkeletonSection = (title: string, count: number, gridClass: string = '') => (
+    <div className="legion-members__section">
+      <h3 className="legion-members__section-title">{title}</h3>
+      <div className={`legion-members__grid ${gridClass}`}>
+        {Array.from({ length: count }).map((_, i) => renderSkeletonCard(i))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="legion-page">
@@ -382,46 +398,57 @@ const LegionPage = () => {
       {activeTab === 'members' && (
         <section className="legion-members">
           <div className="legion-members__container">
-            {/* 军团长 */}
-            {groupByRole('leader').length > 0 && (
-              <div className="legion-members__section">
-                <h3 className="legion-members__section-title">
-                  军团长
-                </h3>
-                <div className="legion-members__grid legion-members__grid--leader">
-                  {groupByRole('leader').map(renderMemberCard)}
-                </div>
-              </div>
-            )}
+            {loading ? (
+              // 加载中显示骨架屏
+              <>
+                {renderSkeletonSection('军团长', 1, 'legion-members__grid--leader')}
+                {renderSkeletonSection('军团精英', 3, 'legion-members__grid--elite')}
+                {renderSkeletonSection('军团成员', 6, '')}
+              </>
+            ) : (
+              <>
+                {/* 军团长 */}
+                {groupByRole('leader').length > 0 && (
+                  <div className="legion-members__section">
+                    <h3 className="legion-members__section-title">
+                      军团长
+                    </h3>
+                    <div className="legion-members__grid legion-members__grid--leader">
+                      {groupByRole('leader').map(renderMemberCard)}
+                    </div>
+                  </div>
+                )}
 
-            {/* 军团精英 */}
-            {groupByRole('elite').length > 0 && (
-              <div className="legion-members__section">
-                <h3 className="legion-members__section-title">
-                  军团精英
-                </h3>
-                <div className="legion-members__grid legion-members__grid--elite">
-                  {groupByRole('elite').map(renderMemberCard)}
-                </div>
-              </div>
-            )}
+                {/* 军团精英 */}
+                {groupByRole('elite').length > 0 && (
+                  <div className="legion-members__section">
+                    <h3 className="legion-members__section-title">
+                      军团精英
+                    </h3>
+                    <div className="legion-members__grid legion-members__grid--elite">
+                      {groupByRole('elite').map(renderMemberCard)}
+                    </div>
+                  </div>
+                )}
 
-            {/* 军团成员 */}
-            {groupByRole('member').length > 0 && (
-              <div className="legion-members__section">
-                <h3 className="legion-members__section-title">
-                  军团成员
-                </h3>
-                <div className="legion-members__grid">
-                  {groupByRole('member').map(renderMemberCard)}
-                </div>
-              </div>
-            )}
+                {/* 军团成员 */}
+                {groupByRole('member').length > 0 && (
+                  <div className="legion-members__section">
+                    <h3 className="legion-members__section-title">
+                      军团成员
+                    </h3>
+                    <div className="legion-members__grid">
+                      {groupByRole('member').map(renderMemberCard)}
+                    </div>
+                  </div>
+                )}
 
-            {membersData.length === 0 && (
-              <div className="legion-members__empty">
-                <p>暂无成员数据</p>
-              </div>
+                {membersData.length === 0 && (
+                  <div className="legion-members__empty">
+                    <p>暂无成员数据</p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </section>

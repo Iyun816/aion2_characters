@@ -120,7 +120,7 @@ const MemberDetailPage = () => {
     if (isFromShare && serverId && characterId) {
       const loadSharedData = async () => {
         try {
-          const cacheKey = `character_${serverId}_${characterId}`;
+          const cacheKey = `character_v2_${serverId}_${characterId}`; // v2: 添加 maxEnchantLevel 字段
           const cached = localStorage.getItem(cacheKey);
 
           // 检查缓存是否有效（8小时内）
@@ -625,12 +625,22 @@ const MemberDetailPage = () => {
             {item.name}
           </span>
           <div className="equip-card__level">
-            {/* 强化等级根据装备的maxEnchantLevel显示(金装15,红装20) */}
-            +{Math.min(item.enchantLevel, item.maxEnchantLevel || 15)}
-            {/* 超过maxEnchantLevel的部分作为突破等级显示 */}
-            {item.enchantLevel > (item.maxEnchantLevel || 15) && (
-              <ExceedLevel level={item.enchantLevel - (item.maxEnchantLevel || 15)} variant="compact" />
-            )}
+            {(() => {
+              const maxEnchant = item.maxEnchantLevel || 15;
+              const exceedLevel = item.exceedLevel !== undefined
+                ? item.exceedLevel
+                : Math.max(0, item.enchantLevel - maxEnchant);
+              const baseLevel = item.enchantLevel - exceedLevel;
+
+              return (
+                <>
+                  +{baseLevel}
+                  {exceedLevel > 0 && (
+                    <ExceedLevel level={exceedLevel} variant="compact" />
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </div>

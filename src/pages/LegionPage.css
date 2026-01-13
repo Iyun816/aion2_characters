@@ -912,3 +912,56 @@
   font-size: 0.9rem;
 }
 
+/* 骨架屏动画 */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 骨架屏卡片样式 */
+.legion-member-card--skeleton {
+  pointer-events: none;
+  cursor: default;
+}
+
+.skeleton-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-secondary) 25%,
+    var(--color-border-light) 50%,
+    var(--color-bg-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-text {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-secondary) 25%,
+    var(--color-border-light) 50%,
+    var(--color-bg-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-text--name {
+  width: 80%;
+  height: 1.1rem;
+  margin: 0 auto var(--spacing-xs);
+}
+
+.skeleton-text--details {
+  width: 60%;
+  height: 0.85rem;
+  margin: 0 auto;
+}

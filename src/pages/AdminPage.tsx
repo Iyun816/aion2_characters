@@ -7,11 +7,10 @@ import MemberManager from '../components/admin/MemberManager';
 import ApplicationManager from '../components/admin/ApplicationManager';
 import GalleryManager from '../components/admin/GalleryManager';
 import ConfigManager from '../components/admin/ConfigManager';
-import CacheManager from '../components/admin/CacheManager';
 import ToolsManager from '../components/admin/ToolsManager';
 import './AdminPage.css';
 
-type TabType = 'members' | 'applications' | 'gallery' | 'config' | 'cache' | 'tools';
+type TabType = 'members' | 'applications' | 'gallery' | 'config' | 'tools';
 
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();
@@ -69,12 +68,6 @@ const AdminPage: React.FC = () => {
             全局配置
           </button>
           <button
-            className={`admin-nav__item ${activeTab === 'cache' ? 'admin-nav__item--active' : ''}`}
-            onClick={() => setActiveTab('cache')}
-          >
-            缓存管理
-          </button>
-          <button
             className={`admin-nav__item ${activeTab === 'tools' ? 'admin-nav__item--active' : ''}`}
             onClick={() => setActiveTab('tools')}
           >
@@ -94,7 +87,6 @@ const AdminPage: React.FC = () => {
         {activeTab === 'applications' && <ApplicationManager />}
         {activeTab === 'gallery' && <GalleryManager />}
         {activeTab === 'config' && <ConfigManager />}
-        {activeTab === 'cache' && <CacheManager />}
         {activeTab === 'tools' && <ToolsManager />}
       </main>
     </div>

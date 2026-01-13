@@ -626,7 +626,9 @@ app.get('/api/character/info', (req, res) => {
     apiRes.on('end', () => {
       try {
         const jsonData = JSON.parse(data);
-        res.json(jsonData);
+        // 转换繁体为简体
+        const simplifiedData = convertToSimplified(jsonData);
+        res.json(simplifiedData);
       } catch (error) {
         console.error('解析API响应失败:', error);
         res.status(500).json({ error: '解析数据失败' });
@@ -659,7 +661,9 @@ app.get('/api/character/equipment', (req, res) => {
     apiRes.on('end', () => {
       try {
         const jsonData = JSON.parse(data);
-        res.json(jsonData);
+        // 转换繁体为简体
+        const simplifiedData = convertToSimplified(jsonData);
+        res.json(simplifiedData);
       } catch (error) {
         console.error('解析装备API响应失败:', error);
         res.status(500).json({ error: '解析数据失败' });
@@ -725,7 +729,9 @@ app.get('/api/character/equipment-detail', (req, res) => {
     apiRes.on('end', () => {
       try {
         const jsonData = JSON.parse(data);
-        res.json(jsonData);
+        // 转换繁体为简体
+        const simplifiedData = convertToSimplified(jsonData);
+        res.json(simplifiedData);
       } catch (error) {
         console.error('解析装备详情API响应失败:', error);
         console.error('原始响应数据:', data);
@@ -766,6 +772,15 @@ app.get('/api/character/rating', (req, res) => {
 
     apiRes.on('end', () => {
       try {
+        // 检查响应是否为空或是错误消息
+        if (!data || data.trim().startsWith('error code:')) {
+          console.warn('PVE评分API返回错误:', data);
+          return res.json({
+            success: false,
+            error: '评分服务暂时不可用'
+          });
+        }
+
         const jsonData = JSON.parse(data);
 
         // 提取评分数据
@@ -783,9 +798,9 @@ app.get('/api/character/rating', (req, res) => {
       } catch (error) {
         console.error('解析PVE评分API响应失败:', error);
         console.error('原始响应数据:', data);
-        res.status(500).json({
+        res.json({
           success: false,
-          error: '解析评分数据失败'
+          error: '评分服务暂时不可用'
         });
       }
     });
@@ -895,7 +910,9 @@ function fetchCharacterInfo(characterId, serverId) {
       apiRes.on('end', () => {
         try {
           const jsonData = JSON.parse(data);
-          resolve(jsonData);
+          // 转换繁体为简体
+          const simplifiedData = convertToSimplified(jsonData);
+          resolve(simplifiedData);
         } catch (error) {
           reject(new Error('解析API响应失败'));
         }
@@ -923,7 +940,9 @@ function fetchCharacterEquipment(characterId, serverId) {
       apiRes.on('end', () => {
         try {
           const jsonData = JSON.parse(data);
-          resolve(jsonData);
+          // 转换繁体为简体
+          const simplifiedData = convertToSimplified(jsonData);
+          resolve(simplifiedData);
         } catch (error) {
           reject(new Error('解析装备API响应失败'));
         }
@@ -1083,7 +1102,9 @@ function fetchEquipmentDetail(itemId, enchantLevel, characterId, serverId, slotP
       apiRes.on('end', () => {
         try {
           const jsonData = JSON.parse(data);
-          resolve(jsonData);
+          // 转换繁体为简体
+          const simplifiedData = convertToSimplified(jsonData);
+          resolve(simplifiedData);
         } catch (error) {
           reject(new Error('解析装备详情API响应失败'));
         }
@@ -1710,21 +1731,41 @@ function fetchFromAPI(url) {
 
 /**
  * 递归转换对象中的所有字符串从繁体到简体
+ * @param {*} obj - 要转换的对象
+ * @param {string} parentKey - 父级键名，用于判断是否跳过转换
+ * @param {Array} pathKeys - 路径键数组，用于判断上下文
  */
-function convertToSimplified(obj) {
+function convertToSimplified(obj, parentKey = '', pathKeys = []) {
+  // 精确匹配：只跳过特定路径的字段
+  const skipPaths = [
+    'profile.characterName',  // 角色信息中的角色名
+    'profile.name',           // 角色信息中的名称
+    'legion.legionName',      // 军团信息中的军团名
+    'legion.name',            // 军团信息中的名称
+  ];
+
+  // 构建当前路径
+  const currentPath = [...pathKeys, parentKey].filter(k => k).join('.');
+
+  // 如果当前路径在跳过列表中，直接返回原值
+  if (skipPaths.some(path => currentPath.endsWith(path))) {
+    return obj;
+  }
+
   if (typeof obj === 'string') {
     return converter(obj);
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(item => convertToSimplified(item));
+    return obj.map(item => convertToSimplified(item, parentKey, pathKeys));
   }
 
   if (obj !== null && typeof obj === 'object') {
     const converted = {};
+    const newPathKeys = parentKey ? [...pathKeys, parentKey] : pathKeys;
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
-        converted[key] = convertToSimplified(obj[key]);
+        converted[key] = convertToSimplified(obj[key], key, newPathKeys);
       }
     }
     return converted;
