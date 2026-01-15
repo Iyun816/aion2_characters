@@ -164,9 +164,15 @@
 
 .tools-manager__time-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
+}
+
+.tools-manager__time-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
 }
 
 .tools-manager__time-input {
@@ -179,6 +185,23 @@
 .tools-manager__time-input:focus {
   outline: none;
   border-color: var(--color-primary);
+}
+
+.tools-manager__time-remove {
+  background: #dc3545;
+  color: #fff;
+  padding: 6px 10px;
+  width: 100%;
+}
+
+.tools-manager__time-remove:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.tools-manager__time-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
 }
 
 /* 工具列表 */
@@ -292,5 +315,10 @@
 
   .tools-manager__time-grid {
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+
+  .tools-manager__time-item {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

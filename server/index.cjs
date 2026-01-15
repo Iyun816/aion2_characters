@@ -11,6 +11,172 @@ const OpenCC = require('opencc-js'); // 繁简转换
 
 const app = express();
 const PORT = 3001;
+const TOOLS_CONFIG_PATH = path.join(__dirname, '../public/data/tools_config.json');
+const DEFAULT_RIFT_CONFIG = {
+  enabled: true,
+  timezone: 'Asia/Shanghai',
+  intervalHours: 3,
+  durationMinutes: 60,
+  doorOpenMinutes: 5,
+  openTimes: ['02:00', '05:00', '08:00', '11:00', '14:00', '17:00', '20:00', '23:00']
+};
+const RIFT_CACHE_TTL = 60 * 1000;
+let cachedRiftInfo = null;
+let cachedRiftTimestamp = 0;
+
+function ensureToolsConfigDefaults(config = {}) {
+  return {
+    rift: normalizeRiftConfig(config?.rift),
+    tools: Array.isArray(config?.tools) ? config.tools : []
+  };
+}
+
+function readToolsConfigFile() {
+  try {
+    if (fs.existsSync(TOOLS_CONFIG_PATH)) {
+      const raw = fs.readFileSync(TOOLS_CONFIG_PATH, 'utf-8');
+      const parsed = JSON.parse(raw);
+      return ensureToolsConfigDefaults(parsed);
+    }
+  } catch (error) {
+    console.error('[ToolsConfig] 读取配置失败:', error);
+  }
+
+  return ensureToolsConfigDefaults();
+}
+
+function normalizeRiftConfig(riftConfig = {}) {
+  const merged = {
+    ...DEFAULT_RIFT_CONFIG,
+    ...(riftConfig || {})
+  };
+
+  let sanitizedTimes = merged.openTimes;
+  if (!Array.isArray(sanitizedTimes) || !sanitizedTimes.length) {
+    sanitizedTimes = DEFAULT_RIFT_CONFIG.openTimes;
+  }
+
+  sanitizedTimes = sanitizedTimes
+    .filter(time => typeof time === 'string')
+    .map(time => {
+      const [h = '00', m = '00'] = time.split(':');
+      const hours = String(Number(h) || 0).padStart(2, '0');
+      const minutes = String(Number(m) || 0).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    });
+
+  return {
+    enabled: merged.enabled !== false,
+    timezone: merged.timezone || DEFAULT_RIFT_CONFIG.timezone,
+    intervalHours: Number(merged.intervalHours) || DEFAULT_RIFT_CONFIG.intervalHours,
+    durationMinutes: Number(merged.durationMinutes) || DEFAULT_RIFT_CONFIG.durationMinutes,
+    doorOpenMinutes: Number(merged.doorOpenMinutes) || DEFAULT_RIFT_CONFIG.doorOpenMinutes,
+    openTimes: sanitizedTimes
+  };
+}
+
+function buildRiftDate(now, dayOffset, totalMinutes) {
+  const date = new Date(now);
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + dayOffset);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  date.setHours(hours, minutes, 0, 0);
+  return date;
+}
+
+function formatCountdownData(totalSeconds) {
+  const safeSeconds = Math.max(0, totalSeconds || 0);
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const seconds = safeSeconds % 60;
+
+  const parts = [];
+  if (hours > 0) {
+    parts.push(`${hours}小时`);
+  }
+  if (minutes > 0 || hours > 0) {
+    parts.push(`${minutes}分`);
+  }
+  parts.push(`${seconds}秒`);
+
+  return {
+    hours,
+    minutes,
+    seconds,
+    formatted: parts.join('')
+  };
+}
+
+function formatDisplayDate(date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${month}-${day} ${hours}:${minutes}`;
+}
+
+function buildRiftPayload(riftConfig = {}) {
+  const config = normalizeRiftConfig(riftConfig);
+
+  if (!config.enabled) {
+    return {
+      enabled: false,
+      config,
+      allOpenTimes: config.openTimes
+    };
+  }
+
+  const now = new Date();
+  const validOpenTimes = config.openTimes
+    .map((time) => {
+      const [hourStr = '0', minuteStr = '0'] = time.split(':');
+      const hours = Number(hourStr);
+      const minutes = Number(minuteStr);
+
+      if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+        return null;
+      }
+
+      return {
+        time,
+        minutes: hours * 60 + minutes
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.minutes - b.minutes);
+
+  if (!validOpenTimes.length) {
+    return {
+      enabled: false,
+      config: { ...config, enabled: false },
+      allOpenTimes: DEFAULT_RIFT_CONFIG.openTimes
+    };
+  }
+
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  let nextSlot = validOpenTimes.find(slot => slot.minutes > currentMinutes);
+  let dayOffset = 0;
+
+  if (!nextSlot) {
+    nextSlot = validOpenTimes[0];
+    dayOffset = 1;
+  }
+
+  const nextOpenDate = buildRiftDate(now, dayOffset, nextSlot.minutes);
+  const countdownSeconds = Math.max(0, Math.floor((nextOpenDate.getTime() - now.getTime()) / 1000));
+
+  return {
+    enabled: true,
+    config,
+    nextOpenTime: nextOpenDate.toISOString(),
+    nextOpenTimeFormatted: formatDisplayDate(nextOpenDate),
+    countdownSeconds,
+    countdown: formatCountdownData(countdownSeconds),
+    currentTime: now.toISOString(),
+    allOpenTimes: config.openTimes
+  };
+}
 
 // 初始化繁简转换器（繁体转简体）
 const converter = OpenCC.Converter({ from: 'tw', to: 'cn' });
@@ -1577,18 +1743,7 @@ app.post('/api/sync/member', async (req, res) => {
 // 获取工具列表
 app.get('/api/tools', (req, res) => {
   try {
-    const configPath = path.join(__dirname, '../public/data/tools_config.json');
-
-    if (!fs.existsSync(configPath)) {
-      return res.json({
-        success: true,
-        tools: []
-      });
-    }
-
-    const configData = fs.readFileSync(configPath, 'utf-8');
-    const config = JSON.parse(configData);
-
+    const config = readToolsConfigFile();
     res.json({
       success: true,
       tools: config.tools || []
@@ -1606,28 +1761,7 @@ app.get('/api/tools', (req, res) => {
 // 获取完整配置(包含rift和tools)
 app.get('/api/admin/tools-config', (req, res) => {
   try {
-    const configPath = path.join(__dirname, '../public/data/tools_config.json');
-
-    if (!fs.existsSync(configPath)) {
-      return res.json({
-        success: true,
-        config: {
-          rift: {
-            enabled: true,
-            timezone: 'Asia/Shanghai',
-            intervalHours: 3,
-            durationMinutes: 60,
-            doorOpenMinutes: 5,
-            openTimes: ['02:00', '05:00', '08:00', '11:00', '14:00', '17:00', '20:00', '23:00']
-          },
-          tools: []
-        }
-      });
-    }
-
-    const configData = fs.readFileSync(configPath, 'utf-8');
-    const config = JSON.parse(configData);
-
+    const config = readToolsConfigFile();
     res.json({
       success: true,
       config
@@ -1653,22 +1787,44 @@ app.post('/api/admin/tools-config', (req, res) => {
       });
     }
 
-    const configPath = path.join(__dirname, '../public/data/tools_config.json');
-
-    // 写入配置文件
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+    const normalized = ensureToolsConfigDefaults(config);
+    fs.writeFileSync(TOOLS_CONFIG_PATH, JSON.stringify(normalized, null, 2), 'utf-8');
+    cachedRiftInfo = buildRiftPayload(normalized.rift);
+    cachedRiftTimestamp = Date.now();
 
     console.log('✅ 工具配置已更新');
 
     res.json({
       success: true,
-      message: '配置已更新'
+      message: '配置已更新',
+      config: normalized
     });
   } catch (error) {
     console.error('更新工具配置失败:', error);
     res.status(500).json({
       success: false,
       error: '更新工具配置失败: ' + error.message
+    });
+  }
+});
+
+app.get('/api/rift/countdown', (req, res) => {
+  try {
+    if (!cachedRiftInfo || Date.now() - cachedRiftTimestamp > RIFT_CACHE_TTL) {
+      const config = readToolsConfigFile();
+      cachedRiftInfo = buildRiftPayload(config.rift);
+      cachedRiftTimestamp = Date.now();
+    }
+
+    res.json({
+      success: true,
+      data: cachedRiftInfo
+    });
+  } catch (error) {
+    console.error('[Rift] 倒计时生成失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '裂缝倒计时生成失败'
     });
   }
 });
@@ -1969,3 +2125,4 @@ app.listen(PORT, () => {
   // 启动游戏通知定时任务
   startNoticesSyncTask();
 });
+

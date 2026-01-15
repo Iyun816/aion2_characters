@@ -165,6 +165,23 @@ const ToolsManager: React.FC = () => {
     });
   };
 
+  const handleAddRiftTime = () => {
+    if (!config) return;
+    setConfig({
+      ...config,
+      rift: { ...config.rift, openTimes: [...config.rift.openTimes, '00:00'] }
+    });
+  };
+
+  const handleRemoveRiftTime = (index: number) => {
+    if (!config) return;
+    const newOpenTimes = config.rift.openTimes.filter((_, i) => i !== index);
+    setConfig({
+      ...config,
+      rift: { ...config.rift, openTimes: newOpenTimes.length ? newOpenTimes : ['00:00'] }
+    });
+  };
+
   const handleSaveRiftConfig = async () => {
     if (!config) return;
     await saveConfig(config);
@@ -210,23 +227,42 @@ const ToolsManager: React.FC = () => {
           <label>开启时间 (每日):</label>
           <div className="tools-manager__time-grid">
             {config.rift.openTimes.map((time, index) => (
-              <input
-                key={index}
-                type="time"
-                value={time}
-                onChange={(e) => handleRiftTimeChange(index, e.target.value)}
-                disabled={saving}
-                className="tools-manager__time-input"
-              />
+              <div className="tools-manager__time-item" key={`${time}-${index}`}>
+                <input
+                  type="time"
+                  value={time}
+                  onChange={(e) => handleRiftTimeChange(index, e.target.value)}
+                  disabled={saving}
+                  className="tools-manager__time-input"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveRiftTime(index)}
+                  disabled={saving || config.rift.openTimes.length <= 1}
+                  className="tools-manager__btn tools-manager__time-remove"
+                >
+                  删除
+                </button>
+              </div>
             ))}
           </div>
-          <button
-            onClick={handleSaveRiftConfig}
-            disabled={saving}
-            className="tools-manager__btn tools-manager__btn--save"
-          >
-            {saving ? '保存中...' : '保存裂缝配置'}
-          </button>
+          <div className="tools-manager__time-actions">
+            <button
+              type="button"
+              onClick={handleAddRiftTime}
+              disabled={saving}
+              className="tools-manager__btn tools-manager__btn--add"
+            >
+              + 新增时间
+            </button>
+            <button
+              onClick={handleSaveRiftConfig}
+              disabled={saving}
+              className="tools-manager__btn tools-manager__btn--save"
+            >
+              {saving ? '保存中...' : '保存裂缝配置'}
+            </button>
+          </div>
         </div>
       </section>
 
