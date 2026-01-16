@@ -18,6 +18,7 @@ export interface CharacterProfile {
   serverName: string;
   regionName: string;
   pcId: number;
+  classId: number;  // 职业ID
   className: string;
   raceId: number;
   raceName: string;

@@ -1,6 +1,7 @@
 // 全局配置管理组件
 
 import React, { useState, useEffect } from 'react';
+import type { ClassBoardConfig, ClassBoardMapping } from '../../utils/daevanion';
 import './ConfigManager.css';
 
 interface GlobalConfig {
@@ -25,7 +26,7 @@ interface SyncLog {
   message: string;
 }
 
-type SubTabType = 'timing' | 'voice' | 'redeem';
+type SubTabType = 'timing' | 'voice' | 'redeem' | 'daevanion';
 
 const ConfigManager: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<SubTabType>('timing');
@@ -53,6 +54,13 @@ const ConfigManager: React.FC = () => {
     nextSyncTime: null
   });
   const [syncIntervalInput, setSyncIntervalInput] = useState(4);
+
+  // 守护力职业配置状态
+  const [daevanionConfig, setDaevanionConfig] = useState<ClassBoardConfig | null>(null);
+  const [daevanionLoading, setDaevanionLoading] = useState(false);
+  const [daevanionSaving, setDaevanionSaving] = useState(false);
+  const [editingClass, setEditingClass] = useState<ClassBoardMapping | null>(null);
+  const [isAddingClass, setIsAddingClass] = useState(false);
 
   // 加载配置
   useEffect(() => {
@@ -236,6 +244,131 @@ const ConfigManager: React.FC = () => {
     });
   };
 
+  // ========== 守护力职业配置管理 ==========
+
+  const loadDaevanionConfig = async () => {
+    setDaevanionLoading(true);
+    try {
+      const response = await fetch('/data/class_board_mapping.json');
+      if (response.ok) {
+        const data: ClassBoardConfig = await response.json();
+        setDaevanionConfig(data);
+      }
+    } catch (error) {
+      console.error('加载守护力配置失败:', error);
+      showMessage('error', '加载守护力配置失败');
+    } finally {
+      setDaevanionLoading(false);
+    }
+  };
+
+  const saveDaevanionConfig = async () => {
+    if (!daevanionConfig) return;
+
+    setDaevanionSaving(true);
+    try {
+      const response = await fetch('/api/daevanion/config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(daevanionConfig)
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        showMessage('success', '守护力配置保存成功！');
+        // 重新加载配置
+        await loadDaevanionConfig();
+      } else {
+        showMessage('error', data.error || '保存失败');
+      }
+    } catch (error) {
+      console.error('保存守护力配置失败:', error);
+      showMessage('error', '保存失败，请稍后重试');
+    } finally {
+      setDaevanionSaving(false);
+    }
+  };
+
+  const handleAddClass = () => {
+    setEditingClass({
+      classId: 0,
+      className: '',
+      classNameSimplified: '',
+      classNameEn: '',
+      boardIds: [0, 0, 0, 0, 0, 0]
+    });
+    setIsAddingClass(true);
+  };
+
+  const handleEditClass = (classMapping: ClassBoardMapping) => {
+    setEditingClass({ ...classMapping });
+    setIsAddingClass(false);
+  };
+
+  const handleDeleteClass = (classId: number) => {
+    if (!daevanionConfig) return;
+
+    if (confirm(`确定要删除职业ID ${classId} 的配置吗？`)) {
+      setDaevanionConfig({
+        ...daevanionConfig,
+        classes: daevanionConfig.classes.filter(c => c.classId !== classId),
+        lastUpdated: new Date().toISOString()
+      });
+    }
+  };
+
+  const handleSaveClass = () => {
+    if (!editingClass || !daevanionConfig) return;
+
+    // 验证
+    if (!editingClass.className || !editingClass.classNameEn) {
+      showMessage('error', '请填写职业名称');
+      return;
+    }
+
+    if (editingClass.boardIds.some(id => id <= 0)) {
+      showMessage('error', '面板ID必须大于0');
+      return;
+    }
+
+    if (isAddingClass) {
+      // 检查ID是否已存在
+      if (daevanionConfig.classes.some(c => c.classId === editingClass.classId)) {
+        showMessage('error', '该职业ID已存在');
+        return;
+      }
+
+      setDaevanionConfig({
+        ...daevanionConfig,
+        classes: [...daevanionConfig.classes, editingClass].sort((a, b) => a.classId - b.classId),
+        lastUpdated: new Date().toISOString()
+      });
+    } else {
+      setDaevanionConfig({
+        ...daevanionConfig,
+        classes: daevanionConfig.classes.map(c =>
+          c.classId === editingClass.classId ? editingClass : c
+        ),
+        lastUpdated: new Date().toISOString()
+      });
+    }
+
+    setEditingClass(null);
+    setIsAddingClass(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingClass(null);
+    setIsAddingClass(false);
+  };
+
+  // 当切换到守护力配置tab时加载配置
+  useEffect(() => {
+    if (activeSubTab === 'daevanion' && !daevanionConfig) {
+      loadDaevanionConfig();
+    }
+  }, [activeSubTab]);
+
   if (loading) {
     return <div className="config-manager__loading">加载中...</div>;
   }
@@ -253,19 +386,25 @@ const ConfigManager: React.FC = () => {
           className={`config-subtabs__tab ${activeSubTab === 'timing' ? 'config-subtabs__tab--active' : ''}`}
           onClick={() => setActiveSubTab('timing')}
         >
-          ⏰ 定时任务
+          定时任务
         </button>
         <button
           className={`config-subtabs__tab ${activeSubTab === 'voice' ? 'config-subtabs__tab--active' : ''}`}
           onClick={() => setActiveSubTab('voice')}
         >
-          🎤 语音配置
+          语音配置
         </button>
         <button
           className={`config-subtabs__tab ${activeSubTab === 'redeem' ? 'config-subtabs__tab--active' : ''}`}
           onClick={() => setActiveSubTab('redeem')}
         >
-          🎁 兑换码管理
+          兑换码管理
+        </button>
+        <button
+          className={`config-subtabs__tab ${activeSubTab === 'daevanion' ? 'config-subtabs__tab--active' : ''}`}
+          onClick={() => setActiveSubTab('daevanion')}
+        >
+          守护力配置
         </button>
       </div>
 
@@ -617,6 +756,215 @@ const ConfigManager: React.FC = () => {
               >
                 重置
               </button>
+            </div>
+          </>
+        )}
+
+        {/* 守护力配置Tab */}
+        {activeSubTab === 'daevanion' && (
+          <>
+            {/* 守护力职业配置 */}
+            <div className="config-section">
+              <h3 className="config-section__title">
+                <span className="config-section__icon">🛡️</span>
+                守护力职业配置
+              </h3>
+              <p className="config-section__desc">
+                配置各职业对应的守护力面板ID（boardId），每个职业有6个面板
+              </p>
+
+              {daevanionLoading ? (
+                <div className="config-manager__loading">加载中...</div>
+              ) : (
+                <>
+                  <div className="daevanion-class-list">
+                    <table className="daevanion-table">
+                      <thead>
+                        <tr>
+                          <th>职业ID</th>
+                          <th>职业名称(繁体)</th>
+                          <th>职业名称(简体)</th>
+                          <th>职业名称(英文)</th>
+                          <th>面板ID列表</th>
+                          <th>操作</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {daevanionConfig?.classes.map((classMapping) => (
+                          <tr key={classMapping.classId}>
+                            <td>{classMapping.classId}</td>
+                            <td>{classMapping.className}</td>
+                            <td>{classMapping.classNameSimplified}</td>
+                            <td>{classMapping.classNameEn}</td>
+                            <td>
+                              <code className="board-ids">
+                                [{classMapping.boardIds.join(', ')}]
+                              </code>
+                            </td>
+                            <td>
+                              <button
+                                onClick={() => handleEditClass(classMapping)}
+                                className="btn btn--small btn--secondary"
+                              >
+                                编辑
+                              </button>
+                              <button
+                                onClick={() => handleDeleteClass(classMapping.classId)}
+                                className="btn btn--small btn--danger"
+                                style={{ marginLeft: '8px' }}
+                              >
+                                删除
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {(!daevanionConfig || daevanionConfig.classes.length === 0) && (
+                      <div className="daevanion-empty">暂无职业配置</div>
+                    )}
+                  </div>
+
+                  <div className="config-section__actions">
+                    <button
+                      onClick={handleAddClass}
+                      className="btn btn--primary"
+                    >
+                      + 新增职业
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* 编辑/新增职业对话框 */}
+            {editingClass && (
+              <div className="modal-overlay" onClick={handleCancelEdit}>
+                <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+                  <h3>{isAddingClass ? '新增职业' : '编辑职业'}</h3>
+
+                  <div className="config-field">
+                    <label htmlFor="classId">职业ID</label>
+                    <input
+                      id="classId"
+                      type="number"
+                      value={editingClass.classId}
+                      onChange={(e) => setEditingClass({
+                        ...editingClass,
+                        classId: parseInt(e.target.value) || 0
+                      })}
+                      disabled={!isAddingClass}
+                      placeholder="例如: 1"
+                    />
+                  </div>
+
+                  <div className="config-field">
+                    <label htmlFor="className">职业名称(繁体)</label>
+                    <input
+                      id="className"
+                      type="text"
+                      value={editingClass.className}
+                      onChange={(e) => setEditingClass({
+                        ...editingClass,
+                        className: e.target.value
+                      })}
+                      placeholder="例如: 劍星"
+                    />
+                  </div>
+
+                  <div className="config-field">
+                    <label htmlFor="classNameSimplified">职业名称(简体)</label>
+                    <input
+                      id="classNameSimplified"
+                      type="text"
+                      value={editingClass.classNameSimplified}
+                      onChange={(e) => setEditingClass({
+                        ...editingClass,
+                        classNameSimplified: e.target.value
+                      })}
+                      placeholder="例如: 剑星"
+                    />
+                  </div>
+
+                  <div className="config-field">
+                    <label htmlFor="classNameEn">职业名称(英文)</label>
+                    <input
+                      id="classNameEn"
+                      type="text"
+                      value={editingClass.classNameEn}
+                      onChange={(e) => setEditingClass({
+                        ...editingClass,
+                        classNameEn: e.target.value
+                      })}
+                      placeholder="例如: Gladiator"
+                    />
+                  </div>
+
+                  <div className="config-field">
+                    <label>面板ID列表 (6个面板)</label>
+                    <div className="board-ids-input">
+                      {editingClass.boardIds.map((id, index) => (
+                        <input
+                          key={index}
+                          type="number"
+                          value={id}
+                          onChange={(e) => {
+                            const newBoardIds = [...editingClass.boardIds];
+                            newBoardIds[index] = parseInt(e.target.value) || 0;
+                            setEditingClass({
+                              ...editingClass,
+                              boardIds: newBoardIds
+                            });
+                          }}
+                          placeholder={`面板${index + 1}`}
+                          style={{ width: '80px', marginRight: '8px' }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="modal-actions">
+                    <button onClick={handleSaveClass} className="btn btn--primary">
+                      保存
+                    </button>
+                    <button onClick={handleCancelEdit} className="btn btn--secondary">
+                      取消
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 保存按钮 */}
+            <div className="config-manager__actions">
+              <button
+                onClick={saveDaevanionConfig}
+                disabled={daevanionSaving}
+                className="btn btn--primary"
+              >
+                {daevanionSaving ? '保存中...' : '保存配置到文件'}
+              </button>
+              <button
+                onClick={loadDaevanionConfig}
+                disabled={daevanionSaving}
+                className="btn btn--secondary"
+              >
+                重新加载
+              </button>
+            </div>
+
+            <div className="sync-notice" style={{ marginTop: '24px' }}>
+              <div className="sync-notice__icon">💡</div>
+              <div className="sync-notice__content">
+                <p><strong>说明:</strong></p>
+                <ul>
+                  <li>配置修改后需要点击"保存配置到文件"才会生效</li>
+                  <li>每个职业必须配置6个守护力面板ID</li>
+                  <li>面板ID通常是职业ID*10 + 序号,例如剑星(职业1): [11,12,13,14,15,16]</li>
+                  <li>配置保存后,前端会自动加载新配置,无需重启</li>
+                </ul>
+              </div>
             </div>
           </>
         )}

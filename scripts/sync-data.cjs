@@ -200,6 +200,50 @@ async function getEquipmentDetail(itemId, enchantLevel, slotPos, member) {
   return await httpsGet(url);
 }
 
+/**
+ * 获取守护力面板数据
+ * @param {number} boardId 面板ID
+ * @param {object} member 成员配置
+ * @returns {Promise<object|null>} 守护力面板数据
+ */
+async function getDaevanionBoard(boardId, member) {
+  // 检查是否有必要的参数
+  const characterId = member.characterId;
+  const serverId = member.serverId;
+
+  if (!characterId || serverId === undefined) {
+    return null;
+  }
+
+  const url = `${API_BASE_URL}/character/daevanion/detail?lang=zh&characterId=${encodeURIComponent(characterId)}&serverId=${serverId}&boardId=${boardId}`;
+  return await httpsGet(url);
+}
+
+/**
+ * 职业ID到守护力面板ID的映射
+ */
+const CLASS_BOARD_IDS = {
+  1: [11, 12, 13, 14, 15, 16],  // Gladiator 剑星
+  2: [21, 22, 23, 24, 25, 26],  // Templar 护星
+  3: [31, 32, 33, 34, 35, 36],  // Assassin 杀星
+  4: [41, 42, 43, 44, 45, 46],  // Ranger 弓星
+  5: [51, 52, 53, 54, 55, 56],  // Sorcerer 魔道星
+  6: [61, 62, 63, 64, 65, 66],  // Spiritmaster 精灵星
+  7: [71, 72, 73, 74, 75, 76],  // Cleric 治愈星
+  8: [81, 82, 83, 84, 85, 86],  // Chanter 吟游星
+  9: [91, 92, 93, 94, 95, 96],  // Gunner 枪炮星
+  10: [101, 102, 103, 104, 105, 106],  // Bard 乐师
+  11: [111, 112, 113, 114, 115, 116],  // Rider 骑士
+  12: [121, 122, 123, 124, 125, 126],  // Painter 画家
+};
+
+/**
+ * 根据职业ID获取守护力面板ID列表
+ */
+function getBoardIdsByClass(classId) {
+  return CLASS_BOARD_IDS[classId] || [31, 32, 33, 34, 35, 36]; // 默认使用Assassin的面板ID
+}
+
 // ============= 同步逻辑 =============
 
 /**
@@ -285,6 +329,39 @@ async function syncMemberData(member) {
     saveJson(equipmentDetailFile, equipmentCache);
     console.log(`  ✓ 装备详情已保存到: ${equipmentDetailFile}`);
     console.log(`  ✓ 成功获取 ${equipmentDetails.length}/${equipmentList.length} 件装备详情`);
+
+    // 4. 获取守护力面板数据 (6个面板，根据职业ID选择)
+    if (member.characterId && member.serverId !== undefined) {
+      console.log(`  步骤 4/4: 获取守护力面板数据 (6个面板)...`);
+
+      // 从角色信息中获取职业ID
+      const classId = characterInfo?.profile?.classId;
+      const boardIds = getBoardIdsByClass(classId);
+
+      console.log(`  职业ID: ${classId || '未知'}, 使用面板ID: ${boardIds.join(', ')}`);
+
+      const daevanionBoards = [];
+
+      for (const boardId of boardIds) {
+        try {
+          const boardData = await getDaevanionBoard(boardId, member);
+          daevanionBoards.push(boardData);
+          console.log(`    ✓ 面板 ${boardId}: 已获取`);
+          await delay(REQUEST_DELAY);
+        } catch (error) {
+          console.error(`    ✗ 面板 ${boardId}: ${error.message}`);
+          daevanionBoards.push(null);
+        }
+      }
+
+      // 保存守护力数据
+      const daevanionFile = path.join(memberDir, 'daevanion_boards.json');
+      saveJson(daevanionFile, daevanionBoards);
+      console.log(`  ✓ 守护力数据已保存到: ${daevanionFile}`);
+      console.log(`  ✓ 成功获取 ${daevanionBoards.filter(b => b !== null).length}/${boardIds.length} 个面板`);
+    } else {
+      console.log(`  ! 跳过守护力数据同步 (缺少 characterId 或 serverId)`);
+    }
 
     console.log(`\n✓ 同步完成: ${member.name}`);
     return { success: true, equipmentCount: equipmentDetails.length };

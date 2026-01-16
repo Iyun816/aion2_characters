@@ -979,6 +979,93 @@ app.get('/api/character/rating', (req, res) => {
   });
 });
 
+// 获取守护力面板数据 - 代理官方API
+app.get('/api/character/daevanion', (req, res) => {
+  const { characterId, serverId, boardId } = req.query;
+
+  if (!characterId || !serverId || !boardId) {
+    return res.status(400).json({
+      success: false,
+      error: '缺少必要参数：characterId, serverId, boardId'
+    });
+  }
+
+  // 官方API地址
+  const url = `https://tw.ncsoft.com/aion2/api/character/daevanion/detail?lang=zh&characterId=${encodeURIComponent(characterId)}&serverId=${serverId}&boardId=${boardId}`;
+
+  console.log(`[守护力API] 请求面板 ${boardId}: ${url.substring(0, 100)}...`);
+
+  https.get(url, (apiRes) => {
+    let data = '';
+
+    apiRes.on('data', (chunk) => {
+      data += chunk;
+    });
+
+    apiRes.on('end', () => {
+      try {
+        const jsonData = JSON.parse(data);
+        res.json({
+          success: true,
+          data: jsonData
+        });
+      } catch (error) {
+        console.error(`解析守护力面板 ${boardId} 失败:`, error);
+        res.json({
+          success: false,
+          error: '解析守护力数据失败'
+        });
+      }
+    });
+  }).on('error', (error) => {
+    console.error(`请求守护力面板 ${boardId} 失败:`, error);
+    res.status(500).json({
+      success: false,
+      error: '请求守护力数据失败: ' + error.message
+    });
+  });
+});
+
+// 保存守护力职业配置
+app.put('/api/daevanion/config', (req, res) => {
+  try {
+    const config = req.body;
+
+    // 验证配置格式
+    if (!config || !config.classes || !Array.isArray(config.classes)) {
+      return res.status(400).json({
+        success: false,
+        error: '配置格式错误'
+      });
+    }
+
+    // 保存到配置文件
+    const configPath = path.join(__dirname, '../public/data/class_board_mapping.json');
+
+    // 确保目录存在
+    const configDir = path.dirname(configPath);
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+
+    // 写入配置文件
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+
+    console.log('✓ 守护力职业配置已更新');
+
+    res.json({
+      success: true,
+      message: '配置保存成功'
+    });
+  } catch (error) {
+    console.error('保存守护力配置失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '保存失败: ' + error.message
+    });
+  }
+});
+
 // ==================== 成员数据保存 API ====================
 
 // 保存成员角色信息
@@ -1282,6 +1369,159 @@ function fetchEquipmentDetail(itemId, enchantLevel, characterId, serverId, slotP
 }
 
 /**
+ * 加载职业面板映射配置
+ */
+function loadClassBoardConfig() {
+  const configPath = path.join(__dirname, '../public/data/class_board_mapping.json');
+  try {
+    if (fs.existsSync(configPath)) {
+      const raw = fs.readFileSync(configPath, 'utf-8');
+      return JSON.parse(raw);
+    }
+  } catch (error) {
+    console.error('[Daevanion] 加载职业面板映射配置失败:', error);
+  }
+
+  // 返回默认配置
+  return {
+    version: '1.0.0',
+    lastUpdated: new Date().toISOString(),
+    classes: []
+  };
+}
+
+/**
+ * 根据职业中文名获取 classId（支持简繁体）
+ * 通过配置文件中的 className 和 classNameSimplified 字段进行匹配
+ */
+function getClassIdByChineseName(className) {
+  const config = loadClassBoardConfig();
+  console.log(`  [Daevanion] 通过中文名查找classId: ${className}`);
+
+  // 在配置中查找，支持繁体和简体匹配
+  const classMapping = config.classes.find(c => {
+    return c.className === className || c.classNameSimplified === className;
+  });
+
+  if (classMapping) {
+    console.log(`  [Daevanion] 找到职业 ${className} 的classId: ${classMapping.classId}`);
+    return classMapping.classId;
+  } else {
+    console.warn(`  [Daevanion] 未找到职业 ${className} 的配置`);
+    return undefined;
+  }
+}
+
+/**
+ * 根据职业ID获取守护力面板ID列表
+ */
+function getBoardIdsByClassId(classId) {
+  const config = loadClassBoardConfig();
+  console.log(`  [Daevanion] 查找职业配置: classId=${classId}`);
+
+  const classMapping = config.classes.find(c => c.classId === classId);
+
+  if (classMapping) {
+    console.log(`  [Daevanion] 找到职业ID ${classId}(${classMapping.className}) 的配置:`, classMapping.boardIds);
+    return classMapping.boardIds;
+  } else {
+    console.warn(`  [Daevanion] 未找到职业ID ${classId} 的配置,返回空数组`);
+    return [];
+  }
+}
+
+/**
+ * 获取单个守护力面板数据
+ */
+function fetchDaevanionBoard(characterId, serverId, boardId) {
+  return new Promise((resolve, reject) => {
+    const url = `https://tw.ncsoft.com/aion2/api/character/daevanion/detail?lang=zh&characterId=${encodeURIComponent(characterId)}&serverId=${serverId}&boardId=${boardId}`;
+
+    https.get(url, (apiRes) => {
+      let data = '';
+
+      apiRes.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      apiRes.on('end', () => {
+        try {
+          const jsonData = JSON.parse(data);
+          // 转换繁体为简体
+          const simplifiedData = convertToSimplified(jsonData);
+          resolve(simplifiedData);
+        } catch (error) {
+          reject(new Error('解析守护力API响应失败'));
+        }
+      });
+    }).on('error', (error) => {
+      reject(error);
+    });
+  });
+}
+
+/**
+ * 获取角色所有守护力面板数据（6个面板）- 并发请求
+ */
+async function fetchDaevanionBoards(characterId, serverId, characterInfo) {
+  try {
+    console.log(`  [Daevanion] 开始获取守护力数据`);
+
+    // 从角色信息中获取中文职业名
+    const chineseClassName = characterInfo?.profile?.className;
+
+    if (!chineseClassName) {
+      console.log(`  [Daevanion] 角色信息中没有职业名称，跳过守护力数据获取`);
+      return null;
+    }
+
+    // 通过中文职业名映射到 classId
+    const classId = getClassIdByChineseName(chineseClassName);
+
+    if (!classId) {
+      console.log(`  [Daevanion] 无法映射职业名称 "${chineseClassName}" 到 classId`);
+      return null;
+    }
+
+    // 根据职业ID获取对应的面板ID列表
+    const boardIds = getBoardIdsByClassId(classId);
+    console.log(`  [Daevanion] 职业: ${chineseClassName}, classId: ${classId}, 使用面板ID:`, boardIds);
+
+    if (boardIds.length === 0) {
+      console.log(`  [Daevanion] 未找到职业ID ${classId} 的面板配置`);
+      return null;
+    }
+
+    // 并发请求所有面板
+    const promises = boardIds.map(async (boardId) => {
+      try {
+        const result = await fetchDaevanionBoard(characterId, serverId, boardId);
+        await delay(200); // 添加延迟避免请求过快
+
+        if (result) {
+          console.log(`  [Daevanion] ✓ 面板 ${boardId} 数据获取成功`);
+          return result;
+        } else {
+          console.log(`  [Daevanion] ✗ 面板 ${boardId} 数据为空`);
+          return null;
+        }
+      } catch (error) {
+        console.log(`  [Daevanion] ✗ 面板 ${boardId} 获取失败: ${error.message}`);
+        return null;
+      }
+    });
+
+    // 等待所有请求完成
+    const boards = await Promise.all(promises);
+    console.log(`  [Daevanion] 守护力数据获取完成，成功获取 ${boards.filter(b => b).length}/${boardIds.length} 个面板`);
+    return boards;
+  } catch (error) {
+    console.error(`  [Daevanion] 获取守护力数据失败:`, error);
+    return null;
+  }
+}
+
+/**
  * 同步单个成员数据 (完整同步: 角色信息 + 装备列表 + 装备详情)
  * 与前端 syncService.ts 保持一致的逻辑
  */
@@ -1396,8 +1636,8 @@ async function syncMemberData(member) {
     fs.writeFileSync(equipmentFilePath, JSON.stringify(equipmentData, null, 2), 'utf-8');
     console.log(`  ✓ 装备详情已保存`);
 
-    // 步骤 4/4: 获取PVE评分数据
-    console.log(`  [${member.name}] 步骤 4/4: 请求PVE评分...`);
+    // 步骤 4/5: 获取PVE评分数据
+    console.log(`  [${member.name}] 步骤 4/5: 请求PVE评分...`);
     try {
       await delay(300); // 添加延迟避免请求过快
       const ratingData = await fetchCharacterRating(characterId, serverId, true); // 传入true强制刷新
@@ -1413,6 +1653,25 @@ async function syncMemberData(member) {
     } catch (error) {
       console.log(`  ⚠️  获取PVE评分失败: ${error.message}`);
       // 评分获取失败不影响整体同步
+    }
+
+    // 步骤 5/5: 获取守护力数据
+    console.log(`  [${member.name}] 步骤 5/5: 请求守护力数据...`);
+    try {
+      await delay(300);
+      const daevanionBoards = await fetchDaevanionBoards(characterId, serverId, characterInfo);
+
+      if (daevanionBoards && daevanionBoards.length > 0) {
+        // 保存守护力数据到 daevanion_boards.json
+        const daevanionFilePath = path.join(memberDir, 'daevanion_boards.json');
+        fs.writeFileSync(daevanionFilePath, JSON.stringify(daevanionBoards, null, 2), 'utf-8');
+        console.log(`  ✓ 守护力数据已保存到 daevanion_boards.json`);
+      } else {
+        console.log(`  ⚠️  该角色暂无守护力数据`);
+      }
+    } catch (error) {
+      console.log(`  ⚠️  获取守护力数据失败: ${error.message}`);
+      // 守护力获取失败不影响整体同步
     }
 
     console.log(`  ✓ 成员 ${member.name} 数据同步成功`);
@@ -1909,7 +2168,12 @@ function convertToSimplified(obj, parentKey = '', pathKeys = []) {
   }
 
   if (typeof obj === 'string') {
-    return converter(obj);
+    try {
+      return converter(obj);
+    } catch (error) {
+      console.error('[convertToSimplified] 转换字符串失败:', obj, error);
+      return obj; // 转换失败时返回原值
+    }
   }
 
   if (Array.isArray(obj)) {

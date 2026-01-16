@@ -452,6 +452,41 @@
   border-radius: 2px;
 }
 
+/* 守护力面板头部布局 */
+.stat-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.stat-panel__header .stat-panel__title {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+  flex: 1;
+}
+
+/* 查看面板效果按钮 */
+.stat-panel__action-btn {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+  background: linear-gradient(135deg, rgba(79, 195, 247, 0.15), rgba(171, 71, 188, 0.15));
+  border: 1px solid rgba(79, 195, 247, 0.3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.stat-panel__action-btn:hover {
+  background: linear-gradient(135deg, rgba(79, 195, 247, 0.25), rgba(171, 71, 188, 0.25));
+  border-color: rgba(79, 195, 247, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 195, 247, 0.3);
+}
+
 .stat-panel__grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

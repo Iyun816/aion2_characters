@@ -7,7 +7,10 @@ import EquipmentTooltip from '../components/EquipmentTooltip';
 import EquipmentDetailModal from '../components/EquipmentDetailModal';
 import ExceedLevel from '../components/ExceedLevel';
 import ConfirmDialog from '../components/ConfirmDialog';
+import DaevanionModal from '../components/DaevanionModal';
 import { useEquipmentTooltip } from '../hooks/useEquipmentTooltip';
+import { loadMemberDaevanion, fetchDaevanionBoards, mergeDaevanionEffects, getClassIdByChineseName } from '../utils/daevanion';
+import type { DaevanionBoards, AggregatedDaevanionEffects } from '../utils/daevanion';
 import './MemberDetailPage.css';
 
 // 成员配置信息
@@ -84,6 +87,11 @@ const MemberDetailPage = () => {
   const [showRefreshDialog, setShowRefreshDialog] = useState(false);
   const [refreshDialogMessage, setRefreshDialogMessage] = useState('');
   const [refreshDialogTitle, setRefreshDialogTitle] = useState('');
+
+  // 守护力弹窗状态
+  const [showDaevanionModal, setShowDaevanionModal] = useState(false);
+  const [daevanionLoading, setDaevanionLoading] = useState(false);
+  const [daevanionEffects, setDaevanionEffects] = useState<AggregatedDaevanionEffects | null>(null);
 
   // 准备装备列表数据
   // 角色BD查询: 直接从 characterData 获取
@@ -555,6 +563,59 @@ const MemberDetailPage = () => {
     }
   };
 
+  // 打开守护力面板
+  const handleShowDaevanion = async () => {
+    setShowDaevanionModal(true);
+    setDaevanionLoading(true);
+    setDaevanionEffects(null);
+
+    try {
+      let boards: DaevanionBoards | null = null;
+
+      if (isFromMember && id) {
+        // 军团成员: 从本地文件加载
+        boards = await loadMemberDaevanion(id);
+      } else if (charInfo?.profile?.characterId && charInfo?.profile?.serverId) {
+        // 角色查询/分享: 从API加载,传入职业ID
+        // 通过中文 className 映射到 classId
+        let classId: number | undefined;
+        const chineseClassName = charInfo.profile.className; // 中文职业名，如"劍星"
+
+        if (chineseClassName) {
+          classId = await getClassIdByChineseName(chineseClassName);
+        }
+
+        console.log('[MemberDetail] 准备加载守护力数据:', {
+          characterId: charInfo.profile.characterId,
+          serverId: charInfo.profile.serverId,
+          chineseClassName: chineseClassName,
+          mappedClassId: classId,
+          classIdType: typeof classId
+        });
+
+        if (classId) {
+          boards = await fetchDaevanionBoards(
+            charInfo.profile.characterId,
+            charInfo.profile.serverId,
+            classId // 传入职业ID以获取正确的面板
+          );
+          console.log('[MemberDetail] fetchDaevanionBoards 返回结果:', boards);
+        } else {
+          console.error(`[MemberDetail] 无法映射职业名称 "${chineseClassName}" 到 classId`);
+        }
+      }
+
+      if (boards) {
+        const effects = mergeDaevanionEffects(boards);
+        setDaevanionEffects(effects);
+      }
+    } catch (error) {
+      console.error('加载守护力数据失败:', error);
+    } finally {
+      setDaevanionLoading(false);
+    }
+  };
+
   // 根据来源确定返回链接和文字
   const backLink = (isFromCharacterBD || isFromShare) ? "/" : "/legion";
   const backText = (isFromCharacterBD || isFromShare) ? "返回首页" : "返回军团";
@@ -803,7 +864,16 @@ const MemberDetailPage = () => {
           {/* 守护力 */}
           {daevanionBoards.length > 0 && (
             <div className="stat-panel">
-              <h3 className="stat-panel__title">守护力</h3>
+              <div className="stat-panel__header">
+                <h3 className="stat-panel__title">守护力</h3>
+                <button
+                  className="stat-panel__action-btn"
+                  onClick={handleShowDaevanion}
+                  title="查看面板效果"
+                >
+                  查看面板效果
+                </button>
+              </div>
               <div className="daevanion-list">
                 {daevanionBoards.map((board) => {
                   const boardColor = getDaevanionColor(board.id);
@@ -1096,6 +1166,14 @@ const MemberDetailPage = () => {
         confirmText="确定"
         onConfirm={() => setShowRefreshDialog(false)}
         onCancel={() => setShowRefreshDialog(false)}
+      />
+
+      {/* 守护力面板弹窗 */}
+      <DaevanionModal
+        visible={showDaevanionModal}
+        loading={daevanionLoading}
+        effects={daevanionEffects}
+        onClose={() => setShowDaevanionModal(false)}
       />
     </div>
   );

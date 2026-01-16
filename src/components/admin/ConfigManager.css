@@ -593,3 +593,116 @@
     right: var(--spacing-md);
   }
 }
+
+/* ========== 守护力职业配置 ========== */
+
+.daevanion-class-list {
+  margin-top: var(--spacing-md);
+  overflow-x: auto;
+}
+
+.daevanion-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.daevanion-table thead {
+  background: var(--color-bg-tertiary);
+}
+
+.daevanion-table th,
+.daevanion-table td {
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.daevanion-table th {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+}
+
+.daevanion-table td {
+  color: var(--color-text-secondary);
+}
+
+.daevanion-table tbody tr:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.board-ids {
+  font-family: 'Courier New', monospace;
+  background: var(--color-bg-primary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.daevanion-empty {
+  text-align: center;
+  padding: var(--spacing-xl) 0;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.config-section__actions {
+  margin-top: var(--spacing-md);
+}
+
+.btn--small {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+/* 模态对话框 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.modal-dialog {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-dialog h3 {
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-primary);
+}
+
+.board-ids-input {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.board-ids-input input {
+  flex: 0 0 auto;
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+  justify-content: flex-end;
+}
+

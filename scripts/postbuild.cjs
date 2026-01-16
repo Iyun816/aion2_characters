@@ -23,6 +23,7 @@ dirsToDelete.forEach(dir => {
 const filesToCopy = [
   { src: 'server/index.cjs', dest: '../部署/chunxia-legion/server/index.cjs' },
   { src: 'public/data/tools_config.json', dest: '../部署/chunxia-legion/public/data/tools_config.json' },
+  { src: 'public/data/class_board_mapping.json', dest: '../部署/chunxia-legion/public/data/class_board_mapping.json' },
   { src: 'package.json', dest: '../部署/chunxia-legion/package.json' }
 ];
 
