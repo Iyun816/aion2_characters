@@ -1461,7 +1461,7 @@ function fetchDaevanionBoard(characterId, serverId, boardId) {
 }
 
 /**
- * 获取角色所有守护力面板数据（6个面板）- 并发请求
+ * 获取角色所有守护力面板数据（6个面板）- 顺序请求避免官方API频率限制
  */
 async function fetchDaevanionBoards(characterId, serverId, characterInfo) {
   try {
@@ -1492,27 +1492,29 @@ async function fetchDaevanionBoards(characterId, serverId, characterInfo) {
       return null;
     }
 
-    // 并发请求所有面板
-    const promises = boardIds.map(async (boardId) => {
+    // 顺序请求所有面板,避免官方API频率限制返回 "Server Error"
+    const boards = [];
+    for (const boardId of boardIds) {
       try {
         const result = await fetchDaevanionBoard(characterId, serverId, boardId);
-        await delay(200); // 添加延迟避免请求过快
 
         if (result) {
           console.log(`  [Daevanion] ✓ 面板 ${boardId} 数据获取成功`);
-          return result;
+          boards.push(result);
         } else {
           console.log(`  [Daevanion] ✗ 面板 ${boardId} 数据为空`);
-          return null;
+          boards.push(null);
         }
+
+        // 每次请求后延迟600ms,避免触发API频率限制
+        await delay(600);
       } catch (error) {
         console.log(`  [Daevanion] ✗ 面板 ${boardId} 获取失败: ${error.message}`);
-        return null;
+        boards.push(null);
+        await delay(600);
       }
-    });
+    }
 
-    // 等待所有请求完成
-    const boards = await Promise.all(promises);
     console.log(`  [Daevanion] 守护力数据获取完成，成功获取 ${boards.filter(b => b).length}/${boardIds.length} 个面板`);
     return boards;
   } catch (error) {
@@ -1994,6 +1996,151 @@ app.post('/api/sync/member', async (req, res) => {
     res.status(500).json({
       success: false,
       error: '同步失败: ' + error.message
+    });
+  }
+});
+
+// ==================== 角色完整数据API (角色查询专用) ====================
+
+/**
+ * 一次性获取角色所有数据 - 用于角色查询详情页
+ * 包括: 角色信息 + 装备列表 + 装备详情 + PVE评分 + 守护力数据
+ */
+app.get('/api/character/complete', async (req, res) => {
+  const { characterId, serverId, skipDaevanion } = req.query;
+
+  if (!characterId || !serverId) {
+    return res.status(400).json({
+      success: false,
+      error: '缺少必要参数: characterId 和 serverId'
+    });
+  }
+
+  console.log(`\n========================================`);
+  console.log(`🔍 [角色完整数据] 开始获取角色数据`);
+  console.log(`📌 characterId: ${characterId}`);
+  console.log(`📌 serverId: ${serverId}`);
+  console.log(`📌 skipDaevanion: ${skipDaevanion || 'false'}`);
+  console.log(`========================================\n`);
+
+  try {
+    // 步骤 1/5: 获取角色基础信息
+    console.log(`[1/5] 获取角色信息...`);
+    const characterInfo = await fetchCharacterInfo(characterId, serverId);
+
+    if (!characterInfo || !characterInfo.profile) {
+      return res.status(404).json({
+        success: false,
+        error: '角色信息获取失败'
+      });
+    }
+    console.log(`✓ 角色信息获取成功: ${characterInfo.profile.characterName}`);
+
+    // 步骤 2/5: 获取装备列表
+    console.log(`[2/5] 获取装备列表...`);
+    await delay(300);
+    const equipmentData = await fetchCharacterEquipment(characterId, serverId);
+
+    if (!equipmentData) {
+      return res.status(404).json({
+        success: false,
+        error: '装备数据获取失败'
+      });
+    }
+    console.log(`✓ 装备列表获取成功`);
+
+    // 步骤 3/5: 获取装备详情
+    const equipmentList = equipmentData?.equipment?.equipmentList || [];
+    console.log(`[3/5] 获取装备详情 (共 ${equipmentList.length} 件装备)...`);
+
+    const equipmentDetails = [];
+
+    for (const equip of equipmentList) {
+      try {
+        const totalEnchantLevel = (equip.enchantLevel || 0) + (equip.exceedLevel || 0);
+
+        const detail = await fetchEquipmentDetail(
+          equip.id,
+          totalEnchantLevel,
+          characterId,
+          serverId,
+          equip.slotPos
+        );
+
+        const enrichedDetail = {
+          ...detail,
+          slotPos: equip.slotPos,
+          slotPosName: equip.slotPosName
+        };
+
+        equipmentDetails.push(enrichedDetail);
+        console.log(`  ✓ ${equip.slotPosName || equip.slotPos}: ${detail.name || equip.name}`);
+        await delay(500);
+      } catch (error) {
+        console.log(`  ✗ ${equip.slotPosName || equip.slotPos}: 获取失败`);
+      }
+    }
+
+    // 将装备详情合并到 equipmentData 中
+    if (equipmentDetails.length > 0) {
+      equipmentData.equipment.equipmentList = equipmentDetails;
+    }
+    console.log(`✓ 成功获取 ${equipmentDetails.length}/${equipmentList.length} 件装备详情`);
+
+    // 步骤 4/5: 获取PVE评分
+    console.log(`[4/5] 获取PVE评分...`);
+    await delay(300);
+    let ratingData = null;
+    try {
+      ratingData = await fetchCharacterRating(characterId, serverId, false);
+      if (ratingData) {
+        console.log(`✓ PVE评分获取成功: ${Math.floor(ratingData.scores.score)}`);
+      } else {
+        console.log(`⚠️  该角色暂无评分数据`);
+      }
+    } catch (error) {
+      console.log(`⚠️  PVE评分获取失败: ${error.message}`);
+    }
+
+    // 步骤 5/5: 获取守护力数据 (可选)
+    let daevanionBoards = null;
+    if (skipDaevanion !== 'true') {
+      console.log(`[5/5] 获取守护力数据...`);
+      await delay(300);
+      try {
+        daevanionBoards = await fetchDaevanionBoards(characterId, serverId, characterInfo);
+        if (daevanionBoards && daevanionBoards.length > 0) {
+          console.log(`✓ 守护力数据获取成功: ${daevanionBoards.length} 个面板`);
+        } else {
+          console.log(`⚠️  该角色暂无守护力数据`);
+        }
+      } catch (error) {
+        console.log(`⚠️  守护力数据获取失败: ${error.message}`);
+      }
+    } else {
+      console.log(`[5/5] 跳过守护力数据获取 (skipDaevanion=true)`);
+    }
+
+    console.log(`\n========================================`);
+    console.log(`✅ 角色完整数据获取成功`);
+    console.log(`========================================\n`);
+
+    // 返回完整数据
+    res.json({
+      success: true,
+      data: {
+        characterInfo,
+        equipmentData,
+        rating: ratingData,
+        daevanionBoards,
+        timestamp: Date.now()
+      }
+    });
+  } catch (error) {
+    console.error(`❌ 获取角色完整数据失败:`, error);
+    res.status(500).json({
+      success: false,
+      error: '获取角色数据失败: ' + error.message
     });
   }
 });

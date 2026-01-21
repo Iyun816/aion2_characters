@@ -202,7 +202,7 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
         });
 
         // 检查浏览器缓存 - 使用包含slotPos的key
-        const CACHE_DURATION = 4 * 60 * 60 * 1000; // 4小时
+        const CACHE_DURATION = 8 * 60 * 60 * 1000; // 8小时
         const cacheKey = actualEquipItem.slotPos
           ? `equipment_detail_${equipmentId}_${actualEquipItem.slotPos}`
           : `equipment_detail_${equipmentId}`;

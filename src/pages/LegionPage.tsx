@@ -29,7 +29,7 @@ interface GalleryImage {
 
 const MEMBERS_CACHE_KEY = 'legion_members_cache_v2';
 const MEMBERS_CACHE_TIME_KEY = 'legion_members_cache_time_v2';
-const MEMBERS_CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
+const MEMBERS_CACHE_TTL = 2 * 60 * 60 * 1000; // 2小时
 
 const LegionPage = () => {
   const location = useLocation();

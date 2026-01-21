@@ -10,24 +10,32 @@ import LegionPage from './pages/LegionPage';
 import MemberDetailPage from './pages/MemberDetailPage';
 import AdminPage from './pages/AdminPage';
 
+function AppRoutes() {
+  return (
+    <>
+      <Header />
+      <main>
+        <Routes>
+          <Route path="/" element={<CharacterBDPage />} />
+          <Route path="/tools" element={<ToolsPage />} />
+          <Route path="/join-legion" element={<JoinLegionPage />} />
+          <Route path="/legion" element={<LegionPage />} />
+          <Route path="/member/:id" element={<MemberDetailPage />} />
+          <Route path="/character/:serverId/:characterId" element={<MemberDetailPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+        </Routes>
+      </main>
+      <Footer />
+      <AdminLoginModal />
+    </>
+  );
+}
+
 function App() {
   return (
     <AdminProvider>
       <HashRouter>
-        <Header />
-        <main>
-          <Routes>
-            <Route path="/" element={<CharacterBDPage />} />
-            <Route path="/tools" element={<ToolsPage />} />
-            <Route path="/join-legion" element={<JoinLegionPage />} />
-            <Route path="/legion" element={<LegionPage />} />
-            <Route path="/member/:id" element={<MemberDetailPage />} />
-            <Route path="/character/:serverId/:characterId" element={<MemberDetailPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-          </Routes>
-        </main>
-        <Footer />
-        <AdminLoginModal />
+        <AppRoutes />
       </HashRouter>
     </AdminProvider>
   );

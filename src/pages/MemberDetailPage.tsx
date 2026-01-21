@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { gradeColors, classIcons } from '../data/memberTypes';
 import type { CharacterInfo, CharacterEquipment, EquipmentItem, TitleItem } from '../data/memberTypes';
@@ -100,25 +100,70 @@ const MemberDetailPage = () => {
   const [attackPowerLoading, setAttackPowerLoading] = useState(false);
   const [showAttackPowerModal, setShowAttackPowerModal] = useState(false);
 
+  // 标记阶段2是否完成(用于触发攻击力计算)
+  const [stage2Complete, setStage2Complete] = useState(false);
+
+  // 用于追踪评分是否已加载,避免重复加载
+  const ratingLoadedRef = useRef(false);
+
+  // 缓存的完整数据(用于守护力等数据,避免重复请求)
+  const cachedCompleteDataRef = useRef<any>(null);
+
   // 准备装备列表数据
   // 角色BD查询: 直接从 characterData 获取
   // 分享链接/军团成员: 从 state 获取
-  const equipment = isFromCharacterBD
-    ? (characterData?.equipment?.equipment?.equipmentList || [])
-    : ((charEquip as any)?.details || charEquip?.equipment?.equipmentList || []);
+  // 使用 useMemo 稳定化数组引用
+  const equipment = useMemo(() => {
+    if (isFromCharacterBD) {
+      return characterData?.equipment?.equipment?.equipmentList || [];
+    }
+    return (charEquip as any)?.details || charEquip?.equipment?.equipmentList || [];
+  }, [isFromCharacterBD, characterData, charEquip]);
+
+  // 准备装备详情数据(用于悬浮提示和点击详情)
+  // 将装备列表转换为 Map<equipmentId, EquipmentDetail> 格式
+  // 使用 useMemo 避免每次渲染都重新创建对象
+  const equipmentDetailsMap = useMemo(() => {
+    return equipment.reduce((acc: Record<number, any>, item: any) => {
+      // 装备详情已经在 equipment 数组中(完整数据API已获取)
+      // 检查是否包含详细信息(stat表示有详细属性,或者有minPower/maxPower等字段)
+      if (item.stat || item.minPower !== undefined || item.slotPosName) {
+        acc[item.id] = item;
+      }
+      return acc;
+    }, {});
+  }, [equipment]);
+
+  console.log('[MemberDetailPage] equipmentDetailsMap大小:', Object.keys(equipmentDetailsMap).length);
+  console.log('[MemberDetailPage] equipment数量:', equipment.length);
+
+  // 使用 useMemo 稳定化 useEquipmentTooltip 的配置对象,避免无限循环
+  const equipmentTooltipConfig = useMemo(() => {
+    if (isFromCharacterBD || isFromShare) {
+      const config = {
+        characterId: isFromShare ? characterId : characterData?.info?.profile?.characterId,
+        serverId: isFromShare ? Number(serverId) : characterData?.info?.profile?.serverId,
+        equipmentList: equipment,
+        // 只有在阶段2完成后才传递equipmentDetails,避免使用不完整的数据
+        equipmentDetails: (stage2Complete && Object.keys(equipmentDetailsMap).length > 0) ? equipmentDetailsMap : undefined
+      };
+      console.log('[MemberDetailPage] 传递给useEquipmentTooltip的配置:', {
+        ...config,
+        stage2Complete,
+        equipmentDetailsKeys: Object.keys(equipmentDetailsMap),
+        hasEquipmentDetails: !!config.equipmentDetails
+      });
+      return config;
+    }
+    return { memberId: id || '' };
+  }, [isFromCharacterBD, isFromShare, characterId, serverId, characterData, equipment, stage2Complete, equipmentDetailsMap, id]);
 
   // 装备悬浮提示和详情模态框
-  const { tooltipState, modalState, handleMouseEnter, handleMouseMove, handleMouseLeave, handleClick, handleCloseModal } = useEquipmentTooltip(
-    isFromCharacterBD || isFromShare
-      ? {
-          characterId: isFromShare ? characterId : characterData?.info?.profile?.characterId,
-          serverId: isFromShare ? Number(serverId) : characterData?.info?.profile?.serverId,
-          equipmentList: equipment
-        }
-      : { memberId: id || '' }
-  );
+  const { tooltipState, modalState, handleMouseEnter, handleMouseMove, handleMouseLeave, handleClick, handleCloseModal } = useEquipmentTooltip(equipmentTooltipConfig);
 
   useEffect(() => {
+    let isMounted = true; // 防止组件卸载后的状态更新
+
     // 如果是从角色BD查询来的，直接使用传入的数据
     if (isFromCharacterBD) {
       if (characterData.info) {
@@ -131,14 +176,16 @@ const MemberDetailPage = () => {
       return;
     }
 
-    // 如果是分享链接，从API加载数据（支持4小时缓存）
+    // 如果是分享链接,从API加载完整数据(包括装备详情、评分、守护力)
     if (isFromShare && serverId && characterId) {
       const loadSharedData = async () => {
         try {
-          const cacheKey = `character_v2_${serverId}_${characterId}`; // v2: 添加 maxEnchantLevel 字段
+          // 确保 characterId 被解码,避免缓存键不匹配
+          const decodedCharacterId = decodeURIComponent(characterId);
+          const cacheKey = `character_complete_${serverId}_${decodedCharacterId}`; // v3: 完整数据缓存
           const cached = localStorage.getItem(cacheKey);
 
-          // 检查缓存是否有效（8小时内）
+          // 检查缓存是否有效(8小时内)
           if (cached) {
             try {
               const cacheData = JSON.parse(cached);
@@ -147,50 +194,107 @@ const MemberDetailPage = () => {
               const eightHours = 8 * 60 * 60 * 1000; // 8小时的毫秒数
 
               if (now - cacheTime < eightHours) {
-                console.log('使用缓存的角色数据');
-                setCharInfo(cacheData.info);
-                setCharEquip(cacheData.equipment);
+                console.log('[完整数据] 使用缓存的角色完整数据,缓存时间:', new Date(cacheTime).toLocaleString());
+                if (!isMounted) return;
+                setCharInfo(cacheData.characterInfo);
+                setCharEquip(cacheData.equipmentData);
+                if (cacheData.rating) {
+                  setRating(cacheData.rating);
+                }
+                // 保存完整数据到 ref,用于守护力等功能
+                cachedCompleteDataRef.current = cacheData;
+                // 标记阶段2已完成(使用缓存也算完成)
+                setStage2Complete(true);
                 setLoading(false);
                 return;
+              } else {
+                console.log('[完整数据] 缓存已过期,重新加载');
               }
             } catch (e) {
-              console.log('缓存数据解析失败，重新加载');
+              console.log('[完整数据] 缓存数据解析失败,重新加载');
             }
+          } else {
+            console.log('[完整数据] 未找到缓存,重新加载');
           }
 
-          // 缓存失效或不存在，从API加载
-          const infoUrl = `/api/character/info?characterId=${encodeURIComponent(characterId)}&serverId=${serverId}`;
-          const equipUrl = `/api/character/equipment?characterId=${encodeURIComponent(characterId)}&serverId=${serverId}`;
+          // 缓存失效或不存在，分阶段加载数据
+          console.log('[完整数据] 开始请求角色完整数据...');
 
-          const [infoResponse, equipmentResponse] = await Promise.all([
-            fetch(infoUrl),
-            fetch(equipUrl)
+          // 阶段1: 快速加载基础数据（角色信息+装备列表）
+          console.log('[阶段1] 快速加载基础数据...');
+          const basicInfoUrl = `/api/character/info?characterId=${characterId}&serverId=${serverId}`;
+          const basicEquipUrl = `/api/character/equipment?characterId=${characterId}&serverId=${serverId}`;
+
+          const [infoResponse, equipResponse] = await Promise.all([
+            fetch(basicInfoUrl),
+            fetch(basicEquipUrl)
           ]);
 
-          const [infoData, equipmentData] = await Promise.all([
+          const [basicCharInfo, basicEquipData] = await Promise.all([
             infoResponse.json(),
-            equipmentResponse.json()
+            equipResponse.json()
           ]);
 
-          setCharInfo(infoData);
+          // 立即显示页面
+          console.log('[阶段1] 基础数据加载完成,显示页面');
+          if (!isMounted) return;
+          setCharInfo(basicCharInfo);
+          setCharEquip(basicEquipData);
+          setLoading(false);
+
+          // 阶段2: 后台加载完整数据（装备详情+评分+守护力）
+          console.log('[阶段2] 后台加载完整数据...');
+          const completeUrl = `/api/character/complete?characterId=${characterId}&serverId=${serverId}`;
+          const response = await fetch(completeUrl);
+          const result = await response.json();
+
+          if (!result.success) {
+            throw new Error(result.error || '获取角色完整数据失败');
+          }
+
+          const { characterInfo, equipmentData, rating: ratingData, daevanionBoards } = result.data;
+
+          console.log('[阶段2] 完整数据获取成功,更新页面:', {
+            hasCharInfo: !!characterInfo,
+            hasEquipment: !!equipmentData,
+            hasRating: !!ratingData,
+            hasDaevanion: !!daevanionBoards,
+            equipmentCount: equipmentData?.equipment?.equipmentList?.length || 0
+          });
+
+          // 更新为完整数据
+          if (!isMounted) return;
+          setCharInfo(characterInfo);
           setCharEquip(equipmentData);
 
-          // 保存到缓存
+          if (ratingData) {
+            setRating(ratingData);
+          }
+
+          // 保存到缓存（包括完整数据和守护力）
           const cacheData = {
-            info: infoData,
-            equipment: equipmentData,
+            characterInfo,
+            equipmentData,
+            rating: ratingData,
+            daevanionBoards: daevanionBoards || null, // 保存守护力数据
             timestamp: Date.now()
           };
           localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-          console.log('角色数据已缓存');
+          // 同时保存到 ref,用于装备详情和攻击力计算等功能
+          cachedCompleteDataRef.current = cacheData;
+          // 标记阶段2已完成
+          setStage2Complete(true);
+          console.log('[阶段2] 角色完整数据已缓存(包括守护力)');
         } catch (e) {
-          console.error('加载分享角色数据失败', e);
+          console.error('[完整数据] 加载分享角色数据失败', e);
         }
-        setLoading(false);
+        // setLoading(false); // 移除这里的setLoading,因为已经在阶段1设置了
       };
 
       loadSharedData();
-      return;
+      return () => {
+        isMounted = false; // 组件卸载时设置标记
+      };
     }
 
     // 否则按原来的方式加载军团成员数据
@@ -206,8 +310,10 @@ const MemberDetailPage = () => {
         if (configRes.ok) {
           const configs: MemberConfig[] = await configRes.json();
           const config = configs.find(c => c.id === id);
+          if (!isMounted) return;
           setMemberConfig(config || { id, role: 'member' });
         } else {
+          if (!isMounted) return;
           setMemberConfig({ id, role: 'member' });
         }
 
@@ -218,6 +324,7 @@ const MemberDetailPage = () => {
           fetch(`/data/${id}/equipment_details.json?t=${timestamp}`)
         ]);
 
+        if (!isMounted) return;
         if (infoRes.ok) {
           setCharInfo(await infoRes.json());
         }
@@ -227,16 +334,32 @@ const MemberDetailPage = () => {
       } catch (e) {
         console.error('加载角色数据失败', e);
       }
+      if (!isMounted) return;
       setLoading(false);
     };
 
     loadData();
+    return () => {
+      isMounted = false; // 组件卸载时设置标记
+    };
   }, [id, serverId, characterId, isFromCharacterBD, isFromShare, characterData]);
 
   // 加载PVE评分数据
   useEffect(() => {
     const loadRating = async () => {
       if (!charInfo?.profile?.characterId || !charInfo?.profile?.serverId) {
+        return;
+      }
+
+      // 如果已经加载过评分,跳过
+      if (ratingLoadedRef.current) {
+        return;
+      }
+
+      // 如果是分享链接且已经有评分数据(从完整API获取),则跳过
+      if (isFromShare && rating) {
+        console.log('[评分] 已从完整数据API获取,跳过单独加载');
+        ratingLoadedRef.current = true;
         return;
       }
 
@@ -252,6 +375,7 @@ const MemberDetailPage = () => {
             if (localResponse.ok) {
               const localRating = await localResponse.json();
               setRating(localRating);
+              ratingLoadedRef.current = true;
               setRatingLoading(false);
               return;
             }
@@ -260,8 +384,8 @@ const MemberDetailPage = () => {
           }
         }
 
-        // 角色BD查询/分享链接: 使用缓存
-        if (isFromCharacterBD || isFromShare) {
+        // 角色BD查询: 使用缓存
+        if (isFromCharacterBD) {
           // 评分缓存键
           const ratingCacheKey = `rating_${charInfo.profile.serverId}_${charInfo.profile.characterId}`;
           const cached = localStorage.getItem(ratingCacheKey);
@@ -276,6 +400,7 @@ const MemberDetailPage = () => {
               if (now - cacheData.timestamp < eightHours) {
                 console.log('[评分缓存] 使用缓存数据');
                 setRating(cacheData.rating);
+                ratingLoadedRef.current = true;
                 setRatingLoading(false);
                 return;
               }
@@ -293,9 +418,10 @@ const MemberDetailPage = () => {
 
         if (data.success && data.rating) {
           setRating(data.rating);
+          ratingLoadedRef.current = true;
 
-          // 保存到缓存(仅角色BD查询/分享链接)
-          if (isFromCharacterBD || isFromShare) {
+          // 保存到缓存(仅角色BD查询)
+          if (isFromCharacterBD) {
             const ratingCacheKey = `rating_${charInfo.profile.serverId}_${charInfo.profile.characterId}`;
             localStorage.setItem(ratingCacheKey, JSON.stringify({
               rating: data.rating,
@@ -312,12 +438,18 @@ const MemberDetailPage = () => {
     };
 
     loadRating();
-  }, [charInfo, id, isFromMember, isFromCharacterBD, isFromShare]);
+  }, [charInfo, id, isFromMember, isFromCharacterBD, isFromShare, rating]);
 
   // 计算攻击力
   useEffect(() => {
     const calculatePower = async () => {
       if (!charInfo || !charEquip) {
+        return;
+      }
+
+      // 分享链接/角色查询: 等待阶段2完成后再计算攻击力(确保守护力数据已加载)
+      if ((isFromShare || isFromCharacterBD) && !stage2Complete) {
+        console.log('[攻击力计算] 等待阶段2完整数据加载完成...');
         return;
       }
 
@@ -341,19 +473,35 @@ const MemberDetailPage = () => {
           } catch (error) {
             console.log('[攻击力计算] 守护力数据读取失败:', error);
           }
-        } else if (isFromCharacterBD || isFromShare) {
-          // 角色BD查询/分享链接: 从API获取
+        } else if (isFromShare) {
+          // 分享链接: 从缓存的完整数据中获取守护力(已在阶段2加载)
           try {
-            const targetCharacterId = isFromShare ? characterId : characterData?.info?.profile?.characterId;
-            const targetServerId = isFromShare ? Number(serverId) : characterData?.info?.profile?.serverId;
-            const className = charInfo?.profile?.className;
+            const decodedCharacterId = decodeURIComponent(characterId!);
+            const cacheKey = `character_complete_${serverId}_${decodedCharacterId}`;
+            const cached = localStorage.getItem(cacheKey);
 
-            if (targetCharacterId && targetServerId && className) {
-              const classId = await getClassIdByChineseName(className);
-              if (classId) {
-                daevanionBoardsData = await fetchDaevanionBoards(targetCharacterId, targetServerId, classId);
-                console.log('[攻击力计算] 成功获取守护力数据,面板数量:', daevanionBoardsData?.length || 0);
+            if (cached) {
+              const cacheData = JSON.parse(cached);
+              if (cacheData.daevanionBoards) {
+                daevanionBoardsData = cacheData.daevanionBoards;
+                console.log('[攻击力计算] 从缓存中获取守护力数据,面板数量:', daevanionBoardsData?.length || 0);
+              } else {
+                console.log('[攻击力计算] 缓存中没有守护力数据');
               }
+            } else {
+              console.log('[攻击力计算] 未找到缓存数据');
+            }
+          } catch (error) {
+            console.log('[攻击力计算] 守护力数据获取失败:', error);
+          }
+        } else if (isFromCharacterBD) {
+          // 角色BD查询: 从characterData中获取守护力数据
+          try {
+            if (characterData?.daevanionBoards) {
+              daevanionBoardsData = characterData.daevanionBoards;
+              console.log('[攻击力计算] 从characterData获取守护力数据,面板数量:', daevanionBoardsData?.length || 0);
+            } else {
+              console.log('[攻击力计算] characterData中没有守护力数据');
             }
           } catch (error) {
             console.log('[攻击力计算] 守护力数据获取失败:', error);
@@ -383,7 +531,7 @@ const MemberDetailPage = () => {
     };
 
     calculatePower();
-  }, [charInfo, charEquip, equipment, isFromMember, isFromCharacterBD, isFromShare, id, serverId, characterId, characterData]);
+  }, [charInfo, charEquip, equipment, isFromMember, isFromCharacterBD, isFromShare, id, serverId, characterId, characterData, stage2Complete]);
 
   // 保存到查询历史（仅角色BD查询/分享链接）
   useEffect(() => {
@@ -491,6 +639,9 @@ const MemberDetailPage = () => {
       return;
     }
 
+    // 重置评分加载标记,允许重新加载评分
+    ratingLoadedRef.current = false;
+
     // 开始刷新
     setRefreshing(true);
     setLastRefreshTime(now);
@@ -505,9 +656,9 @@ const MemberDetailPage = () => {
         targetServerId = charInfo?.profile?.serverId;
         targetCharacterId = charInfo?.profile?.characterId;
       } else if (isFromShare) {
-        // 分享链接:从 URL 参数获取
+        // 分享链接:从 URL 参数获取,需要解码
         targetServerId = Number(serverId);
-        targetCharacterId = characterId;
+        targetCharacterId = decodeURIComponent(characterId!);
       } else if (isFromCharacterBD) {
         // 角色BD查询:从 characterData 获取
         targetServerId = characterData?.info?.profile?.serverId;
@@ -524,8 +675,10 @@ const MemberDetailPage = () => {
 
       // 清除缓存
       const cacheKey = `character_${targetServerId}_${targetCharacterId}`;
+      const completeCacheKey = `character_complete_${targetServerId}_${targetCharacterId}`;
       const ratingCacheKey = `rating_${targetServerId}_${targetCharacterId}`;
       localStorage.removeItem(cacheKey);
+      localStorage.removeItem(completeCacheKey);
       localStorage.removeItem(ratingCacheKey);
 
       // 根据来源执行不同的刷新逻辑
@@ -583,48 +736,37 @@ const MemberDetailPage = () => {
         }
         setRatingLoading(false);
       } else {
-        // 角色查询/分享链接:仅更新缓存,不保存文件
-        console.log('角色查询刷新:仅更新缓存...');
+        // 角色查询/分享链接:使用完整数据API刷新
+        console.log('[刷新] 角色查询刷新:使用完整数据API...');
 
-        const infoUrl = `/api/character/info?characterId=${encodeURIComponent(targetCharacterId)}&serverId=${targetServerId}`;
-        const equipUrl = `/api/character/equipment?characterId=${encodeURIComponent(targetCharacterId)}&serverId=${targetServerId}`;
+        const completeUrl = `/api/character/complete?characterId=${targetCharacterId}&serverId=${targetServerId}`;
+        const response = await fetch(completeUrl);
+        const result = await response.json();
 
-        const [infoResponse, equipmentResponse] = await Promise.all([
-          fetch(infoUrl),
-          fetch(equipUrl)
-        ]);
+        if (!result.success) {
+          throw new Error(result.error || '获取角色数据失败');
+        }
 
-        const [infoData, equipmentData] = await Promise.all([
-          infoResponse.json(),
-          equipmentResponse.json()
-        ]);
+        const { characterInfo, equipmentData, rating: ratingData, daevanionBoards } = result.data;
 
-        setCharInfo(infoData);
+        setCharInfo(characterInfo);
         setCharEquip(equipmentData);
 
-        // 重新缓存
+        if (ratingData) {
+          setRating(ratingData);
+        }
+
+        // 重新缓存完整数据
+        const cacheKey = `character_complete_${targetServerId}_${targetCharacterId}`;
         const cacheData = {
-          info: infoData,
-          equipment: equipmentData,
+          characterInfo,
+          equipmentData,
+          rating: ratingData,
+          daevanionBoards,
           timestamp: Date.now()
         };
         localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-
-        // 重新加载评分（添加refresh=true强制刷新）
-        setRatingLoading(true);
-        const ratingResponse = await fetch(
-          `/api/character/rating?characterId=${encodeURIComponent(targetCharacterId)}&serverId=${targetServerId}&refresh=true`
-        );
-        const ratingData = await ratingResponse.json();
-
-        if (ratingData.success && ratingData.rating) {
-          setRating(ratingData.rating);
-          localStorage.setItem(ratingCacheKey, JSON.stringify({
-            rating: ratingData.rating,
-            timestamp: Date.now()
-          }));
-        }
-        setRatingLoading(false);
+        console.log('[刷新] 完整数据已更新并重新缓存');
       }
 
       // 刷新成功提示
@@ -653,33 +795,62 @@ const MemberDetailPage = () => {
       if (isFromMember && id) {
         // 军团成员: 从本地文件加载
         boards = await loadMemberDaevanion(id);
-      } else if (charInfo?.profile?.characterId && charInfo?.profile?.serverId) {
-        // 角色查询/分享: 从API加载,传入职业ID
-        // 通过中文 className 映射到 classId
-        let classId: number | undefined;
-        const chineseClassName = charInfo.profile.className; // 中文职业名，如"劍星"
+      } else if (isFromShare || isFromCharacterBD) {
+        // 分享链接/角色查询: 优先使用缓存的完整数据中的守护力
+        if (cachedCompleteDataRef.current?.daevanionBoards) {
+          console.log('[守护力] 使用缓存的守护力数据,无需重新请求');
+          boards = cachedCompleteDataRef.current.daevanionBoards;
+        } else if (charInfo?.profile?.characterId && charInfo?.profile?.serverId) {
+          // 缓存中没有,才从API加载
+          console.log('[守护力] 缓存中没有守护力数据,从API获取');
+          const chineseClassName = charInfo.profile.className;
 
-        if (chineseClassName) {
-          classId = await getClassIdByChineseName(chineseClassName);
-        }
+          if (chineseClassName) {
+            const classId = await getClassIdByChineseName(chineseClassName);
 
-        console.log('[MemberDetail] 准备加载守护力数据:', {
-          characterId: charInfo.profile.characterId,
-          serverId: charInfo.profile.serverId,
-          chineseClassName: chineseClassName,
-          mappedClassId: classId,
-          classIdType: typeof classId
-        });
+            console.log('[守护力] 准备加载守护力数据:', {
+              characterId: charInfo.profile.characterId,
+              serverId: charInfo.profile.serverId,
+              chineseClassName: chineseClassName,
+              mappedClassId: classId,
+              classIdType: typeof classId
+            });
 
-        if (classId) {
-          boards = await fetchDaevanionBoards(
-            charInfo.profile.characterId,
-            charInfo.profile.serverId,
-            classId // 传入职业ID以获取正确的面板
-          );
-          console.log('[MemberDetail] fetchDaevanionBoards 返回结果:', boards);
-        } else {
-          console.error(`[MemberDetail] 无法映射职业名称 "${chineseClassName}" 到 classId`);
+            if (classId) {
+              boards = await fetchDaevanionBoards(
+                charInfo.profile.characterId,
+                charInfo.profile.serverId,
+                classId
+              );
+              console.log('[守护力] fetchDaevanionBoards 返回结果:', boards);
+
+              // 保存到缓存
+              if (boards && cachedCompleteDataRef.current) {
+                cachedCompleteDataRef.current.daevanionBoards = boards;
+                console.log('[守护力] 守护力数据已保存到缓存');
+
+                // 同时更新 localStorage 缓存
+                if (isFromShare && serverId && characterId) {
+                  const decodedCharacterId = decodeURIComponent(characterId);
+                  const cacheKey = `character_complete_${serverId}_${decodedCharacterId}`;
+                  const cached = localStorage.getItem(cacheKey);
+                  if (cached) {
+                    try {
+                      const cacheData = JSON.parse(cached);
+                      cacheData.daevanionBoards = boards;
+                      cacheData.timestamp = Date.now();
+                      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+                      console.log('[守护力] 守护力数据已更新到 localStorage');
+                    } catch (e) {
+                      console.error('[守护力] 更新缓存失败:', e);
+                    }
+                  }
+                }
+              }
+            } else {
+              console.error(`[守护力] 无法映射职业名称 "${chineseClassName}" 到 classId`);
+            }
+          }
         }
       }
 
@@ -880,8 +1051,9 @@ const MemberDetailPage = () => {
                 {/* 攻击力显示 */}
                 {attackPowerLoading ? (
                   <div className="member-hero__attack-loading">
+                    <span className="member-hero__attack-label">攻击力:</span>
                     <span className="member-hero__attack-spinner"></span>
-                    <span>计算中...</span>
+                    <span>计算中,请耐心等待</span>
                   </div>
                 ) : attackPower ? (
                   <div className="member-hero__attack">
@@ -896,6 +1068,12 @@ const MemberDetailPage = () => {
                         <path d="M8 0a8 8 0 100 16A8 8 0 008 0zm.5 12h-1v-1h1v1zm0-2h-1V4h1v6z"/>
                       </svg>
                     </button>
+                  </div>
+                ) : (isFromShare || isFromCharacterBD) ? (
+                  <div className="member-hero__attack-loading">
+                    <span className="member-hero__attack-label">攻击力:</span>
+                    <span className="member-hero__attack-spinner"></span>
+                    <span>计算中,请耐心等待</span>
                   </div>
                 ) : null}
               </div>
