@@ -13,6 +13,7 @@ interface ModalState {
   equipmentDetail: EquipmentDetail | null;
   visible: boolean;
   loading: boolean;
+  position: { x: number; y: number };
 }
 
 interface UseEquipmentTooltipReturn {
@@ -21,7 +22,7 @@ interface UseEquipmentTooltipReturn {
   handleMouseEnter: (event: React.MouseEvent, equipmentId: number) => void;
   handleMouseMove: (event: React.MouseEvent) => void;
   handleMouseLeave: () => void;
-  handleClick: (equipmentId: number, equipmentItem?: any, charId?: string, srvId?: number) => void;
+  handleClick: (event: React.MouseEvent, equipmentId: number, equipmentItem?: any, charId?: string, srvId?: number) => void;
   handleCloseModal: () => void;
 }
 
@@ -47,6 +48,7 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
     equipmentDetail: null,
     visible: false,
     loading: false,
+    position: { x: 0, y: 0 },
   });
 
   const [equipmentCache, setEquipmentCache] = useState<Map<string, EquipmentDetail>>(new Map());
@@ -151,7 +153,24 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
   }, []);
 
   // 点击装备 - 打开详情模态框
-  const handleClick = useCallback(async (equipmentId: number, equipmentItem?: any, charId?: string, srvId?: number) => {
+  const handleClick = useCallback(async (event: React.MouseEvent, equipmentId: number, equipmentItem?: any, charId?: string, srvId?: number) => {
+    // 获取点击元素的位置信息 - 传递完整的rect用于智能定位
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    // 传递装备元素的完整位置信息，让弹窗组件智能选择显示方向
+    const clickPosition = {
+      x: rect.right + 10,
+      y: rect.top,
+      // 额外传递装备元素的边界信息
+      equipRect: {
+        left: rect.left,
+        right: rect.right,
+        top: rect.top,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height,
+      }
+    };
     console.log('[useEquipmentTooltip] handleClick 接收到的参数:', {
       equipmentId,
       equipmentItem,
@@ -177,6 +196,7 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
         equipmentDetail: null,
         visible: true,
         loading: true,
+        position: clickPosition,
       });
 
       // 如果没有 memberId，说明是角色BD查询，需要按需请求装备详情
@@ -277,6 +297,7 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
         equipmentDetail: detail,
         visible: true,
         loading: false,
+        position: clickPosition,
       });
     } else {
       console.warn('[useEquipmentTooltip] 无法获取装备详情, ID:', equipmentId);
@@ -285,6 +306,7 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
         equipmentDetail: null,
         visible: false,
         loading: false,
+        position: { x: 0, y: 0 },
       });
     }
   }, [equipmentCache, memberId, characterId, serverId, equipmentList]);
@@ -295,6 +317,7 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
       equipmentDetail: null,
       visible: false,
       loading: false,
+      position: { x: 0, y: 0 },
     });
   }, []);
 

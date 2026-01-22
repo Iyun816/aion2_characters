@@ -783,6 +783,30 @@
   font-weight: 700;
   color: var(--color-elyos);
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 名次变化提示 */
+.ranking-item__change {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.ranking-item__change--up {
+  color: #4caf50;
+  background: rgba(76, 175, 80, 0.15);
+}
+
+.ranking-item__change--down {
+  color: #f44336;
+  background: rgba(244, 67, 54, 0.15);
 }
 
 .ranking-item__point {
@@ -841,7 +865,7 @@
   padding: var(--spacing-sm);
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
-  border-left: 3px solid var(--grade-color, var(--color-border));
+  border: 1px solid color-mix(in srgb, var(--grade-color, var(--color-border)) 40%, transparent);
 }
 
 .sidebar-petwing__icon {
@@ -888,7 +912,7 @@
   padding: var(--spacing-xs);
   background: var(--color-bg-secondary);
   border-radius: var(--radius-sm);
-  border-left: 3px solid var(--grade-color, #9d9d9d);
+  border: 1px solid color-mix(in srgb, var(--grade-color, #9d9d9d) 40%, transparent);
 }
 
 .sidebar-equip__icon {
@@ -911,48 +935,9 @@
    ======================================== */
 .member-main {
   min-width: 0;
-}
-
-.member-tabs {
   display: flex;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
-}
-
-.member-tabs__btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-md);
-  background: var(--color-bg-card);
-  border: 2px solid transparent;
-  border-radius: var(--radius-lg);
-  font-size: 1rem;
-  font-family: inherit;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-}
-
-.member-tabs__btn:hover {
-  border-color: var(--color-primary-light);
-  color: var(--color-primary);
-  transform: translateY(-2px);
-}
-
-.member-tabs__btn--active {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-  color: white;
-  border-color: transparent;
-  box-shadow: 0 4px 15px rgba(93, 138, 102, 0.4);
-}
-
-.member-tabs__icon {
-  font-size: 1.3rem;
+  flex-direction: column;
+  gap: var(--spacing-md);
 }
 
 /* ========================================
@@ -961,24 +946,24 @@
 .equipment-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 .equip-section {
   background: var(--color-bg-card);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
   box-shadow: var(--shadow-sm);
 }
 
 .equip-section__title {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  font-size: 1.1rem;
+  gap: var(--spacing-xs);
+  font-size: 0.95rem;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-md);
-  padding-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-xs);
   border-bottom: 1px solid var(--color-border-light);
 }
 
@@ -996,8 +981,8 @@
 
 .equip-section__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--spacing-sm);
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xs);
 }
 
 .equip-section__empty {
@@ -1011,22 +996,22 @@
 .equip-card {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
   background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  border-left: 4px solid var(--grade-color, #9d9d9d);
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--grade-color, #9d9d9d) 40%, transparent);
   transition: all var(--transition-fast);
 }
 
 .equip-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
 
 .equip-card__icon {
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
@@ -1038,29 +1023,45 @@
 
 .equip-card__name {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .equip-card__level {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: var(--color-text-muted);
 }
 
 .equip-card__exceed {
   margin-left: var(--spacing-xs);
-  padding: 2px 6px;
+  padding: 1px 4px;
   background: var(--color-elyos);
   color: white;
-  border-radius: 4px;
-  font-size: 0.7rem;
+  border-radius: 3px;
+  font-size: 0.65rem;
+}
+
+/* 装备卡片中的外观图标 */
+.equip-card__skin-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  margin-left: auto;
+  opacity: 0.85;
+  border: 1px solid color-mix(in srgb, var(--grade-color, #9d9d9d) 50%, transparent);
+  transition: opacity var(--transition-fast);
+}
+
+.equip-card:hover .equip-card__skin-icon {
+  opacity: 1;
 }
 
 /* 宠物/翅膀 */
@@ -1124,43 +1125,43 @@
 .skills-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 .skill-section {
   background: var(--color-bg-card);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
   box-shadow: var(--shadow-sm);
 }
 
 .skill-section__title {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-md);
-  padding-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-xs);
   border-bottom: 1px solid var(--color-border-light);
 }
 
 .skill-section__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: var(--spacing-sm);
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-xs);
 }
 
 .skill-card {
   position: relative;
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
   background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
 }
 
 .skill-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
 
@@ -1170,54 +1171,52 @@
 }
 
 .skill-card--brand {
-  opacity: 0.6;
-  border-left: 3px solid var(--color-elyos);
+  opacity: 0.5;
+  border: 1px solid color-mix(in srgb, var(--color-elyos) 30%, transparent);
 }
 
 .skill-card--brand.skill-card--equipped {
   opacity: 1;
-  background: linear-gradient(135deg, rgba(201, 169, 98, 0.15), transparent);
-  border: 2px solid var(--color-elyos);
+  background: linear-gradient(135deg, rgba(201, 169, 98, 0.08), transparent);
+  border: 1px solid color-mix(in srgb, var(--color-elyos) 50%, transparent);
 }
 
 .skill-card__icon {
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
 
 .skill-card__info {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   min-width: 0;
 }
 
 .skill-card__name {
-  display: block;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--color-text-primary);
 }
 
 .skill-card__level {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   color: var(--color-text-muted);
 }
 
 .skill-card__badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  padding: 3px 8px;
-  background: linear-gradient(135deg, var(--color-elyos), #d4a84b);
+  top: 2px;
+  right: 2px;
+  padding: 1px 4px;
+  background: var(--color-elyos);
   color: white;
-  font-size: 0.65rem;
-  font-weight: 600;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(201, 169, 98, 0.4);
+  font-size: 0.55rem;
+  border-radius: 3px;
 }
 
 /* ========================================
@@ -1425,22 +1424,22 @@
   padding: var(--spacing-sm);
   background: var(--color-bg-secondary);
   border-radius: var(--radius-sm);
-  border-left: 3px solid var(--color-border);
+  border: 1px solid color-mix(in srgb, var(--title-color, var(--color-border)) 40%, transparent);
 }
 
 .title-category__card--legend {
-  border-left-color: #ab47bc;
-  background: linear-gradient(135deg, rgba(171, 71, 188, 0.08), transparent);
+  border-color: color-mix(in srgb, #ab47bc 40%, transparent);
+  background: linear-gradient(135deg, rgba(171, 71, 188, 0.05), transparent);
 }
 
 .title-category__card--unique {
-  border-left-color: #ff9800;
-  background: linear-gradient(135deg, rgba(255, 152, 0, 0.08), transparent);
+  border-color: color-mix(in srgb, #ff9800 40%, transparent);
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.05), transparent);
 }
 
 .title-category__card--rare {
-  border-left-color: #4fc3f7;
-  background: linear-gradient(135deg, rgba(79, 195, 247, 0.08), transparent);
+  border-color: color-mix(in srgb, #4fc3f7 40%, transparent);
+  background: linear-gradient(135deg, rgba(79, 195, 247, 0.05), transparent);
 }
 
 .title-category__title-name {
@@ -1497,18 +1496,116 @@
 }
 
 @media (max-width: 768px) {
-  .member-hero__profile {
-    flex-direction: column;
-    text-align: center;
+  .member-hero {
+    padding-top: 60px;
+    min-height: auto;
   }
 
-  .member-hero__meta {
-    justify-content: center;
+  .member-hero__content {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .member-hero__top-bar {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .member-hero__profile {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    text-align: left;
+  }
+
+  .member-hero__avatar img {
+    width: 80px;
+    height: 80px;
+    border-width: 3px;
   }
 
   .member-hero__item-level {
-    width: 100%;
-    max-width: 200px;
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 8px;
+    font-size: 0.65rem;
+  }
+
+  .member-hero__il-label {
+    font-size: 0.55rem;
+  }
+
+  .member-hero__il-value {
+    font-size: 0.8rem;
+  }
+
+  .member-hero__info {
+    min-width: 0;
+    gap: var(--spacing-xs);
+  }
+
+  .member-hero__name-row {
+    gap: var(--spacing-sm);
+  }
+
+  .member-hero__name {
+    font-size: 1.3rem;
+  }
+
+  .member-hero__title {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+  }
+
+  .member-hero__meta {
+    font-size: 0.75rem;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+
+  .member-hero__stats-row {
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+  }
+
+  .member-hero__rating,
+  .member-hero__attack {
+    font-size: 0.85rem;
+  }
+
+  .member-hero__rating-label,
+  .member-hero__attack-label {
+    font-size: 0.85rem;
+  }
+
+  .member-hero__rating-value,
+  .member-hero__attack-value {
+    font-size: 0.95rem;
+  }
+
+  .member-hero__attack-note {
+    font-size: 0.6rem;
+  }
+
+  .member-hero__class-wrapper {
+    display: none;
+  }
+
+  .member-hero__actions {
+    gap: var(--spacing-xs);
+  }
+
+  .member-hero__refresh-btn,
+  .member-hero__share-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .member-hero__refresh-btn svg,
+  .member-hero__share-btn svg {
+    width: 16px;
+    height: 16px;
   }
 
   .member-content {
@@ -1520,31 +1617,156 @@
     grid-template-columns: 1fr;
   }
 
-  .member-tabs {
-    flex-direction: column;
+  /* 装备区块 - 更紧凑 */
+  .equip-section {
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+  }
+
+  .equip-section__title {
+    font-size: 0.85rem;
+    margin-bottom: var(--spacing-xs);
+    padding-bottom: var(--spacing-xs);
   }
 
   .equip-section__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  /* 装备卡片 - 更紧凑 */
+  .equip-card {
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .equip-card__icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .equip-card__name {
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
+
+  .equip-card__level {
+    font-size: 0.6rem;
+  }
+
+  .equip-card__exceed {
+    padding: 1px 3px;
+    font-size: 0.55rem;
+  }
+
+  /* 技能区块 - 更紧凑 */
+  .skill-section {
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+  }
+
+  .skill-section__title {
+    font-size: 0.85rem;
+    margin-bottom: var(--spacing-xs);
+    padding-bottom: var(--spacing-xs);
   }
 
   .skill-section__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+  }
+
+  /* 技能卡片 - 更紧凑 */
+  .skill-card {
+    padding: 4px;
+    gap: 2px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .skill-card__icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .skill-card__info {
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+  }
+
+  .skill-card__name {
+    font-size: 0.6rem;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+  }
+
+  .skill-card__level {
+    font-size: 0.55rem;
+  }
+
+  .skill-card__badge {
+    font-size: 0.5rem;
+    padding: 1px 3px;
+    top: 1px;
+    right: 1px;
+  }
+
+  /* 面板间距 */
+  .equipment-panel,
+  .skills-panel {
+    gap: var(--spacing-xs);
   }
 }
 
 @media (max-width: 480px) {
   .member-hero__avatar img {
-    width: 100px;
-    height: 100px;
+    width: 64px;
+    height: 64px;
   }
 
   .member-hero__name {
-    font-size: 1.8rem;
+    font-size: 1.1rem;
   }
 
+  .member-hero__title {
+    font-size: 0.7rem;
+  }
+
+  .member-hero__meta {
+    font-size: 0.7rem;
+  }
+
+  .member-hero__stats-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  /* 超小屏幕装备改为2列 */
+  .equip-section__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* 超小屏幕技能改为3列 */
   .skill-section__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .skill-card__icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .equip-card__icon {
+    width: 24px;
+    height: 24px;
   }
 
   .stat-panel__grid {

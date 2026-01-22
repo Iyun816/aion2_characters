@@ -440,24 +440,172 @@
 
 
 @media (max-width: 768px) {
+  .legion-page {
+    padding-top: 60px;
+  }
+
+  .legion-banner {
+    height: 180px;
+  }
+
+  .legion-banner__emblem {
+    width: 60px;
+    height: 60px;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .legion-banner__title {
+    font-size: 1.8rem;
+    letter-spacing: 0.15em;
+  }
+
+  .legion-banner__subtitle {
+    font-size: 0.85rem;
+  }
+
+  .legion-intro {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .legion-intro__logo {
+    width: 80px;
+    height: 80px;
+    border-width: 3px;
+  }
+
+  .legion-intro__title {
+    font-size: 2rem;
+    letter-spacing: 0.1em;
+  }
+
+  .legion-intro__subtitle {
+    font-size: 0.85rem;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .legion-intro__desc p {
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
   .legion-intro__values {
-    flex-direction: column;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-xs);
+  }
+
+  .legion-intro__value {
+    font-size: 0.8rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    justify-content: center;
+  }
+
+  .legion-members {
+    padding: var(--spacing-lg) var(--spacing-md);
   }
 
   .legion-members__grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
   }
 
   .legion-members__grid--leader,
   .legion-members__grid--elite {
     grid-template-columns: 1fr;
   }
+
+  .legion-member-card {
+    padding: var(--spacing-sm);
+  }
+
+  .legion-member-card__avatar {
+    width: 60px;
+    height: 60px;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .legion-members__grid--leader .legion-member-card__avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .legion-member-card__name {
+    font-size: 0.9rem;
+  }
+
+  .legion-member-card__role {
+    font-size: 0.6rem;
+    padding: 2px 8px;
+  }
+
+  .legion-member-card__details {
+    font-size: 0.75rem;
+  }
+
+  .legion-member-card__class-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .legion-tabs {
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .legion-tabs__btn {
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 480px) {
+  .legion-banner {
+    height: 140px;
+  }
+
+  .legion-banner__emblem {
+    width: 48px;
+    height: 48px;
+  }
+
+  .legion-banner__title {
+    font-size: 1.4rem;
+    letter-spacing: 0.1em;
+  }
+
+  .legion-banner__subtitle {
+    font-size: 0.75rem;
+  }
+
+  .legion-intro__logo {
+    width: 64px;
+    height: 64px;
+  }
+
+  .legion-intro__title {
+    font-size: 1.5rem;
+  }
+
+  .legion-intro__desc p {
+    font-size: 0.85rem;
+  }
+
+  .legion-intro__value {
+    font-size: 0.8rem;
+  }
+
   .legion-members__grid {
     grid-template-columns: 1fr;
+  }
+
+  .legion-tabs__btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.85rem;
+    gap: 4px;
+  }
+
+  .legion-tabs__icon {
+    font-size: 1rem;
   }
 }
 

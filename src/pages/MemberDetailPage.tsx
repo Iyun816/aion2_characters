@@ -79,7 +79,6 @@ const MemberDetailPage = () => {
   const [charEquip, setCharEquip] = useState<CharacterEquipment | null>(null);
   const [_memberConfig, setMemberConfig] = useState<MemberConfig | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'equipment' | 'skills'>('equipment');
   const [rating, setRating] = useState<Rating | null>(null);
   const [ratingLoading, setRatingLoading] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
@@ -160,6 +159,26 @@ const MemberDetailPage = () => {
 
   // 装备悬浮提示和详情模态框
   const { tooltipState, modalState, handleMouseEnter, handleMouseMove, handleMouseLeave, handleClick, handleCloseModal } = useEquipmentTooltip(equipmentTooltipConfig);
+
+  // 检测是否为触摸设备（用于区分桌面端悬浮触发和移动端点击触发）
+  // 注意：必须在所有早期返回之前定义，保持 hooks 调用顺序一致
+  const isTouchDevice = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(pointer: coarse)').matches;
+  }, []);
+
+  // 悬浮延迟定时器 ref
+  const hoverTimerRef = useRef<number | null>(null);
+
+  // 外观按 slotPosName 映射，用于在装备卡片中显示对应外观图标
+  // 注意：必须在所有早期返回之前定义，保持 hooks 调用顺序一致
+  const skinsBySlot = useMemo(() => {
+    const skinList = charEquip?.equipment?.skinList || [];
+    return skinList.reduce((acc, skin) => {
+      acc[skin.slotPosName] = skin;
+      return acc;
+    }, {} as Record<string, typeof skinList[0]>);
+  }, [charEquip]);
 
   useEffect(() => {
     let isMounted = true; // 防止组件卸载后的状态更新
@@ -871,7 +890,6 @@ const MemberDetailPage = () => {
 
   // 兼容旧数据格式(items对象)和新数据格式(equipment/skill/petwing结构)
   // equipment 已在前面定义
-  const skins = charEquip?.equipment?.skinList || [];
   const skills = charEquip?.skill?.skillList?.filter(s => s.acquired === 1) || [];
   const pet = charEquip?.petwing?.pet;
   const wing = charEquip?.petwing?.wing;
@@ -908,15 +926,59 @@ const MemberDetailPage = () => {
   const renderEquipItem = (item: EquipmentItem) => {
     console.log('[MemberDetailPage] renderEquipItem 渲染装备:', item.id, '当前 charInfo:', charInfo?.profile);
 
-    const handleEquipClick = () => {
-      console.log('[MemberDetailPage] 装备点击事件:', {
-        equipmentId: item.id,
-        equipmentItem: item,
-        characterId: charInfo?.profile?.characterId,
-        serverId: charInfo?.profile?.serverId,
-        charInfo: charInfo
-      });
-      handleClick(item.id, item, charInfo?.profile?.characterId, charInfo?.profile?.serverId);
+    // 获取对应的外观
+    const skin = skinsBySlot[item.slotPosName];
+
+    const handleEquipClick = (e: React.MouseEvent) => {
+      // 移动端：点击触发详情
+      if (isTouchDevice) {
+        console.log('[MemberDetailPage] 移动端点击事件:', {
+          equipmentId: item.id,
+          equipmentItem: item,
+          characterId: charInfo?.profile?.characterId,
+          serverId: charInfo?.profile?.serverId,
+          charInfo: charInfo
+        });
+        handleClick(e, item.id, item, charInfo?.profile?.characterId, charInfo?.profile?.serverId);
+      }
+      // 桌面端：点击已由悬浮处理，这里不做额外操作
+    };
+
+    const handleEquipMouseEnter = (e: React.MouseEvent) => {
+      handleMouseEnter(e, item.id);
+
+      // 桌面端：悬浮 500ms 后触发详情
+      if (!isTouchDevice) {
+        // 清除之前的定时器
+        if (hoverTimerRef.current) {
+          clearTimeout(hoverTimerRef.current);
+        }
+        // 保存元素引用，因为 setTimeout 中事件对象会被回收，currentTarget 会变成 null
+        const targetElement = e.currentTarget as HTMLElement;
+        hoverTimerRef.current = window.setTimeout(() => {
+          console.log('[MemberDetailPage] 桌面端悬浮触发详情:', {
+            equipmentId: item.id,
+            equipmentItem: item,
+            characterId: charInfo?.profile?.characterId,
+            serverId: charInfo?.profile?.serverId
+          });
+          // 创建一个模拟事件对象，包含保存的元素引用
+          const syntheticEvent = { currentTarget: targetElement } as unknown as React.MouseEvent;
+          handleClick(syntheticEvent, item.id, item, charInfo?.profile?.characterId, charInfo?.profile?.serverId);
+        }, 150);
+      }
+    };
+
+    const handleEquipMouseLeave = () => {
+      handleMouseLeave();
+      // 鼠标离开装备图标时，同时关闭详情弹窗
+      handleCloseModal();
+
+      // 清除悬浮定时器
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+        hoverTimerRef.current = null;
+      }
     };
 
     return (
@@ -924,9 +986,9 @@ const MemberDetailPage = () => {
         key={`${item.slotPos}-${item.id}`}
         className="equip-card"
         style={{ '--grade-color': gradeColors[item.grade] || '#9d9d9d', cursor: 'pointer' } as React.CSSProperties}
-        onMouseEnter={(e) => handleMouseEnter(e, item.id)}
+        onMouseEnter={handleEquipMouseEnter}
         onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        onMouseLeave={handleEquipMouseLeave}
         onClick={handleEquipClick}
       >
         <img src={item.icon} alt={item.name} className="equip-card__icon" />
@@ -953,6 +1015,27 @@ const MemberDetailPage = () => {
             })()}
           </div>
         </div>
+        {/* 外观图标 - 如果该部位有外观则显示 */}
+        {/* 阻止事件冒泡，让外观图标区域不触发装备详情弹窗，显示原生title提示 */}
+        {skin && (
+          <img
+            src={skin.icon}
+            alt={skin.name}
+            className="equip-card__skin-icon"
+            title={`外观: ${skin.name}`}
+            onMouseEnter={(e) => {
+              e.stopPropagation();
+              // 清除装备详情的悬浮定时器
+              if (hoverTimerRef.current) {
+                clearTimeout(hoverTimerRef.current);
+                hoverTimerRef.current = null;
+              }
+              // 关闭装备详情弹窗
+              handleCloseModal();
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        )}
       </div>
     );
   };
@@ -1135,7 +1218,7 @@ const MemberDetailPage = () => {
                   <div className="divine-stat__bar">
                     <div
                       className="divine-stat__fill"
-                      style={{ width: `${Math.min(stat.value, 100)}%` }}
+                      style={{ width: `${Math.min((stat.value / 200) * 100, 100)}%` }}
                     ></div>
                   </div>
                   {stat.statSecondList && stat.statSecondList.length > 0 && (
@@ -1194,110 +1277,89 @@ const MemberDetailPage = () => {
 
         {/* 中间主区域 */}
         <main className="member-main">
-          {/* 标签切换 */}
-          <div className="member-tabs">
-            <button
-              className={`member-tabs__btn ${activeTab === 'equipment' ? 'member-tabs__btn--active' : ''}`}
-              onClick={() => setActiveTab('equipment')}
-            >
-              装备
-            </button>
-            <button
-              className={`member-tabs__btn ${activeTab === 'skills' ? 'member-tabs__btn--active' : ''}`}
-              onClick={() => setActiveTab('skills')}
-            >
-              技能
-            </button>
+          {/* 装备面板 - 直接展示 */}
+          <div className="equipment-panel">
+            {/* 主装备 */}
+            <section className="equip-section">
+              <h4 className="equip-section__title">武器/防具/首饰</h4>
+              <div className="equip-section__grid">
+                {gearEquipment.map(renderEquipItem)}
+              </div>
+            </section>
           </div>
 
-          {/* 装备面板 */}
-          {activeTab === 'equipment' && (
-            <div className="equipment-panel">
-              {/* 主装备 */}
-              <section className="equip-section">
-                <h4 className="equip-section__title">武器/防具/首饰</h4>
-                <div className="equip-section__grid">
-                  {gearEquipment.map(renderEquipItem)}
+          {/* 技能面板 - 直接展示 */}
+          <div className="skills-panel">
+            {/* 主动技能 */}
+            {activeSkills.length > 0 && (
+              <section className="skill-section">
+                <h4 className="skill-section__title">主动技能</h4>
+                <div className="skill-section__grid">
+                  {activeSkills.map((skill, idx) => (
+                    <div key={idx} className="skill-card">
+                      <img src={skill.icon} alt={skill.name} className="skill-card__icon" />
+                      <div className="skill-card__info">
+                        <span className="skill-card__name">{skill.name}</span>
+                        <span className="skill-card__level">Lv.{skill.skillLevel}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </section>
+            )}
 
-              {/* 阿尔卡那 */}
-              {arcanaEquipment.length > 0 && (
-                <section className="equip-section">
-                  <h4 className="equip-section__title">阿尔卡那</h4>
-                  <div className="equip-section__grid">
-                    {arcanaEquipment.map(renderEquipItem)}
-                  </div>
-                </section>
-              )}
-            </div>
-          )}
-
-          {/* 技能面板 */}
-          {activeTab === 'skills' && (
-            <div className="skills-panel">
-              {/* 主动技能 - 不显示装备中 */}
-              {activeSkills.length > 0 && (
-                <section className="skill-section">
-                  <h4 className="skill-section__title">主动技能</h4>
-                  <div className="skill-section__grid">
-                    {activeSkills.map((skill, idx) => (
-                      <div key={idx} className="skill-card">
-                        <img src={skill.icon} alt={skill.name} className="skill-card__icon" />
-                        <div className="skill-card__info">
-                          <span className="skill-card__name">{skill.name}</span>
-                          <span className="skill-card__level">Lv.{skill.skillLevel}</span>
-                        </div>
+            {/* 被动技能 */}
+            {passiveSkills.length > 0 && (
+              <section className="skill-section">
+                <h4 className="skill-section__title">被动技能</h4>
+                <div className="skill-section__grid">
+                  {passiveSkills.map((skill, idx) => (
+                    <div key={idx} className="skill-card skill-card--passive">
+                      <img src={skill.icon} alt={skill.name} className="skill-card__icon" />
+                      <div className="skill-card__info">
+                        <span className="skill-card__name">{skill.name}</span>
+                        <span className="skill-card__level">Lv.{skill.skillLevel}</span>
                       </div>
-                    ))}
-                  </div>
-                </section>
-              )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-              {/* 被动技能 */}
-              {passiveSkills.length > 0 && (
-                <section className="skill-section">
-                  <h4 className="skill-section__title">被动技能</h4>
-                  <div className="skill-section__grid">
-                    {passiveSkills.map((skill, idx) => (
-                      <div key={idx} className="skill-card skill-card--passive">
-                        <img src={skill.icon} alt={skill.name} className="skill-card__icon" />
-                        <div className="skill-card__info">
-                          <span className="skill-card__name">{skill.name}</span>
-                          <span className="skill-card__level">Lv.{skill.skillLevel}</span>
-                        </div>
+            {/* 烙印技能 */}
+            {brandSkills.length > 0 && (
+              <section className="skill-section">
+                <h4 className="skill-section__title">烙印技能</h4>
+                <div className="skill-section__grid">
+                  {brandSkills.map((skill, idx) => (
+                    <div
+                      key={idx}
+                      className={`skill-card skill-card--brand ${skill.equip ? 'skill-card--equipped' : ''}`}
+                    >
+                      <img src={skill.icon} alt={skill.name} className="skill-card__icon" />
+                      <div className="skill-card__info">
+                        <span className="skill-card__name">{skill.name}</span>
+                        <span className="skill-card__level">Lv.{skill.skillLevel}</span>
                       </div>
-                    ))}
-                  </div>
-                </section>
-              )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-              {/* 烙印技能 - 显示装备中 */}
-              {brandSkills.length > 0 && (
-                <section className="skill-section">
-                  <h4 className="skill-section__title">烙印技能</h4>
-                  <div className="skill-section__grid">
-                    {brandSkills.map((skill, idx) => (
-                      <div
-                        key={idx}
-                        className={`skill-card skill-card--brand ${skill.equip ? 'skill-card--equipped' : ''}`}
-                      >
-                        <img src={skill.icon} alt={skill.name} className="skill-card__icon" />
-                        <div className="skill-card__info">
-                          <span className="skill-card__name">{skill.name}</span>
-                          <span className="skill-card__level">Lv.{skill.skillLevel}</span>
-                        </div>
-                        {skill.equip === 1 && <span className="skill-card__badge">装备中</span>}
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-            </div>
-          )}
+            {/* 阿尔卡那 - 放在烙印技能下面 */}
+            {arcanaEquipment.length > 0 && (
+              <section className="equip-section">
+                <h4 className="equip-section__title">阿尔卡那</h4>
+                <div className="equip-section__grid">
+                  {arcanaEquipment.map(renderEquipItem)}
+                </div>
+              </section>
+            )}
+          </div>
         </main>
 
-        {/* 右侧边栏 - 排行榜 + 称号 + 宠物/翅膀 + 外观 */}
+        {/* 右侧边栏 - 排行榜 + 称号 + 宠物/翅膀 */}
         <aside className="member-sidebar member-sidebar--right">
           {rankings.length > 0 && (
             <div className="ranking-panel">
@@ -1315,6 +1377,13 @@ const MemberDetailPage = () => {
                     <div className="ranking-item__stats">
                       <div className="ranking-item__rank">
                         第{rank.rank?.toLocaleString() || '-'}名
+                        {/* 名次变化提示 */}
+                        {rank.rankChange !== null && rank.rankChange !== undefined && rank.rankChange !== 0 && (
+                          <span className={`ranking-item__change ${rank.rankChange > 0 ? 'ranking-item__change--up' : 'ranking-item__change--down'}`}>
+                            {rank.rankChange > 0 ? '↑' : '↓'}
+                            {Math.abs(rank.rankChange)}
+                          </span>
+                        )}
                       </div>
                       {rank.point !== null && rank.point !== undefined && (
                         <div className="ranking-item__point">
@@ -1353,7 +1422,7 @@ const MemberDetailPage = () => {
                         </div>
                         <span className="title-category__progress">{title.ownedCount}/{title.totalCount}</span>
                       </div>
-                      <div className="title-category__card" style={{ borderColor: titleColor }}>
+                      <div className="title-category__card" style={{ '--title-color': titleColor } as React.CSSProperties}>
                         <span className="title-category__title-name" style={{ color: titleColor }}>{title.name}</span>
                         <div className="title-category__stats">
                           {(title.equipStatList || []).map((stat, i) => (
@@ -1399,26 +1468,6 @@ const MemberDetailPage = () => {
             </div>
           )}
 
-          {/* 外观 */}
-          {skins.length > 0 && (
-            <div className="sidebar-panel">
-              <h3 className="sidebar-panel__title">外观</h3>
-              <div className="sidebar-panel__grid">
-                {skins.map((item) => (
-                  <div
-                    key={`${item.slotPos}-${item.id}`}
-                    className="sidebar-equip"
-                    style={{ '--grade-color': gradeColors[item.grade] || '#9d9d9d' } as React.CSSProperties}
-                  >
-                    <img src={item.icon} alt={item.name} className="sidebar-equip__icon" />
-                    <span className="sidebar-equip__name" style={{ color: gradeColors[item.grade] }}>
-                      {item.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </aside>
       </div>
 
@@ -1433,7 +1482,7 @@ const MemberDetailPage = () => {
         equipmentDetail={modalState.equipmentDetail}
         visible={modalState.visible}
         loading={modalState.loading}
-        onClose={handleCloseModal}
+        position={modalState.position}
       />
 
       {/* 分享确认框 */}

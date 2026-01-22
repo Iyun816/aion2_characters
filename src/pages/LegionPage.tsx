@@ -318,19 +318,15 @@ const LegionPage = () => {
           </div>
           <div className="legion-intro__values">
             <div className="legion-intro__value">
-              <span className="legion-intro__value-icon">🏰</span>
               <span>PVE 副本</span>
             </div>
             <div className="legion-intro__value">
-              <span className="legion-intro__value-icon">☕</span>
               <span>休闲氛围</span>
             </div>
             <div className="legion-intro__value">
-              <span className="legion-intro__value-icon">🤝</span>
               <span>互帮互助</span>
             </div>
             <div className="legion-intro__value">
-              <span className="legion-intro__value-icon">💬</span>
               <span>友善交流</span>
             </div>
           </div>
@@ -375,21 +371,18 @@ const LegionPage = () => {
           className={`legion-tabs__btn ${activeTab === 'members' ? 'legion-tabs__btn--active' : ''}`}
           onClick={() => setActiveTab('members')}
         >
-          <span className="legion-tabs__icon">👥</span>
           军团成员
         </button>
         <button
           className={`legion-tabs__btn ${activeTab === 'gallery' ? 'legion-tabs__btn--active' : ''}`}
           onClick={() => setActiveTab('gallery')}
         >
-          <span className="legion-tabs__icon">📷</span>
           军团相册
         </button>
         <button
           className={`legion-tabs__btn ${activeTab === 'voice' ? 'legion-tabs__btn--active' : ''}`}
           onClick={() => setActiveTab('voice')}
         >
-          <span className="legion-tabs__icon">🎤</span>
           军团语音
         </button>
       </div>

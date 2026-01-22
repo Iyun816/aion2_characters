@@ -29,3 +29,11 @@
     transform: translateY(0);
   }
 }
+
+/* ========== 移动端适配 ========== */
+/* 移动端隐藏hover提示,因为触屏设备没有hover事件 */
+@media (max-width: 768px) {
+  .equipment-tooltip {
+    display: none !important;
+  }
+}

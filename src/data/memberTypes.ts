@@ -45,6 +45,7 @@ export interface RankingItem {
   rankingContentsName: string;
   rankingType: number | null;
   rank: number | null;
+  rankChange: number | null;
   characterName: string | null;
   classId: number | null;
   className: string | null;

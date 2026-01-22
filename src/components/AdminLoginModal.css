@@ -170,3 +170,36 @@
 .admin-modal__btn--logout:hover {
   background: #c0392b;
 }
+
+/* ========== 移动端适配 ========== */
+@media (max-width: 480px) {
+  .admin-modal {
+    max-width: 95vw;
+    padding: var(--spacing-lg) var(--spacing-md);
+    margin: var(--spacing-sm);
+  }
+
+  .admin-modal__icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .admin-modal__icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .admin-modal__content h2 {
+    font-size: 1.3rem;
+  }
+
+  .admin-modal__input-group input {
+    padding: var(--spacing-md);
+    font-size: 1rem;
+  }
+
+  .admin-modal__btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    min-height: 44px;
+  }
+}

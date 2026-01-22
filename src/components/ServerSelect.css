@@ -212,16 +212,31 @@
 /* 响应式 */
 @media (max-width: 768px) {
   .server-select__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .server-select__column {
-    border-right: none;
-    border-bottom: 1px solid var(--color-border);
+    border-right: 1px solid var(--color-border);
+    border-bottom: none;
   }
 
   .server-select__column:last-child {
-    border-bottom: none;
+    border-right: none;
+  }
+
+  .server-select__column-header {
+    padding: var(--spacing-xs);
+    font-size: 0.85rem;
+  }
+
+  .server-select__column-list {
+    max-height: 120px;
+    padding: 4px;
+  }
+
+  .server-select__option {
+    padding: 6px 8px;
+    font-size: 0.85rem;
   }
 
   .server-select__dropdown {
@@ -232,7 +247,8 @@
     bottom: auto;
     transform: translate(-50%, -50%);
     width: 90%;
-    max-width: 400px;
+    max-width: 360px;
+    max-height: 60vh;
   }
 
   .server-select__dropdown::before {
