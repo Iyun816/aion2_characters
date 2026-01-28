@@ -9,6 +9,9 @@ import ExceedLevel from '../components/ExceedLevel';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DaevanionModal from '../components/DaevanionModal';
 import AttackPowerModal from '../components/AttackPowerModal';
+import CharacterSelectModal from '../components/CharacterSelectModal';
+import type { CharacterBasicInfo } from '../components/CharacterSelectModal';
+import CharacterCompareModal from '../components/CharacterCompareModal';
 import { useEquipmentTooltip } from '../hooks/useEquipmentTooltip';
 import { loadMemberDaevanion, fetchDaevanionBoards, mergeDaevanionEffects, getClassIdByChineseName } from '../utils/daevanion';
 import type { DaevanionBoards, AggregatedDaevanionEffects } from '../utils/daevanion';
@@ -98,6 +101,11 @@ const MemberDetailPage = () => {
   const [attackPower, setAttackPower] = useState<AttackPowerResult | null>(null);
   const [attackPowerLoading, setAttackPowerLoading] = useState(false);
   const [showAttackPowerModal, setShowAttackPowerModal] = useState(false);
+
+  // 角色对比相关状态
+  const [showCharacterSelectModal, setShowCharacterSelectModal] = useState(false);
+  const [showCompareModal, setShowCompareModal] = useState(false);
+  const [compareCharacter, setCompareCharacter] = useState<CharacterBasicInfo | null>(null);
 
   // 标记阶段2是否完成(用于触发攻击力计算)
   const [stage2Complete, setStage2Complete] = useState(false);
@@ -1055,6 +1063,17 @@ const MemberDetailPage = () => {
               {backText}
             </Link>
             <div className="member-hero__actions">
+              {/* 角色对比按钮 */}
+              <button
+                onClick={() => setShowCharacterSelectModal(true)}
+                className="member-hero__compare-btn"
+                title="角色对比"
+                aria-label="角色对比"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                  <text x="12" y="16" textAnchor="middle" fontSize="11" fontWeight="bold">VS</text>
+                </svg>
+              </button>
               {/* 刷新按钮 */}
               <button
                 onClick={handleRefresh}
@@ -1520,6 +1539,31 @@ const MemberDetailPage = () => {
         isOpen={showAttackPowerModal}
         onClose={() => setShowAttackPowerModal(false)}
         attackPowerData={attackPower}
+      />
+
+      {/* 角色选择弹窗 */}
+      <CharacterSelectModal
+        visible={showCharacterSelectModal}
+        onClose={() => setShowCharacterSelectModal(false)}
+        onSelect={(character) => {
+          setCompareCharacter(character);
+          setShowCharacterSelectModal(false);
+          setShowCompareModal(true);
+        }}
+        currentCharacterId={charInfo?.profile?.characterId}
+      />
+
+      {/* 角色对比弹窗 */}
+      <CharacterCompareModal
+        visible={showCompareModal}
+        onClose={() => setShowCompareModal(false)}
+        currentCharacter={charInfo ? {
+          characterInfo: charInfo,
+          equipmentData: charEquip,
+          rating: rating,
+          attackPower: attackPower
+        } : null}
+        compareCharacter={compareCharacter}
       />
     </div>
   );

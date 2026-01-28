@@ -1,0 +1,714 @@
+.character-compare-modal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: var(--spacing-md);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.character-compare-modal {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 800px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease-out;
+}
+
+.character-compare-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border-light);
+  background: linear-gradient(135deg, rgba(79, 195, 247, 0.1), rgba(171, 71, 188, 0.1));
+}
+
+.character-compare-modal__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.character-compare-modal__close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.character-compare-modal__close:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+/* 角色头部 */
+.character-compare-modal__characters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--color-bg-secondary);
+  gap: var(--spacing-sm);
+}
+
+.compare-character {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  position: relative;
+}
+
+.compare-character__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-border-light);
+}
+
+.compare-character__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.compare-character__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compare-character__meta {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+.compare-character__label {
+  position: absolute;
+  top: -6px;
+  right: 8px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+}
+
+.compare-character--current .compare-character__label {
+  background: rgba(79, 195, 247, 0.3);
+  color: #4fc3f7;
+}
+
+.compare-character--compare .compare-character__label {
+  background: rgba(255, 152, 0, 0.3);
+  color: #ff9800;
+}
+
+.compare-character__loading,
+.compare-character__error,
+.compare-character__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+
+.compare-character__spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border-light);
+  border-top-color: #4fc3f7;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.compare-vs {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+/* 标签页 */
+.character-compare-modal__tabs {
+  display: flex;
+  padding: 0 var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.compare-tab {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.compare-tab:hover {
+  color: var(--color-text-secondary);
+}
+
+.compare-tab--active {
+  color: var(--color-primary);
+}
+
+.compare-tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary);
+}
+
+/* 内容区 */
+.character-compare-modal__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+}
+
+.compare-loading,
+.compare-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--color-text-tertiary);
+}
+
+.compare-loading__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border-light);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 对比区块 */
+.compare-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.compare-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-sm) 0;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+/* 对比表格 */
+.compare-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.compare-table--4col .compare-row {
+  grid-template-columns: 1.2fr 1fr 1fr 1fr;
+}
+
+.compare-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.compare-row--header {
+  background: var(--color-bg-tertiary);
+  font-weight: 500;
+}
+
+.compare-row--header .compare-cell {
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+}
+
+.compare-cell {
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.compare-cell--label {
+  color: var(--color-text-secondary);
+}
+
+.compare-cell--value {
+  text-align: center;
+}
+
+.compare-cell--diff {
+  text-align: center;
+}
+
+.compare-cell--current {
+  text-align: center;
+}
+
+.compare-cell--compare {
+  text-align: center;
+}
+
+.compare-cell--skill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compare-skill-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.compare-skill-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* 技能提示 */
+.compare-skills__notice {
+  text-align: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  border-radius: var(--radius-md);
+  color: #ff9800;
+  font-size: 13px;
+}
+
+/* 差值显示 */
+.compare-diff {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.compare-diff--positive {
+  color: #f44336;
+}
+
+.compare-diff--negative {
+  color: #4caf50;
+}
+
+.compare-diff--equal {
+  color: var(--color-text-tertiary);
+}
+
+/* 加载中状态 */
+.compare-cell--loading {
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* 装备对比 */
+.compare-equipment__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compare-equipment__row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.compare-equipment__slot {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  white-space: nowrap;
+  padding: 0 8px;
+}
+
+.compare-equip-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  min-height: 56px;
+}
+
+.compare-equip-item--higher {
+  border-color: rgba(76, 175, 80, 0.3);
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.compare-equip-item--lower {
+  border-color: rgba(244, 67, 54, 0.2);
+  background: rgba(244, 67, 54, 0.03);
+}
+
+.compare-equip-item__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.compare-equip-item__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.compare-equip-item__name {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compare-equip-item__level {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.compare-equip-item__empty {
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+  width: 100%;
+  text-align: center;
+}
+
+/* 技能对比 */
+.compare-skills__more {
+  text-align: center;
+  padding: var(--spacing-sm);
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+/* 不同职业技能展示 */
+.compare-skills__different-class {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.compare-skills__notice {
+  text-align: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  border-radius: var(--radius-md);
+  color: #ff9800;
+  font-size: 13px;
+}
+
+.compare-skills__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.compare-skills__column {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+}
+
+.compare-skills__column-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-sm) 0;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-border-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compare-skills__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.compare-skill-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+.compare-skill-item__icon {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.compare-skill-item__name {
+  flex: 1;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compare-skill-item__level {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+/* 响应式 */
+@media (max-width: 700px) {
+  .character-compare-modal__overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .character-compare-modal {
+    max-height: 90vh;
+    border-radius: 16px 16px 0 0;
+    animation: slideUpMobile 0.3s ease-out;
+  }
+
+  @keyframes slideUpMobile {
+    from {
+      transform: translateY(100%);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .character-compare-modal__header {
+    padding: var(--spacing-md);
+  }
+
+  .character-compare-modal__title {
+    font-size: 1.1rem;
+  }
+
+  .character-compare-modal__characters {
+    flex-direction: row;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm);
+  }
+
+  .compare-vs {
+    font-size: 12px;
+    padding: 0 4px;
+  }
+
+  .compare-character {
+    flex: 1;
+    padding: 6px 8px;
+    min-width: 0;
+  }
+
+  .compare-character__avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .compare-character__name {
+    font-size: 12px;
+  }
+
+  .compare-character__meta {
+    font-size: 10px;
+  }
+
+  .compare-character__label {
+    font-size: 9px;
+    padding: 1px 4px;
+    top: -5px;
+    right: 4px;
+  }
+
+  /* 标签页优化 */
+  .character-compare-modal__tabs {
+    padding: 0 var(--spacing-sm);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .compare-tab {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  /* 内容区优化 */
+  .character-compare-modal__content {
+    padding: var(--spacing-md);
+  }
+
+  .compare-section {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .compare-section__title {
+    font-size: 13px;
+  }
+
+  /* 表格优化 - 移动端更紧凑 */
+  .compare-row {
+    padding: var(--spacing-xs);
+    gap: 4px;
+  }
+
+  .compare-table--4col .compare-row {
+    grid-template-columns: 1.5fr 0.8fr 0.8fr 0.8fr;
+  }
+
+  .compare-cell {
+    font-size: 12px;
+  }
+
+  .compare-row--header .compare-cell {
+    font-size: 11px;
+  }
+
+  .compare-cell--skill {
+    gap: 4px;
+  }
+
+  .compare-skill-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .compare-skill-name {
+    font-size: 12px;
+  }
+
+  .compare-diff {
+    font-size: 11px;
+  }
+
+  /* 装备对比优化 */
+  .compare-equipment__row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .compare-equipment__slot {
+    order: -1;
+    text-align: left;
+    padding: var(--spacing-xs) 0;
+    border-top: 1px solid var(--color-border-light);
+    font-size: 11px;
+  }
+
+  .compare-equipment__row:first-child .compare-equipment__slot {
+    border-top: none;
+  }
+
+  .compare-equip-item {
+    min-height: 48px;
+    padding: var(--spacing-xs);
+  }
+
+  .compare-equip-item__icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .compare-equip-item__name {
+    font-size: 12px;
+  }
+
+  .compare-equip-item__level {
+    font-size: 11px;
+  }
+
+  /* 技能对比优化 */
+  .compare-skills__columns {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-skills__notice {
+    font-size: 12px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+}
