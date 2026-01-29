@@ -5,6 +5,7 @@ interface Server {
   id: number;
   name: string;
   label: string;
+  raceId?: number; // 1=天族, 2=魔族
 }
 
 interface ServerSelectorProps {
@@ -23,6 +24,13 @@ const ServerSelector = ({ servers, selectedServer, onSelectServer }: ServerSelec
     return server ? server.label : '全部服务器';
   };
 
+  // 获取选中服务器的阵营
+  const getSelectedServerRace = () => {
+    if (!selectedServer) return null;
+    const server = servers.find(s => s.id === selectedServer);
+    return server?.raceId || null;
+  };
+
   // 选择服务器
   const handleSelectServer = (serverId: number | null) => {
     onSelectServer(serverId);
@@ -34,16 +42,24 @@ const ServerSelector = ({ servers, selectedServer, onSelectServer }: ServerSelec
     setShowDropdown(!showDropdown);
   };
 
-  // 天族服务器 (serverId 1001-1018)
-  const celestialServers = servers.filter(s => s.id >= 1001 && s.id <= 1018);
-  // 魔族服务器 (serverId 2001-2018)
-  const asmodianServers = servers.filter(s => s.id >= 2001 && s.id <= 2018);
+  // 天族服务器 (raceId = 1)
+  const celestialServers = servers.filter(s => s.raceId === 1);
+  // 魔族服务器 (raceId = 2)
+  const asmodianServers = servers.filter(s => s.raceId === 2);
+
+  // 获取按钮的阵营样式类
+  const selectedRace = getSelectedServerRace();
+  const buttonRaceClass = selectedRace === 1
+    ? 'server-selector-button--celestial'
+    : selectedRace === 2
+      ? 'server-selector-button--asmodian'
+      : '';
 
   return (
     <div className="server-selector-wrapper">
       <button
         type="button"
-        className="server-selector-button"
+        className={`server-selector-button ${buttonRaceClass}`}
         onClick={toggleDropdown}
       >
         {getSelectedServerLabel()}

@@ -8,6 +8,7 @@ interface Server {
   id: number;
   name: string;
   label: string;
+  raceId?: number; // 1=天族, 2=魔族
 }
 
 // 角色基础信息类型
@@ -165,7 +166,8 @@ const CharacterBDPage = () => {
         const localServers = localData.serverList.map((server: any) => ({
           id: server.serverId,
           name: server.serverName,
-          label: server.serverName
+          label: server.serverName,
+          raceId: server.raceId
         }));
         setServers(localServers);
       } catch (error) {
@@ -413,7 +415,14 @@ const CharacterBDPage = () => {
             )}
             <button
               type="submit"
-              className="search-box__submit"
+              className={`search-box__submit ${
+                (() => {
+                  const server = servers.find(s => s.id === selectedServer);
+                  if (server?.raceId === 1) return 'search-box__submit--celestial';
+                  if (server?.raceId === 2) return 'search-box__submit--asmodian';
+                  return '';
+                })()
+              }`}
               disabled={searching}
             >
               {searching ? '搜索中...' : '搜索'}

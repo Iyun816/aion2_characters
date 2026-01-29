@@ -1399,8 +1399,8 @@ const MemberDetailPage = () => {
                         第{rank.rank?.toLocaleString() || '-'}名
                         {/* 名次变化提示 */}
                         {rank.rankChange !== null && rank.rankChange !== undefined && rank.rankChange !== 0 && (
-                          <span className={`ranking-item__change ${rank.rankChange < 0 ? 'ranking-item__change--up' : 'ranking-item__change--down'}`}>
-                            {rank.rankChange < 0 ? '↑' : '↓'}
+                          <span className={`ranking-item__change ${rank.rankChange > 0 ? 'ranking-item__change--up' : 'ranking-item__change--down'}`}>
+                            {rank.rankChange > 0 ? '↑' : '↓'}
                             {Math.abs(rank.rankChange)}
                           </span>
                         )}

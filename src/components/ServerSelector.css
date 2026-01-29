@@ -17,6 +17,8 @@
   transition: all 0.2s;
   white-space: nowrap;
   height: 100%;
+  min-width: 120px;
+  text-align: center;
 }
 
 .server-selector-button:hover {
@@ -27,6 +29,30 @@
 .server-selector-button:focus {
   border-color: var(--color-primary);
   outline: none;
+}
+
+/* 天族服务器按钮 - 蓝色 */
+.server-selector-button--celestial {
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.15), rgba(135, 206, 250, 0.2));
+  border-color: #4a90e2;
+  color: #4a90e2;
+}
+
+.server-selector-button--celestial:hover {
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.25), rgba(135, 206, 250, 0.3));
+  border-color: #4a90e2;
+}
+
+/* 魔族服务器按钮 - 紫色 */
+.server-selector-button--asmodian {
+  background: linear-gradient(135deg, rgba(147, 112, 219, 0.15), rgba(177, 156, 217, 0.2));
+  border-color: #9370db;
+  color: #9370db;
+}
+
+.server-selector-button--asmodian:hover {
+  background: linear-gradient(135deg, rgba(147, 112, 219, 0.25), rgba(177, 156, 217, 0.3));
+  border-color: #9370db;
 }
 
 /* 服务器选择面板遮罩 */

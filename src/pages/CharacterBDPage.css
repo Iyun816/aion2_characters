@@ -232,7 +232,7 @@
 .search-box__submit {
   flex-shrink: 0;
   padding: var(--spacing-md) var(--spacing-xl);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  background: linear-gradient(135deg, #5a8fd4, #9a7fd1);
   color: white;
   border: none;
   border-radius: 0;
@@ -246,7 +246,7 @@
 }
 
 .search-box__submit:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2471a3, #3498db);
+  background: linear-gradient(135deg, #4a7fc4, #8a6fc1);
 }
 
 .search-box__submit:active:not(:disabled) {
@@ -256,6 +256,24 @@
 .search-box__submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* 天族服务器 - 蓝色 */
+.search-box__submit--celestial {
+  background: linear-gradient(135deg, #4a90e2, #87ceeb);
+}
+
+.search-box__submit--celestial:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3a7bc8, #6bb8d9);
+}
+
+/* 魔族服务器 - 紫色 */
+.search-box__submit--asmodian {
+  background: linear-gradient(135deg, #9370db, #b19cd9);
+}
+
+.search-box__submit--asmodian:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7b5fc7, #9d88c5);
 }
 
 /* 服务器选择 */
