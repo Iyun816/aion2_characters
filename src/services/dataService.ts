@@ -357,42 +357,6 @@ export function exportEquipmentCacheToFile(cache: EquipmentDetailsCache): void {
   downloadFile(json, `${cache.memberId}_equipment_details.json`, 'application/json');
 }
 
-// ============= 管理员认证 =============
-
-const ADMIN_PASSWORD = 'chunxia2025';
-
-/**
- * 验证管理员密码
- */
-export function verifyAdminPassword(password: string): boolean {
-  return password === ADMIN_PASSWORD;
-}
-
-/**
- * 检查是否已登录
- */
-export function isAdminLoggedIn(): boolean {
-  return localStorage.getItem(STORAGE_KEYS.ADMIN_LOGIN) === 'true';
-}
-
-/**
- * 管理员登录
- */
-export function adminLogin(password: string): boolean {
-  if (verifyAdminPassword(password)) {
-    localStorage.setItem(STORAGE_KEYS.ADMIN_LOGIN, 'true');
-    return true;
-  }
-  return false;
-}
-
-/**
- * 管理员登出
- */
-export function adminLogout(): void {
-  localStorage.removeItem(STORAGE_KEYS.ADMIN_LOGIN);
-}
-
 // ============= 工具函数 =============
 
 /**

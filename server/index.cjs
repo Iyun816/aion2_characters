@@ -731,7 +731,8 @@ const readConfigDB = () => {
     voiceChannelName: '军团语音',
     voiceChannelDescription: '点击加入我们的语音频道',
     defaultServerId: 1001,  // 默认服务器：希埃尔
-    defaultServerName: '希埃爾'
+    defaultServerName: '希埃爾',
+    adminPassword: 'chunxia2025'  // 默认管理员密码
   };
 };
 
@@ -778,6 +779,67 @@ app.put('/api/config', (req, res) => {
   } catch (error) {
     console.error('更新配置失败:', error);
     res.status(500).json({ error: '更新失败: ' + error.message });
+  }
+});
+
+// ============= 管理员认证 API =============
+
+// 1. 管理员登录
+app.post('/api/auth/login', (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ success: false, error: '请输入密码' });
+    }
+
+    const config = readConfigDB();
+    const adminPassword = config.adminPassword || 'chunxia2025';
+
+    if (password === adminPassword) {
+      res.json({ success: true, message: '登录成功' });
+    } else {
+      res.status(401).json({ success: false, error: '密码错误' });
+    }
+  } catch (error) {
+    console.error('登录失败:', error);
+    res.status(500).json({ success: false, error: '登录失败: ' + error.message });
+  }
+});
+
+// 2. 修改管理员密码
+app.post('/api/auth/change-password', (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, error: '请填写所有密码字段' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, error: '新密码长度至少6位' });
+    }
+
+    const config = readConfigDB();
+    const adminPassword = config.adminPassword || 'chunxia2025';
+
+    if (currentPassword !== adminPassword) {
+      return res.status(401).json({ success: false, error: '当前密码错误' });
+    }
+
+    // 更新密码
+    config.adminPassword = newPassword;
+    const success = writeConfigDB(config);
+
+    if (success) {
+      console.log('✓ 管理员密码已更新');
+      res.json({ success: true, message: '密码修改成功' });
+    } else {
+      res.status(500).json({ success: false, error: '保存失败' });
+    }
+  } catch (error) {
+    console.error('修改密码失败:', error);
+    res.status(500).json({ success: false, error: '修改密码失败: ' + error.message });
   }
 });
 

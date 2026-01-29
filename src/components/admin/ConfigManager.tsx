@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import type { ClassBoardConfig, ClassBoardMapping } from '../../utils/daevanion';
+import { useAdmin } from '../../contexts/AdminContext';
 import './ConfigManager.css';
 
 interface GlobalConfig {
@@ -26,10 +27,17 @@ interface SyncLog {
   message: string;
 }
 
-type SubTabType = 'timing' | 'voice' | 'redeem' | 'daevanion';
+type SubTabType = 'timing' | 'voice' | 'redeem' | 'daevanion' | 'security';
 
 const ConfigManager: React.FC = () => {
+  const { changePassword } = useAdmin();
   const [activeSubTab, setActiveSubTab] = useState<SubTabType>('timing');
+
+  // 密码修改状态
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordChanging, setPasswordChanging] = useState(false);
 
   const [config, setConfig] = useState<GlobalConfig>({
     voiceChannelUrl: '',
@@ -369,6 +377,35 @@ const ConfigManager: React.FC = () => {
     }
   }, [activeSubTab]);
 
+  // 处理密码修改
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showMessage('error', '请填写所有密码字段');
+      return;
+    }
+    if (newPassword.length < 6) {
+      showMessage('error', '新密码长度至少6位');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showMessage('error', '两次输入的新密码不一致');
+      return;
+    }
+
+    setPasswordChanging(true);
+    const result = await changePassword(currentPassword, newPassword);
+    setPasswordChanging(false);
+
+    if (result.success) {
+      showMessage('success', '密码修改成功！');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } else {
+      showMessage('error', result.error || '当前密码错误');
+    }
+  };
+
   if (loading) {
     return <div className="config-manager__loading">加载中...</div>;
   }
@@ -405,6 +442,12 @@ const ConfigManager: React.FC = () => {
           onClick={() => setActiveSubTab('daevanion')}
         >
           守护力配置
+        </button>
+        <button
+          className={`config-subtabs__tab ${activeSubTab === 'security' ? 'config-subtabs__tab--active' : ''}`}
+          onClick={() => setActiveSubTab('security')}
+        >
+          安全设置
         </button>
       </div>
 
@@ -964,6 +1007,79 @@ const ConfigManager: React.FC = () => {
                   <li>面板ID通常是职业ID*10 + 序号,例如剑星(职业1): [11,12,13,14,15,16]</li>
                   <li>配置保存后,前端会自动加载新配置,无需重启</li>
                 </ul>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* 安全设置Tab */}
+        {activeSubTab === 'security' && (
+          <>
+            <div className="config-section">
+              <h3 className="config-section__title">
+                <span className="config-section__icon">🔐</span>
+                修改管理员密码
+              </h3>
+              <p className="config-section__desc">
+                修改管理后台的登录密码
+              </p>
+
+              <div className="config-field">
+                <label htmlFor="currentPassword">当前密码</label>
+                <input
+                  id="currentPassword"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="请输入当前密码"
+                  autoComplete="current-password"
+                />
+              </div>
+
+              <div className="config-field">
+                <label htmlFor="newPassword">新密码</label>
+                <input
+                  id="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="请输入新密码（至少6位）"
+                  autoComplete="new-password"
+                />
+              </div>
+
+              <div className="config-field">
+                <label htmlFor="confirmPassword">确认新密码</label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="请再次输入新密码"
+                  autoComplete="new-password"
+                />
+              </div>
+
+              <div className="config-manager__actions">
+                <button
+                  onClick={handleChangePassword}
+                  disabled={passwordChanging}
+                  className="btn btn--primary"
+                >
+                  {passwordChanging ? '修改中...' : '修改密码'}
+                </button>
+              </div>
+
+              <div className="sync-notice" style={{ marginTop: '24px' }}>
+                <div className="sync-notice__icon">💡</div>
+                <div className="sync-notice__content">
+                  <p><strong>说明:</strong></p>
+                  <ul>
+                    <li>密码修改后立即生效</li>
+                    <li>新密码长度至少6位</li>
+                    <li>密码存储在服务器，所有设备共享同一密码</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </>

@@ -7,10 +7,17 @@ const AdminLoginModal = () => {
   const { showLoginModal, setShowLoginModal, login, isAdmin, logout } = useAdmin();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(password)) {
+    setLoading(true);
+    setError('');
+
+    const success = await login(password);
+
+    setLoading(false);
+    if (success) {
       setPassword('');
       setError('');
     } else {
@@ -86,8 +93,8 @@ const AdminLoginModal = () => {
               />
               {error && <span className="admin-modal__error">{error}</span>}
             </div>
-            <button type="submit" className="admin-modal__btn">
-              登录
+            <button type="submit" className="admin-modal__btn" disabled={loading}>
+              {loading ? '登录中...' : '登录'}
             </button>
           </form>
         )}

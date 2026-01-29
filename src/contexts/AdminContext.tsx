@@ -3,16 +3,14 @@ import type { ReactNode } from 'react';
 
 interface AdminContextType {
   isAdmin: boolean;
-  login: (password: string) => boolean;
+  login: (password: string) => Promise<boolean>;
   logout: () => void;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
-
-// 管理员密码（生产环境应使用更安全的方式）
-const ADMIN_PASSWORD = 'chunxia2025';
 
 interface AdminProviderProps {
   children: ReactNode;
@@ -30,14 +28,27 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     }
   }, []);
 
-  const login = (password: string): boolean => {
-    if (password === ADMIN_PASSWORD) {
-      setIsAdmin(true);
-      localStorage.setItem('chunxia_admin', 'true');
-      setShowLoginModal(false);
-      return true;
+  const login = async (password: string): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setIsAdmin(true);
+        localStorage.setItem('chunxia_admin', 'true');
+        setShowLoginModal(false);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('登录请求失败:', error);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
@@ -45,8 +56,28 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     localStorage.removeItem('chunxia_admin');
   };
 
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        return { success: true };
+      }
+      return { success: false, error: data.error || '修改失败' };
+    } catch (error) {
+      console.error('修改密码请求失败:', error);
+      return { success: false, error: '网络请求失败' };
+    }
+  };
+
   return (
-    <AdminContext.Provider value={{ isAdmin, login, logout, showLoginModal, setShowLoginModal }}>
+    <AdminContext.Provider value={{ isAdmin, login, logout, changePassword, showLoginModal, setShowLoginModal }}>
       {children}
     </AdminContext.Provider>
   );
