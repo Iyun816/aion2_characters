@@ -7,7 +7,10 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
-const OpenCC = require('opencc-js'); // 繁简转换
+const OpenCC = require('opencc-js');
+
+// 统一繁简转换模块
+const converter = require('./converter.cjs');
 
 // 物品数据库模块
 const itemsDb = require('./db/itemsDb.cjs');
@@ -184,11 +187,13 @@ function buildRiftPayload(riftConfig = {}) {
 }
 
 // 初始化繁简转换器（繁体转简体）
-const converter = OpenCC.Converter({ from: 'tw', to: 'cn' });
+const openccConverter = OpenCC.Converter({ from: 'tw', to: 'cn' });
+converter.setConverter(openccConverter);
 
 // 初始化物品数据库
 itemsDb.initDatabase();
-syncItems.setConverter(converter);
+// syncItems 也使用统一的转换模块
+syncItems.setConverter(openccConverter);
 
 // ============= 定时任务状态管理 =============
 let syncInterval = null;
@@ -2365,55 +2370,8 @@ function fetchFromAPI(url) {
   });
 }
 
-/**
- * 递归转换对象中的所有字符串从繁体到简体
- * @param {*} obj - 要转换的对象
- * @param {string} parentKey - 父级键名，用于判断是否跳过转换
- * @param {Array} pathKeys - 路径键数组，用于判断上下文
- */
-function convertToSimplified(obj, parentKey = '', pathKeys = []) {
-  // 精确匹配：只跳过特定路径的字段
-  const skipPaths = [
-    'profile.characterName',  // 角色信息中的角色名
-    'profile.name',           // 角色信息中的名称
-    'legion.legionName',      // 军团信息中的军团名
-    'legion.name',            // 军团信息中的名称
-  ];
-
-  // 构建当前路径
-  const currentPath = [...pathKeys, parentKey].filter(k => k).join('.');
-
-  // 如果当前路径在跳过列表中，直接返回原值
-  if (skipPaths.some(path => currentPath.endsWith(path))) {
-    return obj;
-  }
-
-  if (typeof obj === 'string') {
-    try {
-      return converter(obj);
-    } catch (error) {
-      console.error('[convertToSimplified] 转换字符串失败:', obj, error);
-      return obj; // 转换失败时返回原值
-    }
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(item => convertToSimplified(item, parentKey, pathKeys));
-  }
-
-  if (obj !== null && typeof obj === 'object') {
-    const converted = {};
-    const newPathKeys = parentKey ? [...pathKeys, parentKey] : pathKeys;
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        converted[key] = convertToSimplified(obj[key], key, newPathKeys);
-      }
-    }
-    return converted;
-  }
-
-  return obj;
-}
+// 使用统一转换模块的 convertToSimplified
+const convertToSimplified = converter.convertToSimplified;
 
 /**
  * 从官方API获取游戏通知(更新+公告)

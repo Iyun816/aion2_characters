@@ -4,6 +4,7 @@
  */
 
 const itemsDb = require('../db/itemsDb.cjs');
+const converter = require('../converter.cjs');
 
 // 同步配置
 const CONFIG = {
@@ -33,103 +34,18 @@ let syncState = {
   nextBatchTimer: null,
 };
 
-// OpenCC 转换器（由主服务器注入）
-let converter = null;
-
 /**
- * 保护字符映射表（不希望被 OpenCC 转换的字符）
- * 这些字符会在转换前被替换为占位符，转换后再还原
- * 格式: { '要保护的字符': '保护后的结果' }
- */
-const PROTECTED_CHARS = {
-  '乾': '乾',  // 乾 不转为 干
-  // 添加更多需要保护的字符...
-};
-
-/**
- * 自定义繁简转换映射表（转换后修正）
- * 用于修正 OpenCC 转换不准确的字符
- * 格式: { '错误的简体': '正确的简体' }
- */
-const CUSTOM_MAPPINGS = {
-  // 示例：添加你需要的特殊映射
-  // '范': '範',      // 如果需要保留繁体
-  // 游戏专有名词示例：
-  // '希埃尔': '希埃爾',
-};
-
-/**
- * 设置繁简转换器
+ * 设置繁简转换器（保留接口兼容性）
  */
 function setConverter(conv) {
-  converter = conv;
+  // 转换器现在由 converter.cjs 统一管理
+  // 这个函数保留是为了兼容性
 }
 
 /**
- * 应用自定义映射
+ * 繁体转简体 - 使用统一转换模块
  */
-function applyCustomMappings(text) {
-  if (!text || typeof text !== 'string') return text;
-  let result = text;
-  for (const [from, to] of Object.entries(CUSTOM_MAPPINGS)) {
-    result = result.split(from).join(to);
-  }
-  return result;
-}
-
-/**
- * 生成保护字符的占位符映射
- */
-const PLACEHOLDER_PREFIX = '\uE000'; // 使用私用区字符作为占位符
-const protectedPlaceholders = Object.keys(PROTECTED_CHARS).map((char, index) => ({
-  char,
-  placeholder: PLACEHOLDER_PREFIX + String.fromCharCode(0xE001 + index),
-  result: PROTECTED_CHARS[char]
-}));
-
-/**
- * 繁体转简体
- */
-function toSimplified(text) {
-  if (!converter) return text;
-  if (text === null || text === undefined) return text;
-  // 确保是字符串类型
-  if (typeof text !== 'string') {
-    // 如果是数组，转换每个元素
-    if (Array.isArray(text)) {
-      return text.map(t => toSimplified(t));
-    }
-    // 如果是对象，返回原值（不转换）
-    if (typeof text === 'object') {
-      return text;
-    }
-    // 数字等其他类型转为字符串
-    text = String(text);
-  }
-  try {
-    let result = text;
-
-    // 1. 先将保护字符替换为占位符
-    for (const { char, placeholder } of protectedPlaceholders) {
-      result = result.split(char).join(placeholder);
-    }
-
-    // 2. 用 OpenCC 转换
-    result = converter(result);
-
-    // 3. 将占位符替换为目标字符
-    for (const { placeholder, result: targetChar } of protectedPlaceholders) {
-      result = result.split(placeholder).join(targetChar);
-    }
-
-    // 4. 应用自定义映射修正
-    result = applyCustomMappings(result);
-    return result;
-  } catch (e) {
-    console.error('[toSimplified] 转换失败:', typeof text, text);
-    return text;
-  }
-}
+const toSimplified = converter.toSimplified;
 
 /**
  * 递归转换对象中所有字符串为简体中文
