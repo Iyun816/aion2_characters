@@ -1094,9 +1094,11 @@ app.get('/api/character/daevanion', (req, res) => {
       try {
         const data = Buffer.concat(chunks).toString('utf-8');
         const jsonData = JSON.parse(data);
+        // 转换繁体为简体
+        const simplifiedData = convertToSimplified(jsonData);
         res.json({
           success: true,
-          data: jsonData
+          data: simplifiedData
         });
       } catch (error) {
         console.error(`解析守护力面板 ${boardId} 失败:`, error);
