@@ -204,6 +204,13 @@ let isSyncing = false;
 // 中间件配置
 app.use(cors());
 app.use(express.json());
+
+// 强制所有 JSON 响应使用 UTF-8 编码
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
+
 app.use('/uploads', express.static(path.join(__dirname, '../public/images/gallery')));
 
 // 注册物品数据库路由
@@ -862,14 +869,15 @@ app.get('/api/character/info', (req, res) => {
   const url = `https://tw.ncsoft.com/aion2/api/character/info?lang=zh&characterId=${characterId}&serverId=${serverId}`;
 
   https.get(url, (apiRes) => {
-    let data = '';
+    const chunks = [];
 
     apiRes.on('data', (chunk) => {
-      data += chunk;
+      chunks.push(chunk);
     });
 
     apiRes.on('end', () => {
       try {
+        const data = Buffer.concat(chunks).toString('utf-8');
         const jsonData = JSON.parse(data);
         // 转换繁体为简体
         const simplifiedData = convertToSimplified(jsonData);
@@ -897,14 +905,15 @@ app.get('/api/character/equipment', (req, res) => {
   const url = `https://tw.ncsoft.com/aion2/api/character/equipment?lang=zh&characterId=${characterId}&serverId=${serverId}`;
 
   https.get(url, (apiRes) => {
-    let data = '';
+    const chunks = [];
 
     apiRes.on('data', (chunk) => {
-      data += chunk;
+      chunks.push(chunk);
     });
 
     apiRes.on('end', () => {
       try {
+        const data = Buffer.concat(chunks).toString('utf-8');
         const jsonData = JSON.parse(data);
         // 转换繁体为简体
         const simplifiedData = convertToSimplified(jsonData);
@@ -965,22 +974,22 @@ app.get('/api/character/equipment-detail', (req, res) => {
   console.log(`[装备详情API] 请求URL: ${url}`);
 
   https.get(url, (apiRes) => {
-    let data = '';
+    const chunks = [];
 
     apiRes.on('data', (chunk) => {
-      data += chunk;
+      chunks.push(chunk);
     });
 
     apiRes.on('end', () => {
       try {
+        const data = Buffer.concat(chunks).toString('utf-8');
         const jsonData = JSON.parse(data);
         // 转换繁体为简体
         const simplifiedData = convertToSimplified(jsonData);
         res.json(simplifiedData);
       } catch (error) {
         console.error('解析装备详情API响应失败:', error);
-        console.error('原始响应数据:', data);
-        res.status(500).json({ error: '解析响应失败', rawData: data });
+        res.status(500).json({ error: '解析响应失败' });
       }
     });
   }).on('error', (error) => {
@@ -1009,14 +1018,15 @@ app.get('/api/character/rating', (req, res) => {
   console.log(`[PVE评分API] 请求URL: ${url}`);
 
   https.get(url, (apiRes) => {
-    let data = '';
+    const chunks = [];
 
     apiRes.on('data', (chunk) => {
-      data += chunk;
+      chunks.push(chunk);
     });
 
     apiRes.on('end', () => {
       try {
+        const data = Buffer.concat(chunks).toString('utf-8');
         // 检查响应是否为空或是错误消息
         if (!data || data.trim().startsWith('error code:')) {
           console.warn('PVE评分API返回错误:', data);
@@ -1042,7 +1052,6 @@ app.get('/api/character/rating', (req, res) => {
         }
       } catch (error) {
         console.error('解析PVE评分API响应失败:', error);
-        console.error('原始响应数据:', data);
         res.json({
           success: false,
           error: '评分服务暂时不可用'
@@ -1075,14 +1084,15 @@ app.get('/api/character/daevanion', (req, res) => {
   console.log(`[守护力API] 请求面板 ${boardId}: ${url.substring(0, 100)}...`);
 
   https.get(url, (apiRes) => {
-    let data = '';
+    const chunks = [];
 
     apiRes.on('data', (chunk) => {
-      data += chunk;
+      chunks.push(chunk);
     });
 
     apiRes.on('end', () => {
       try {
+        const data = Buffer.concat(chunks).toString('utf-8');
         const jsonData = JSON.parse(data);
         res.json({
           success: true,
@@ -1233,14 +1243,15 @@ function fetchCharacterInfo(characterId, serverId) {
     const url = `https://tw.ncsoft.com/aion2/api/character/info?lang=zh&characterId=${encodeURIComponent(characterId)}&serverId=${serverId}`;
 
     https.get(url, (apiRes) => {
-      let data = '';
+      const chunks = [];
 
       apiRes.on('data', (chunk) => {
-        data += chunk;
+        chunks.push(chunk);
       });
 
       apiRes.on('end', () => {
         try {
+          const data = Buffer.concat(chunks).toString('utf-8');
           const jsonData = JSON.parse(data);
           // 转换繁体为简体
           const simplifiedData = convertToSimplified(jsonData);
@@ -1263,14 +1274,15 @@ function fetchCharacterEquipment(characterId, serverId) {
     const url = `https://tw.ncsoft.com/aion2/api/character/equipment?lang=zh&characterId=${encodeURIComponent(characterId)}&serverId=${serverId}`;
 
     https.get(url, (apiRes) => {
-      let data = '';
+      const chunks = [];
 
       apiRes.on('data', (chunk) => {
-        data += chunk;
+        chunks.push(chunk);
       });
 
       apiRes.on('end', () => {
         try {
+          const data = Buffer.concat(chunks).toString('utf-8');
           const jsonData = JSON.parse(data);
           // 转换繁体为简体
           const simplifiedData = convertToSimplified(jsonData);
@@ -1303,14 +1315,15 @@ function fetchCharacterRating(characterId, serverId, forceRefresh = false) {
     }
 
     https.get(url, (apiRes) => {
-      let data = '';
+      const chunks = [];
 
       apiRes.on('data', (chunk) => {
-        data += chunk;
+        chunks.push(chunk);
       });
 
       apiRes.on('end', () => {
         try {
+          const data = Buffer.concat(chunks).toString('utf-8');
           const jsonData = JSON.parse(data);
 
           // 提取评分数据
@@ -1354,15 +1367,16 @@ function searchCharacter(characterName, serverId, race) {
     }, 10000);
 
     const req = https.get(url, (apiRes) => {
-      let data = '';
+      const chunks = [];
 
       apiRes.on('data', (chunk) => {
-        data += chunk;
+        chunks.push(chunk);
       });
 
       apiRes.on('end', () => {
         clearTimeout(timeout);
         try {
+          const data = Buffer.concat(chunks).toString('utf-8');
           const jsonData = JSON.parse(data);
 
           if (!jsonData.list || jsonData.list.length === 0) {
@@ -1425,14 +1439,16 @@ function fetchEquipmentDetail(itemId, enchantLevel, characterId, serverId, slotP
     const url = `https://tw.ncsoft.com/aion2/api/character/equipment/item?id=${itemId}&enchantLevel=${enchantLevel}&characterId=${encodeURIComponent(characterId)}&serverId=${serverId}&slotPos=${slotPos}&lang=zh&_t=${timestamp}`;
 
     https.get(url, (apiRes) => {
-      let data = '';
+      const chunks = [];
 
       apiRes.on('data', (chunk) => {
-        data += chunk;
+        chunks.push(chunk);
       });
 
       apiRes.on('end', () => {
         try {
+          // 使用 Buffer.concat 合并后再解码，避免多字节字符被截断导致乱码
+          const data = Buffer.concat(chunks).toString('utf-8');
           const jsonData = JSON.parse(data);
           // 转换繁体为简体
           const simplifiedData = convertToSimplified(jsonData);
@@ -1475,7 +1491,6 @@ function loadClassBoardConfig() {
  */
 function getClassIdByChineseName(className) {
   const config = loadClassBoardConfig();
-  console.log(`  [Daevanion] 通过中文名查找classId: ${className}`);
 
   // 在配置中查找，支持繁体和简体匹配
   const classMapping = config.classes.find(c => {
@@ -1483,10 +1498,8 @@ function getClassIdByChineseName(className) {
   });
 
   if (classMapping) {
-    console.log(`  [Daevanion] 找到职业 ${className} 的classId: ${classMapping.classId}`);
     return classMapping.classId;
   } else {
-    console.warn(`  [Daevanion] 未找到职业 ${className} 的配置`);
     return undefined;
   }
 }
@@ -1496,15 +1509,12 @@ function getClassIdByChineseName(className) {
  */
 function getBoardIdsByClassId(classId) {
   const config = loadClassBoardConfig();
-  console.log(`  [Daevanion] 查找职业配置: classId=${classId}`);
 
   const classMapping = config.classes.find(c => c.classId === classId);
 
   if (classMapping) {
-    console.log(`  [Daevanion] 找到职业ID ${classId}(${classMapping.className}) 的配置:`, classMapping.boardIds);
     return classMapping.boardIds;
   } else {
-    console.warn(`  [Daevanion] 未找到职业ID ${classId} 的配置,返回空数组`);
     return [];
   }
 }
@@ -1517,14 +1527,15 @@ function fetchDaevanionBoard(characterId, serverId, boardId) {
     const url = `https://tw.ncsoft.com/aion2/api/character/daevanion/detail?lang=zh&characterId=${encodeURIComponent(characterId)}&serverId=${serverId}&boardId=${boardId}`;
 
     https.get(url, (apiRes) => {
-      let data = '';
+      const chunks = [];
 
       apiRes.on('data', (chunk) => {
-        data += chunk;
+        chunks.push(chunk);
       });
 
       apiRes.on('end', () => {
         try {
+          const data = Buffer.concat(chunks).toString('utf-8');
           const jsonData = JSON.parse(data);
           // 转换繁体为简体
           const simplifiedData = convertToSimplified(jsonData);
@@ -1615,28 +1626,28 @@ async function syncMemberData(member) {
     const serverId = member.serverId;
 
     if (!characterId || !serverId) {
-      console.log(`  ⚠️  成员 ${member.name} 缺少角色配置 (characterId 或 serverId)，跳过同步`);
+      console.log(`  ⚠️  成员 ${member.name} 缺少角色配置，跳过同步`);
       return { success: false, reason: '缺少角色配置' };
     }
 
-    // 步骤 1/3: 获取角色信息
-    console.log(`  [${member.name}] 步骤 1/3: 请求角色信息...`);
+    // 步骤 1: 获取角色信息
+    console.log(`  [${member.name}] 步骤 1/5: 请求角色信息...`);
     const characterInfo = await fetchCharacterInfo(characterId, serverId);
 
     if (!characterInfo || !characterInfo.profile) {
-      console.log(`  ❌ 获取成员 ${member.name} 角色信息失败`);
+      console.log(`  ❌ ${member.name}: 获取角色信息失败`);
       return { success: false, reason: '获取角色信息失败' };
     }
 
     await delay(300);
     console.log(`  ✓ 角色信息获取成功`);
 
-    // 步骤 2/3: 获取装备列表
-    console.log(`  [${member.name}] 步骤 2/3: 请求装备列表...`);
+    // 步骤 2: 获取装备列表
+    console.log(`  [${member.name}] 步骤 2/5: 请求装备列表...`);
     const equipmentData = await fetchCharacterEquipment(characterId, serverId);
 
     if (!equipmentData) {
-      console.log(`  ⚠️  获取成员 ${member.name} 装备列表失败，仅保存角色信息`);
+      console.log(`  ⚠️  ${member.name}: 装备列表获取失败，仅保存角色信息`);
 
       // 只保存角色信息
       const memberDir = path.join(__dirname, '../public/data', member.id);
@@ -1652,13 +1663,13 @@ async function syncMemberData(member) {
     await delay(300);
     console.log(`  ✓ 装备列表获取成功`);
 
-    // 步骤 3/3: 获取装备详情
+    // 步骤 3: 获取装备详情
     const equipmentList = equipmentData?.equipment?.equipmentList || [];
 
     if (equipmentList.length === 0) {
       console.log(`  [${member.name}] 该角色没有装备`);
     } else {
-      console.log(`  [${member.name}] 步骤 3/3: 获取装备详情 (共 ${equipmentList.length} 件装备)...`);
+      console.log(`  [${member.name}] 步骤 3/5: 获取装备详情 (共 ${equipmentList.length} 件装备)...`);
 
       const equipmentDetails = [];
 
@@ -1666,9 +1677,6 @@ async function syncMemberData(member) {
         try {
           // 计算总强化等级
           const totalEnchantLevel = (equip.enchantLevel || 0) + (equip.exceedLevel || 0);
-
-          // 调试:打印即将请求的参数
-          console.log(`  [调试] 请求装备详情: ${equip.slotPosName}, slotPos=${equip.slotPos}, id=${equip.id}`);
 
           const detail = await fetchEquipmentDetail(
             equip.id,
@@ -1687,7 +1695,7 @@ async function syncMemberData(member) {
 
           equipmentDetails.push(enrichedDetail);
           console.log(`  ✓ ${equip.slotPosName || equip.slotPos}: ${detail.name || equip.name}`);
-          await delay(500); // 增加延迟至500ms,配合时间戳参数确保API返回正确数据
+          await delay(500);
         } catch (error) {
           console.log(`  ✗ ${equip.slotPosName || equip.slotPos}: ${error.message}`);
         }
@@ -1717,48 +1725,44 @@ async function syncMemberData(member) {
     fs.writeFileSync(equipmentFilePath, JSON.stringify(equipmentData, null, 2), 'utf-8');
     console.log(`  ✓ 装备详情已保存`);
 
-    // 步骤 4/5: 获取PVE评分数据
+    // 步骤 4: 获取PVE评分数据
     console.log(`  [${member.name}] 步骤 4/5: 请求PVE评分...`);
     try {
-      await delay(300); // 添加延迟避免请求过快
-      const ratingData = await fetchCharacterRating(characterId, serverId, true); // 传入true强制刷新
+      await delay(300);
+      const ratingData = await fetchCharacterRating(characterId, serverId, true);
 
       if (ratingData) {
-        // 保存评分数据到 score.json
         const scoreFilePath = path.join(memberDir, 'score.json');
         fs.writeFileSync(scoreFilePath, JSON.stringify(ratingData, null, 2), 'utf-8');
-        console.log(`  ✓ PVE评分已保存到 score.json: ${Math.floor(ratingData.scores.score)}`);
+        console.log(`  ✓ PVE评分已保存: ${Math.floor(ratingData.scores.score)}`);
       } else {
         console.log(`  ⚠️  该角色暂无评分数据`);
       }
     } catch (error) {
       console.log(`  ⚠️  获取PVE评分失败: ${error.message}`);
-      // 评分获取失败不影响整体同步
     }
 
-    // 步骤 5/5: 获取守护力数据
+    // 步骤 5: 获取守护力数据
     console.log(`  [${member.name}] 步骤 5/5: 请求守护力数据...`);
     try {
       await delay(300);
       const daevanionBoards = await fetchDaevanionBoards(characterId, serverId, characterInfo);
 
       if (daevanionBoards && daevanionBoards.length > 0) {
-        // 保存守护力数据到 daevanion_boards.json
         const daevanionFilePath = path.join(memberDir, 'daevanion_boards.json');
         fs.writeFileSync(daevanionFilePath, JSON.stringify(daevanionBoards, null, 2), 'utf-8');
-        console.log(`  ✓ 守护力数据已保存到 daevanion_boards.json`);
+        console.log(`  ✓ 守护力数据已保存`);
       } else {
         console.log(`  ⚠️  该角色暂无守护力数据`);
       }
     } catch (error) {
       console.log(`  ⚠️  获取守护力数据失败: ${error.message}`);
-      // 守护力获取失败不影响整体同步
     }
 
-    console.log(`  ✓ 成员 ${member.name} 数据同步成功`);
+    console.log(`  ✓ ${member.name} 同步完成`);
     return { success: true };
   } catch (error) {
-    console.error(`  ❌ 同步成员 ${member.name} 失败:`, error.message);
+    console.error(`  ❌ ${member.name} 同步失败:`, error.message);
     return { success: false, reason: error.message };
   }
 }
@@ -1773,33 +1777,22 @@ async function syncServerList() {
     const url = 'https://tw.ncsoft.com/aion2/api/gameinfo/servers?lang=zh';
 
     https.get(url, (res) => {
-      let data = '';
+      const chunks = [];
 
       res.on('data', (chunk) => {
-        data += chunk;
+        chunks.push(chunk);
       });
 
       res.on('end', () => {
         try {
+          const data = Buffer.concat(chunks).toString('utf-8');
           const response = JSON.parse(data);
-
-          // 调试: 打印原始响应结构
-          console.log('[调试] API响应类型:', typeof response);
-          console.log('[调试] API响应是否为数组:', Array.isArray(response));
-          if (typeof response === 'object' && !Array.isArray(response)) {
-            console.log('[调试] API响应的键:', Object.keys(response));
-          }
 
           // 处理可能的数据格式: 可能是数组,也可能是对象包含data字段
           const servers = Array.isArray(response) ? response : (response.data || response.serverList || []);
 
           if (!Array.isArray(servers)) {
             throw new Error('服务器数据格式错误: 不是数组');
-          }
-
-          console.log(`[调试] 服务器数组长度: ${servers.length}`);
-          if (servers.length > 0) {
-            console.log('[调试] 第一个服务器数据样例:', JSON.stringify(servers[0]));
           }
 
           // 如果API返回空列表,不更新文件,保留现有数据
@@ -2350,14 +2343,15 @@ const NOTICES_SYNC_INTERVAL = 60 * 60 * 1000; // 1小时
 function fetchFromAPI(url) {
   return new Promise((resolve, reject) => {
     https.get(url, (apiRes) => {
-      let data = '';
+      const chunks = [];
 
       apiRes.on('data', (chunk) => {
-        data += chunk;
+        chunks.push(chunk);
       });
 
       apiRes.on('end', () => {
         try {
+          const data = Buffer.concat(chunks).toString('utf-8');
           const jsonData = JSON.parse(data);
           resolve(jsonData);
         } catch (error) {

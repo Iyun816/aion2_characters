@@ -7,6 +7,7 @@ interface Server {
   id: number;
   name: string;
   label: string;
+  raceId?: number;
 }
 
 // 角色基础信息类型
@@ -83,14 +84,15 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
         const localServers = localData.serverList.map((server: any) => ({
           id: server.serverId,
           name: server.serverName,
-          label: server.serverName
+          label: server.serverName,
+          raceId: server.raceId
         }));
         setServers(localServers);
       } catch (error) {
         console.error('加载服务器列表失败:', error);
         setServers([
-          { id: 1001, name: '希埃尔', label: '希埃尔' },
-          { id: 1002, name: '伊斯哈拉', label: '伊斯哈拉' }
+          { id: 1001, name: '希埃尔', label: '希埃尔', raceId: 1 },
+          { id: 2001, name: '伊斯拉佩尔', label: '伊斯拉佩尔', raceId: 2 }
         ]);
       }
     };
