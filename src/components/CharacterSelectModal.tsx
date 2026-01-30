@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import ServerSelector from './ServerSelector';
 import type { SearchHistory } from '../types/character';
+import { STORAGE_KEYS } from '../constants';
 import './CharacterSelectModal.css';
 
 // 角色基础信息类型
@@ -18,9 +19,6 @@ export interface CharacterBasicInfo {
 
 // 对比历史记录类型（与搜索历史结构相同）
 type CompareHistory = SearchHistory;
-
-const HISTORY_STORAGE_KEY = 'character_search_history';
-const COMPARE_HISTORY_KEY = 'character_compare_history';
 
 interface CharacterSelectModalProps {
   visible: boolean;
@@ -83,7 +81,7 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
 
     const loadHistory = () => {
       try {
-        const stored = localStorage.getItem(HISTORY_STORAGE_KEY);
+        const stored = localStorage.getItem(STORAGE_KEYS.SEARCH_HISTORY);
         if (stored) {
           const history = JSON.parse(stored);
           // 排除当前角色
@@ -99,7 +97,7 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
 
     const loadCompareHistory = () => {
       try {
-        const stored = localStorage.getItem(COMPARE_HISTORY_KEY);
+        const stored = localStorage.getItem(STORAGE_KEYS.COMPARE_HISTORY);
         if (stored) {
           const history = JSON.parse(stored);
           // 排除当前角色
@@ -223,7 +221,7 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
   // 保存到对比历史
   const saveToCompareHistory = (character: CharacterBasicInfo) => {
     try {
-      const stored = localStorage.getItem(COMPARE_HISTORY_KEY);
+      const stored = localStorage.getItem(STORAGE_KEYS.COMPARE_HISTORY);
       let history: CompareHistory[] = stored ? JSON.parse(stored) : [];
 
       // 移除已存在的相同角色
@@ -244,7 +242,7 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
       // 最多保留20条
       history = history.slice(0, 20);
 
-      localStorage.setItem(COMPARE_HISTORY_KEY, JSON.stringify(history));
+      localStorage.setItem(STORAGE_KEYS.COMPARE_HISTORY, JSON.stringify(history));
     } catch {
       // 保存对比历史失败
     }
@@ -254,11 +252,11 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
   const handleDeleteCompareHistory = (e: React.MouseEvent, characterId: string) => {
     e.stopPropagation();
     try {
-      const stored = localStorage.getItem(COMPARE_HISTORY_KEY);
+      const stored = localStorage.getItem(STORAGE_KEYS.COMPARE_HISTORY);
       if (stored) {
         let history: CompareHistory[] = JSON.parse(stored);
         history = history.filter(h => h.characterId !== characterId);
-        localStorage.setItem(COMPARE_HISTORY_KEY, JSON.stringify(history));
+        localStorage.setItem(STORAGE_KEYS.COMPARE_HISTORY, JSON.stringify(history));
         // 更新状态，排除当前角色
         const filtered = currentCharacterId
           ? history.filter(h => h.characterId !== currentCharacterId)

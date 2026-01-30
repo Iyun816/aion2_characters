@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import type { EquipmentDetail } from '../types/admin';
 import type { EquipmentItem } from '../data/memberTypes';
 import { getEquipmentCache } from '../services/dataService';
+import { CACHE_TTL, STORAGE_KEY_BUILDERS } from '../constants';
 
 interface TooltipState {
   position: { x: number; y: number };
@@ -188,17 +189,14 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
 
       if (!memberId && actualCharId && actualSrvId && actualEquipItemInner) {
         // 检查浏览器缓存 - 使用包含slotPos的key
-        const CACHE_DURATION = 8 * 60 * 60 * 1000; // 8小时
-        const cacheKey = actualEquipItemInner.slotPos
-          ? `equipment_detail_${equipmentId}_${actualEquipItemInner.slotPos}`
-          : `equipment_detail_${equipmentId}`;
+        const cacheKey = STORAGE_KEY_BUILDERS.equipmentDetail(equipmentId, actualEquipItemInner.slotPos);
         const cached = localStorage.getItem(cacheKey);
         const now = Date.now();
 
         if (cached) {
           try {
             const cachedData = JSON.parse(cached);
-            if (now - cachedData.timestamp < CACHE_DURATION) {
+            if (now - cachedData.timestamp < CACHE_TTL.LONG) {
               detail = cachedData.data;
               // 更新到内存缓存
               setEquipmentCache(prev => {

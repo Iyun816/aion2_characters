@@ -17,6 +17,7 @@ import { useEquipmentTooltip } from '../hooks/useEquipmentTooltip';
 import { loadMemberDaevanion, fetchDaevanionBoards, mergeDaevanionEffects, getClassIdByChineseName } from '../utils/daevanion';
 import type { DaevanionBoards, AggregatedDaevanionEffects } from '../utils/daevanion';
 import { calculateAttackPower, type AttackPowerResult } from '../utils/attackPowerCalculator';
+import { STORAGE_KEYS, CACHE_TTL, LIMITS, STORAGE_KEY_BUILDERS } from '../constants';
 import './MemberDetailPage.css';
 
 // 成员配置信息
@@ -32,10 +33,6 @@ const titleCategoryNames: Record<string, string> = {
   'Defense': '防禦系列',
   'Etc': '其他系列'
 };
-
-// 搜索历史记录常量
-const HISTORY_STORAGE_KEY = 'character_search_history';
-const MAX_HISTORY_ITEMS = 5;
 
 // 称号分类图标
 const titleCategoryIcons: Record<string, string> = {
@@ -189,7 +186,7 @@ const MemberDetailPage = () => {
         try {
           // 确保 characterId 被解码,避免缓存键不匹配
           const decodedCharacterId = decodeURIComponent(characterId);
-          const cacheKey = `character_complete_${serverId}_${decodedCharacterId}`; // v3: 完整数据缓存
+          const cacheKey = STORAGE_KEY_BUILDERS.characterComplete(Number(serverId), decodedCharacterId); // v3: 完整数据缓存
           const cached = localStorage.getItem(cacheKey);
 
           // 检查缓存是否有效(8小时内)
@@ -198,9 +195,8 @@ const MemberDetailPage = () => {
               const cacheData = JSON.parse(cached);
               const cacheTime = cacheData.timestamp || 0;
               const now = Date.now();
-              const eightHours = 8 * 60 * 60 * 1000; // 8小时的毫秒数
 
-              if (now - cacheTime < eightHours) {
+              if (now - cacheTime < CACHE_TTL.LONG) {
                 if (!isMounted) return;
                 setCharInfo(cacheData.characterInfo);
                 setCharEquip(cacheData.equipmentData);
@@ -382,9 +378,8 @@ const MemberDetailPage = () => {
             try {
               const cacheData = JSON.parse(cached);
               const now = Date.now();
-              const eightHours = 8 * 60 * 60 * 1000;
 
-              if (now - cacheData.timestamp < eightHours) {
+              if (now - cacheData.timestamp < CACHE_TTL.LONG) {
                 setRating(cacheData.rating);
                 ratingLoadedRef.current = true;
                 setRatingLoading(false);
@@ -458,7 +453,7 @@ const MemberDetailPage = () => {
           // 分享链接: 从缓存的完整数据中获取守护力(已在阶段2加载)
           try {
             const decodedCharacterId = decodeURIComponent(characterId!);
-            const cacheKey = `character_complete_${serverId}_${decodedCharacterId}`;
+            const cacheKey = STORAGE_KEY_BUILDERS.characterComplete(Number(serverId), decodedCharacterId);
             const cached = localStorage.getItem(cacheKey);
 
             if (cached) {
@@ -509,7 +504,7 @@ const MemberDetailPage = () => {
 
     // 保存到历史记录
     try {
-      const stored = localStorage.getItem(HISTORY_STORAGE_KEY);
+      const stored = localStorage.getItem(STORAGE_KEYS.SEARCH_HISTORY);
       const history: SearchHistory[] = stored ? JSON.parse(stored) : [];
 
       const newHistory: SearchHistory = {
@@ -527,9 +522,9 @@ const MemberDetailPage = () => {
       const filtered = history.filter(
         h => !(h.characterName === newHistory.characterName && h.serverId === newHistory.serverId)
       );
-      const updated = [newHistory, ...filtered].slice(0, MAX_HISTORY_ITEMS);
+      const updated = [newHistory, ...filtered].slice(0, LIMITS.MAX_SEARCH_HISTORY);
 
-      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+      localStorage.setItem(STORAGE_KEYS.SEARCH_HISTORY, JSON.stringify(updated));
     } catch {
       // 保存查询历史失败
     }
@@ -642,7 +637,7 @@ const MemberDetailPage = () => {
 
       // 清除缓存
       const cacheKey = `character_${targetServerId}_${targetCharacterId}`;
-      const completeCacheKey = `character_complete_${targetServerId}_${targetCharacterId}`;
+      const completeCacheKey = STORAGE_KEY_BUILDERS.characterComplete(targetServerId, targetCharacterId);
       const ratingCacheKey = `rating_${targetServerId}_${targetCharacterId}`;
       localStorage.removeItem(cacheKey);
       localStorage.removeItem(completeCacheKey);
@@ -718,7 +713,7 @@ const MemberDetailPage = () => {
         }
 
         // 重新缓存完整数据
-        const cacheKey = `character_complete_${targetServerId}_${targetCharacterId}`;
+        const cacheKey = STORAGE_KEY_BUILDERS.characterComplete(targetServerId, targetCharacterId);
         const cacheData = {
           characterInfo,
           equipmentData,
@@ -779,7 +774,7 @@ const MemberDetailPage = () => {
                 // 同时更新 localStorage 缓存
                 if (isFromShare && serverId && characterId) {
                   const decodedCharacterId = decodeURIComponent(characterId);
-                  const cacheKey = `character_complete_${serverId}_${decodedCharacterId}`;
+                  const cacheKey = STORAGE_KEY_BUILDERS.characterComplete(Number(serverId), decodedCharacterId);
                   const cached = localStorage.getItem(cacheKey);
                   if (cached) {
                     try {

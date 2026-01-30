@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { STORAGE_KEYS } from '../constants';
 
 interface AdminContextType {
   isAdmin: boolean;
@@ -22,7 +23,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
 
   // 从 localStorage 恢复登录状态
   useEffect(() => {
-    const adminSession = localStorage.getItem('chunxia_admin');
+    const adminSession = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION);
     if (adminSession === 'true') {
       setIsAdmin(true);
     }
@@ -40,7 +41,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
 
       if (data.success) {
         setIsAdmin(true);
-        localStorage.setItem('chunxia_admin', 'true');
+        localStorage.setItem(STORAGE_KEYS.ADMIN_SESSION, 'true');
         setShowLoginModal(false);
         return true;
       }
@@ -52,7 +53,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
 
   const logout = () => {
     setIsAdmin(false);
-    localStorage.removeItem('chunxia_admin');
+    localStorage.removeItem(STORAGE_KEYS.ADMIN_SESSION);
   };
 
   const changePassword = async (currentPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {

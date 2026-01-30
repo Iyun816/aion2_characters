@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { CharacterInfo, SkillItem, CharacterEquipment } from '../data/memberTypes';
 import type { Rating } from '../types/admin';
 import { calculateAttackPower, type AttackPowerResult } from '../utils/attackPowerCalculator';
+import { CACHE_TTL, STORAGE_KEY_BUILDERS } from '../constants';
 import './CharacterCompareModal.css';
 
 // 技能对比项
@@ -81,16 +82,13 @@ const DiffValue = ({
   );
 };
 
-// 缓存有效期：4小时（与角色查询缓存一致）
-const CACHE_TTL = 4 * 60 * 60 * 1000;
-
 // 模块级缓存
 const compareDataCache = new Map<string, CachedCompareData>();
 
 // 从 localStorage 获取角色缓存
 const getCharacterCacheFromStorage = (characterId: string, serverId: number): CompareCharacterData | null => {
   // 尝试从角色完整数据缓存获取
-  const cacheKey = `character_complete_${serverId}_${characterId}`;
+  const cacheKey = STORAGE_KEY_BUILDERS.characterComplete(serverId, characterId);
   const cached = localStorage.getItem(cacheKey);
 
   if (cached) {
@@ -99,7 +97,7 @@ const getCharacterCacheFromStorage = (characterId: string, serverId: number): Co
       const now = Date.now();
 
       // 检查缓存是否有效（4小时内）
-      if (now - cacheData.timestamp < CACHE_TTL && cacheData.characterInfo) {
+      if (now - cacheData.timestamp < CACHE_TTL.MEDIUM && cacheData.characterInfo) {
         return {
           characterInfo: cacheData.characterInfo,
           equipmentData: cacheData.equipmentData,
@@ -139,7 +137,7 @@ const CharacterCompareModal = ({ visible, onClose, currentCharacter, compareChar
 
       // 1. 先检查模块级缓存（完整数据，包含攻击力）
       const cached = compareDataCache.get(cacheKey);
-      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL.MEDIUM) {
         setCompareData(cached.data);
         return;
       }
@@ -253,7 +251,7 @@ const CharacterCompareModal = ({ visible, onClose, currentCharacter, compareChar
         });
 
         // 存入 localStorage
-        const storageCacheKey = `character_complete_${compareCharacter.serverId}_${compareCharacter.characterId}`;
+        const storageCacheKey = STORAGE_KEY_BUILDERS.characterComplete(compareCharacter.serverId, compareCharacter.characterId);
         try {
           localStorage.setItem(storageCacheKey, JSON.stringify({
             characterInfo,

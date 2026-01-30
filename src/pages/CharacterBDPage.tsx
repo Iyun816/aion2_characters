@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ServerSelector from '../components/ServerSelector';
 import type { ServerOption, SearchHistory } from '../types/character';
+import { STORAGE_KEYS, CACHE_TTL, LIMITS } from '../constants';
 import './CharacterBDPage.css';
 
 // 角色基础信息类型
@@ -16,9 +17,6 @@ interface CharacterBasicInfo {
   pcId?: number;
   profileImage?: string;
 }
-
-const HISTORY_STORAGE_KEY = 'character_search_history';
-const MAX_HISTORY_ITEMS = 5;
 
 // 历史记录项组件 - 显示缓存的评分（不主动请求）
 interface HistoryItemProps {
@@ -39,10 +37,9 @@ const HistoryItem = ({ history, onClick, onDelete }: HistoryItemProps) => {
       try {
         const cacheData = JSON.parse(cached);
         const now = Date.now();
-        const eightHours = 8 * 60 * 60 * 1000;
 
         // 检查缓存是否有效（8小时内）
-        if (now - cacheData.timestamp < eightHours && cacheData.rating?.scores?.score) {
+        if (now - cacheData.timestamp < CACHE_TTL.LONG && cacheData.rating?.scores?.score) {
           setCachedRating(Math.floor(cacheData.rating.scores.score));
         }
       } catch (e) {
@@ -162,7 +159,7 @@ const CharacterBDPage = () => {
 
     const loadHistory = () => {
       try {
-        const stored = localStorage.getItem(HISTORY_STORAGE_KEY);
+        const stored = localStorage.getItem(STORAGE_KEYS.SEARCH_HISTORY);
         if (stored) {
           const history = JSON.parse(stored);
           setSearchHistory(history);
@@ -194,10 +191,10 @@ const CharacterBDPage = () => {
       const filtered = searchHistory.filter(
         h => !(h.characterName === name && h.serverId === serverId)
       );
-      const updated = [newHistory, ...filtered].slice(0, MAX_HISTORY_ITEMS);
+      const updated = [newHistory, ...filtered].slice(0, LIMITS.MAX_SEARCH_HISTORY);
 
       setSearchHistory(updated);
-      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+      localStorage.setItem(STORAGE_KEYS.SEARCH_HISTORY, JSON.stringify(updated));
     } catch {
       // 保存搜索历史失败
     }
@@ -206,7 +203,7 @@ const CharacterBDPage = () => {
   // 清除搜索历史
   const clearHistory = () => {
     setSearchHistory([]);
-    localStorage.removeItem(HISTORY_STORAGE_KEY);
+    localStorage.removeItem(STORAGE_KEYS.SEARCH_HISTORY);
   };
 
   // 删除单条历史记录
@@ -214,7 +211,7 @@ const CharacterBDPage = () => {
     e.stopPropagation(); // 阻止事件冒泡,防止触发查看详情
     const updated = searchHistory.filter((_, i) => i !== index);
     setSearchHistory(updated);
-    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+    localStorage.setItem(STORAGE_KEYS.SEARCH_HISTORY, JSON.stringify(updated));
   };
 
   // 搜索单个服务器

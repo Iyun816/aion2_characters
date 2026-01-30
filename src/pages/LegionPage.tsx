@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { classIconsSmall } from '../data/memberTypes';
 import type { CharacterInfo, MemberRole } from '../data/memberTypes';
+import { CACHE_TTL } from '../constants';
 import './LegionPage.css';
 
 // 成员配置
@@ -29,7 +30,6 @@ interface GalleryImage {
 
 const MEMBERS_CACHE_KEY = 'legion_members_cache_v2';
 const MEMBERS_CACHE_TIME_KEY = 'legion_members_cache_time_v2';
-const MEMBERS_CACHE_TTL = 2 * 60 * 60 * 1000; // 2小时
 
 const LegionPage = () => {
   const location = useLocation();
@@ -74,7 +74,7 @@ const LegionPage = () => {
         return null;
       }
 
-      if (Date.now() - Number(cacheTime) > MEMBERS_CACHE_TTL) {
+      if (Date.now() - Number(cacheTime) > CACHE_TTL.SHORT) {
         return null;
       }
 
