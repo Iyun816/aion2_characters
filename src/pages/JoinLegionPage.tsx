@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Hero from '../components/Hero';
 import About from '../components/About';
 import { loadMembers, addApplication } from '../services/dataService';
-import ServerSelect from '../components/ServerSelect';
+import ServerSelector from '../components/ServerSelector';
 import { SERVER_LIST } from '../data/serverList';
 import './JoinLegionPage.css';
 
@@ -282,12 +282,12 @@ const JoinLegionPage = () => {
 
               <div className="join-legion__field">
                 <label htmlFor="serverId">服务器 *</label>
-                <ServerSelect
-                  value={formData.serverId.toString()}
-                  onChange={handleServerChange}
-                  serverList={SERVER_LIST}
+                <ServerSelector
+                  servers={SERVER_LIST.map(s => ({ id: s.serverId, name: s.serverName, label: s.serverName, raceId: s.raceId }))}
+                  selectedServer={formData.serverId}
+                  onSelectServer={(serverId) => handleServerChange(serverId || 1001, '')}
+                  showAllOption={false}
                   placeholder="请选择服务器"
-                  required
                 />
                 <div className="join-legion__hints">
                   <div className="join-legion__hint-item">✓ 选择角色所在的服务器</div>

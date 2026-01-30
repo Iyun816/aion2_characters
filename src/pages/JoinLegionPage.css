@@ -612,15 +612,72 @@
 
 /* 响应式 */
 @media (max-width: 768px) {
-  .join-legion__form-content {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-lg);
+  /* 相册区域手机端优化 */
+  .join-legion__gallery {
+    padding: var(--spacing-lg) 0;
+  }
+
+  .join-legion__gallery-container {
+    padding: 0 var(--spacing-md);
+  }
+
+  .join-legion__section-title {
+    font-size: 1.5rem;
+  }
+
+  .join-legion__section-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: var(--spacing-md);
   }
 
   .join-legion__gallery-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
   }
 
+  .join-legion__gallery-item {
+    border-radius: var(--radius-sm);
+  }
+
+  /* 查看军团按钮区域 - 与相册分离，避免遮挡 */
+  .join-legion__cta {
+    padding: var(--spacing-lg) 0;
+    margin-top: 0;
+    background: var(--color-bg-secondary);
+  }
+
+  .join-legion__cta-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  /* 表单区域 */
+  .join-legion__form-content {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .join-legion__form-container {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .join-legion__info-card {
+    padding: var(--spacing-md);
+  }
+
+  .join-legion__form {
+    padding: var(--spacing-md);
+  }
+
+  .join-legion__hints {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .join-legion__hint-item {
+    font-size: 0.8rem;
+  }
+
+  /* 通知 */
   .join-legion__notification {
     top: var(--spacing-md);
     right: var(--spacing-md);
@@ -629,5 +686,18 @@
 
   .join-legion__notification-content {
     max-width: 100%;
+  }
+
+  /* 成功页面 */
+  .join-legion__success {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  .join-legion__success h2 {
+    font-size: 1.5rem;
+  }
+
+  .join-legion__success p {
+    font-size: 1rem;
   }
 }

@@ -2077,11 +2077,11 @@ app.post('/api/sync/member', async (req, res) => {
 // ==================== 角色完整数据API (角色查询专用) ====================
 
 /**
- * 一次性获取角色所有数据 - 用于角色查询详情页
- * 包括: 角色信息 + 装备列表 + 装备详情 + PVE评分 + 守护力数据
+ * 只获取装备详情 - 用于快速显示装备信息
+ * 不包括评分和守护力数据
  */
-app.get('/api/character/complete', async (req, res) => {
-  const { characterId, serverId, skipDaevanion } = req.query;
+app.get('/api/character/equipment-details', async (req, res) => {
+  const { characterId, serverId } = req.query;
 
   if (!characterId || !serverId) {
     return res.status(400).json({
@@ -2090,29 +2090,12 @@ app.get('/api/character/complete', async (req, res) => {
     });
   }
 
-  console.log(`\n========================================`);
-  console.log(`🔍 [角色完整数据] 开始获取角色数据`);
-  console.log(`📌 characterId: ${characterId}`);
-  console.log(`📌 serverId: ${serverId}`);
-  console.log(`📌 skipDaevanion: ${skipDaevanion || 'false'}`);
-  console.log(`========================================\n`);
+  console.log(`\n[装备详情API] 开始获取装备详情...`);
+  console.log(`  characterId: ${characterId}`);
+  console.log(`  serverId: ${serverId}`);
 
   try {
-    // 步骤 1/5: 获取角色基础信息
-    console.log(`[1/5] 获取角色信息...`);
-    const characterInfo = await fetchCharacterInfo(characterId, serverId);
-
-    if (!characterInfo || !characterInfo.profile) {
-      return res.status(404).json({
-        success: false,
-        error: '角色信息获取失败'
-      });
-    }
-    console.log(`✓ 角色信息获取成功: ${characterInfo.profile.characterName}`);
-
-    // 步骤 2/5: 获取装备列表
-    console.log(`[2/5] 获取装备列表...`);
-    await delay(300);
+    // 获取装备列表
     const equipmentData = await fetchCharacterEquipment(characterId, serverId);
 
     if (!equipmentData) {
@@ -2121,11 +2104,10 @@ app.get('/api/character/complete', async (req, res) => {
         error: '装备数据获取失败'
       });
     }
-    console.log(`✓ 装备列表获取成功`);
 
-    // 步骤 3/5: 获取装备详情
+    // 获取装备详情
     const equipmentList = equipmentData?.equipment?.equipmentList || [];
-    console.log(`[3/5] 获取装备详情 (共 ${equipmentList.length} 件装备)...`);
+    console.log(`[装备详情API] 获取 ${equipmentList.length} 件装备详情...`);
 
     const equipmentDetails = [];
 
@@ -2159,10 +2141,119 @@ app.get('/api/character/complete', async (req, res) => {
     if (equipmentDetails.length > 0) {
       equipmentData.equipment.equipmentList = equipmentDetails;
     }
-    console.log(`✓ 成功获取 ${equipmentDetails.length}/${equipmentList.length} 件装备详情`);
+    console.log(`[装备详情API] ✓ 成功获取 ${equipmentDetails.length}/${equipmentList.length} 件装备详情\n`);
 
-    // 步骤 4/5: 获取PVE评分
-    console.log(`[4/5] 获取PVE评分...`);
+    res.json({
+      success: true,
+      data: {
+        equipmentData,
+        timestamp: Date.now()
+      }
+    });
+  } catch (error) {
+    console.error(`[装备详情API] ❌ 获取失败:`, error);
+    res.status(500).json({
+      success: false,
+      error: '获取装备详情失败: ' + error.message
+    });
+  }
+});
+
+/**
+ * 一次性获取角色所有数据 - 用于角色查询详情页
+ * 包括: 角色信息 + 装备列表 + 装备详情 + PVE评分 + 守护力数据
+ * 支持 skipEquipmentDetails 参数跳过装备详情获取(由单独的API获取)
+ */
+app.get('/api/character/complete', async (req, res) => {
+  const { characterId, serverId, skipDaevanion, skipEquipmentDetails } = req.query;
+
+  if (!characterId || !serverId) {
+    return res.status(400).json({
+      success: false,
+      error: '缺少必要参数: characterId 和 serverId'
+    });
+  }
+
+  const shouldSkipEquipDetails = skipEquipmentDetails === 'true';
+
+  console.log(`\n========================================`);
+  console.log(`🔍 [角色完整数据] 开始获取角色数据`);
+  console.log(`📌 characterId: ${characterId}`);
+  console.log(`📌 serverId: ${serverId}`);
+  console.log(`📌 skipDaevanion: ${skipDaevanion || 'false'}`);
+  console.log(`📌 skipEquipmentDetails: ${shouldSkipEquipDetails}`);
+  console.log(`========================================\n`);
+
+  try {
+    // 步骤 1: 获取角色基础信息
+    console.log(`[1/${shouldSkipEquipDetails ? '3' : '5'}] 获取角色信息...`);
+    const characterInfo = await fetchCharacterInfo(characterId, serverId);
+
+    if (!characterInfo || !characterInfo.profile) {
+      return res.status(404).json({
+        success: false,
+        error: '角色信息获取失败'
+      });
+    }
+    console.log(`✓ 角色信息获取成功: ${characterInfo.profile.characterName}`);
+
+    // 步骤 2: 获取装备列表
+    console.log(`[2/${shouldSkipEquipDetails ? '3' : '5'}] 获取装备列表...`);
+    await delay(300);
+    const equipmentData = await fetchCharacterEquipment(characterId, serverId);
+
+    if (!equipmentData) {
+      return res.status(404).json({
+        success: false,
+        error: '装备数据获取失败'
+      });
+    }
+    console.log(`✓ 装备列表获取成功`);
+
+    // 步骤 3: 获取装备详情 (可跳过)
+    if (!shouldSkipEquipDetails) {
+      const equipmentList = equipmentData?.equipment?.equipmentList || [];
+      console.log(`[3/5] 获取装备详情 (共 ${equipmentList.length} 件装备)...`);
+
+      const equipmentDetails = [];
+
+      for (const equip of equipmentList) {
+        try {
+          const totalEnchantLevel = (equip.enchantLevel || 0) + (equip.exceedLevel || 0);
+
+          const detail = await fetchEquipmentDetail(
+            equip.id,
+            totalEnchantLevel,
+            characterId,
+            serverId,
+            equip.slotPos
+          );
+
+          const enrichedDetail = {
+            ...detail,
+            slotPos: equip.slotPos,
+            slotPosName: equip.slotPosName
+          };
+
+          equipmentDetails.push(enrichedDetail);
+          console.log(`  ✓ ${equip.slotPosName || equip.slotPos}: ${detail.name || equip.name}`);
+          await delay(500);
+        } catch (error) {
+          console.log(`  ✗ ${equip.slotPosName || equip.slotPos}: 获取失败`);
+        }
+      }
+
+      // 将装备详情合并到 equipmentData 中
+      if (equipmentDetails.length > 0) {
+        equipmentData.equipment.equipmentList = equipmentDetails;
+      }
+      console.log(`✓ 成功获取 ${equipmentDetails.length}/${equipmentList.length} 件装备详情`);
+    } else {
+      console.log(`[跳过] 装备详情获取 (由单独API处理)`);
+    }
+
+    // 步骤 4: 获取PVE评分
+    console.log(`[${shouldSkipEquipDetails ? '3/3' : '4/5'}] 获取PVE评分...`);
     await delay(300);
     let ratingData = null;
     try {

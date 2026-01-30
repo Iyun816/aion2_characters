@@ -4,7 +4,6 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import type { EquipmentDetail } from '../types/admin';
 import type { EquipmentItem } from '../data/memberTypes';
 import { getEquipmentCache } from '../services/dataService';
-import { CACHE_TTL, STORAGE_KEY_BUILDERS } from '../constants';
 
 interface TooltipState {
   position: { x: number; y: number };
@@ -38,8 +37,8 @@ interface UseEquipmentTooltipOptions {
 
 export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string): UseEquipmentTooltipReturn {
   // 兼容旧的调用方式（直接传 memberId 字符串）
-  const { memberId, equipmentDetails, characterId, serverId, equipmentList } = typeof options === 'string'
-    ? { memberId: options, equipmentDetails: undefined, characterId: undefined, serverId: undefined, equipmentList: undefined }
+  const { memberId, equipmentDetails, equipmentList } = typeof options === 'string'
+    ? { memberId: options, equipmentDetails: undefined, equipmentList: undefined }
     : options;
   const [tooltipState, setTooltipState] = useState<TooltipState>({
     position: { x: 0, y: 0 },
@@ -145,7 +144,7 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
   }, []);
 
   // 点击装备 - 打开详情模态框
-  const handleClick = useCallback(async (event: React.MouseEvent, equipmentId: number, equipmentItem?: any, charId?: string, srvId?: number) => {
+  const handleClick = useCallback((event: React.MouseEvent, equipmentId: number, equipmentItem?: any, _charId?: string, _srvId?: number) => {
     // 获取点击元素的位置信息 - 传递完整的rect用于智能定位
     const target = event.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
@@ -170,80 +169,13 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
     const cacheKeyForMemory = actualEquipItem?.slotPos
       ? `${equipmentId}_${actualEquipItem.slotPos}`
       : String(equipmentId);
-    let detail = equipmentCache.get(cacheKeyForMemory);
+    const detail = equipmentCache.get(cacheKeyForMemory);
 
-    if (!detail) {
-      // 显示加载状态
-      setModalState({
-        equipmentDetail: null,
-        visible: true,
-        loading: true,
-        position: clickPosition,
-      });
-
-      // 如果没有 memberId，说明是角色BD查询，需要按需请求装备详情
-      // 参数可以从函数参数传入，或者从 hook 配置中获取
-      const actualCharId = charId || characterId;
-      const actualSrvId = srvId || serverId;
-      const actualEquipItemInner = equipmentItem || equipmentList?.find((item) => item.id === equipmentId);
-
-      if (!memberId && actualCharId && actualSrvId && actualEquipItemInner) {
-        // 检查浏览器缓存 - 使用包含slotPos的key
-        const cacheKey = STORAGE_KEY_BUILDERS.equipmentDetail(equipmentId, actualEquipItemInner.slotPos);
-        const cached = localStorage.getItem(cacheKey);
-        const now = Date.now();
-
-        if (cached) {
-          try {
-            const cachedData = JSON.parse(cached);
-            if (now - cachedData.timestamp < CACHE_TTL.LONG) {
-              detail = cachedData.data;
-              // 更新到内存缓存
-              setEquipmentCache(prev => {
-                const newCache = new Map(prev);
-                newCache.set(cacheKeyForMemory, detail!);
-                return newCache;
-              });
-            }
-          } catch {
-            // 解析缓存失败，忽略
-          }
-        }
-
-        // 如果浏览器缓存也没有，从API请求
-        if (!detail) {
-          try {
-            const url = `/api/character/equipment-detail?itemId=${equipmentId}&enchantLevel=${actualEquipItemInner.enchantLevel}&characterId=${encodeURIComponent(actualCharId)}&serverId=${actualSrvId}&slotPos=${actualEquipItemInner.slotPos}`;
-
-            const response = await fetch(url);
-            if (response.ok) {
-              detail = await response.json();
-
-              // 保存到浏览器缓存
-              localStorage.setItem(cacheKey, JSON.stringify({
-                data: detail,
-                timestamp: now
-              }));
-
-              // 更新到内存缓存
-              setEquipmentCache(prev => {
-                const newCache = new Map(prev);
-                newCache.set(cacheKeyForMemory, detail!);
-                return newCache;
-              });
-            }
-          } catch {
-            // 请求失败，忽略
-          }
-        }
-      }
-    }
+    // 隐藏提示
+    setTooltipState({ position: { x: 0, y: 0 }, visible: false });
 
     if (detail) {
-      // 隐藏提示
-      setTooltipState({ position: { x: 0, y: 0 }, visible: false });
-
-      // 显示模态框(加载完成)
+      // 显示模态框(数据已加载)
       setModalState({
         equipmentDetail: detail,
         visible: true,
@@ -251,15 +183,15 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
         position: clickPosition,
       });
     } else {
-      // 关闭加载状态
+      // 数据还未加载完成，显示加载状态（不发起额外请求）
       setModalState({
         equipmentDetail: null,
-        visible: false,
-        loading: false,
-        position: { x: 0, y: 0 },
+        visible: true,
+        loading: true,
+        position: clickPosition,
       });
     }
-  }, [equipmentCache, memberId, characterId, serverId, equipmentList]);
+  }, [equipmentCache, equipmentList]);
 
   // 关闭模态框
   const handleCloseModal = useCallback(() => {

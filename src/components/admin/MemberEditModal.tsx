@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import type { MemberConfig } from '../../types/admin';
 import type { Server } from '../../data/serverList';
-import ServerSelect from '../ServerSelect';
+import ServerSelector from '../ServerSelector';
 import './MemberEditModal.css';
 
 interface MemberEditModalProps {
@@ -225,10 +225,11 @@ const MemberEditModal: React.FC<MemberEditModalProps> = ({
 
                   <div className="form-field">
                     <label htmlFor="member-server">服务器</label>
-                    <ServerSelect
-                      value={formData.serverId?.toString() || ''}
-                      onChange={(serverId) => handleChange('serverId', serverId)}
-                      serverList={serverList}
+                    <ServerSelector
+                      servers={serverList.map(s => ({ id: s.serverId, name: s.serverName, label: s.serverName, raceId: s.raceId }))}
+                      selectedServer={formData.serverId || null}
+                      onSelectServer={(serverId) => handleChange('serverId', serverId)}
+                      showAllOption={false}
                       placeholder="请选择服务器"
                     />
                     {errors.serverId && <span className="form-error">{errors.serverId}</span>}

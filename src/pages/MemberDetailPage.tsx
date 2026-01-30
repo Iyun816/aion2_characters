@@ -120,8 +120,10 @@ const MemberDetailPage = () => {
   const equipmentDetailsMap = useMemo(() => {
     return equipment.reduce((acc: Record<number, any>, item: any) => {
       // 装备详情已经在 equipment 数组中(完整数据API已获取)
-      // 检查是否包含详细信息(stat表示有详细属性,或者有minPower/maxPower等字段)
-      if (item.stat || item.minPower !== undefined || item.slotPosName) {
+      // 检查是否包含详细信息: mainStats/subStats/magicStoneStat 等字段只有完整详情才有
+      // 注意: slotPosName 在基础数据中也存在,不能作为判断依据
+      const hasDetailedInfo = item.mainStats || item.subStats || item.magicStoneStat || item.godStoneStat;
+      if (hasDetailedInfo) {
         acc[item.id] = item;
       }
       return acc;
@@ -135,12 +137,12 @@ const MemberDetailPage = () => {
         characterId: isFromShare ? characterId : characterData?.info?.profile?.characterId,
         serverId: isFromShare ? Number(serverId) : characterData?.info?.profile?.serverId,
         equipmentList: equipment,
-        // 只有在阶段2完成后才传递equipmentDetails,避免使用不完整的数据
-        equipmentDetails: (stage2Complete && Object.keys(equipmentDetailsMap).length > 0) ? equipmentDetailsMap : undefined
+        // 直接传递 equipmentDetailsMap，当装备详情加载完成后会自动更新
+        equipmentDetails: Object.keys(equipmentDetailsMap).length > 0 ? equipmentDetailsMap : undefined
       };
     }
     return { memberId: id || '' };
-  }, [isFromCharacterBD, isFromShare, characterId, serverId, characterData, equipment, stage2Complete, equipmentDetailsMap, id]);
+  }, [isFromCharacterBD, isFromShare, characterId, serverId, characterData, equipment, equipmentDetailsMap, id]);
 
   // 装备悬浮提示和详情模态框
   const { tooltipState, modalState, handleMouseEnter, handleMouseMove, handleMouseLeave, handleClick, handleCloseModal } = useEquipmentTooltip(equipmentTooltipConfig);
@@ -236,10 +238,27 @@ const MemberDetailPage = () => {
           setCharEquip(basicEquipData);
           setLoading(false);
 
-          // 阶段2: 后台加载完整数据（装备详情+评分+守护力）
-          const completeUrl = `/api/character/complete?characterId=${characterId}&serverId=${serverId}`;
-          const response = await fetch(completeUrl);
-          const result = await response.json();
+          // 阶段2: 并行加载装备详情和评分/守护力
+          // 装备详情单独请求,完成后立即更新(不等待评分和守护力)
+          const equipmentDetailsUrl = `/api/character/equipment-details?characterId=${characterId}&serverId=${serverId}`;
+          const equipmentDetailsPromise = fetch(equipmentDetailsUrl).then(res => res.json());
+
+          // 评分和守护力使用 complete API (跳过装备详情,因为已经单独请求)
+          const completeUrl = `/api/character/complete?characterId=${characterId}&serverId=${serverId}&skipEquipmentDetails=true`;
+          const completePromise = fetch(completeUrl).then(res => res.json());
+
+          // 装备详情完成后立即更新
+          equipmentDetailsPromise.then(detailsResult => {
+            if (!isMounted) return;
+            if (detailsResult.success && detailsResult.data?.equipmentData) {
+              setCharEquip(detailsResult.data.equipmentData);
+            }
+          }).catch(() => {
+            // 装备详情加载失败,静默处理
+          });
+
+          // 等待 complete API 完成(评分+守护力)
+          const result = await completePromise;
 
           if (!result.success) {
             throw new Error(result.error || '获取角色完整数据失败');
@@ -247,19 +266,27 @@ const MemberDetailPage = () => {
 
           const { characterInfo, equipmentData, rating: ratingData, daevanionBoards } = result.data;
 
-          // 更新为完整数据
+          // 更新角色信息和评分
           if (!isMounted) return;
           setCharInfo(characterInfo);
-          setCharEquip(equipmentData);
+
+          // 如果 complete API 返回了装备详情(没有跳过),也更新装备数据
+          if (equipmentData?.equipment?.equipmentList?.[0]?.mainStats) {
+            setCharEquip(equipmentData);
+          }
 
           if (ratingData) {
             setRating(ratingData);
           }
 
+          // 等待装备详情也完成,然后保存完整缓存
+          const detailsResult = await equipmentDetailsPromise.catch(() => null);
+          const finalEquipmentData = detailsResult?.success ? detailsResult.data.equipmentData : equipmentData;
+
           // 保存到缓存（包括完整数据和守护力）
           const cacheData = {
             characterInfo,
-            equipmentData,
+            equipmentData: finalEquipmentData,
             rating: ratingData,
             daevanionBoards: daevanionBoards || null, // 保存守护力数据
             timestamp: Date.now()

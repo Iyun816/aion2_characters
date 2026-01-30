@@ -1,15 +1,7 @@
 // 数据服务 - 处理成员和申请数据的加载、保存、导出
 
 import type { MemberConfig, JoinApplication, EquipmentDetailsCache } from '../types/admin';
-
-// ============= 常量 =============
-
-const STORAGE_KEYS = {
-  MEMBERS: 'chunxia_members',
-  APPLICATIONS: 'chunxia_applications',
-  EQUIPMENT_CACHE: 'chunxia_equipment_cache',
-  ADMIN_LOGIN: 'chunxia_admin_login',
-};
+import { STORAGE_KEYS } from '../constants';
 
 // ============= 成员管理 =============
 
