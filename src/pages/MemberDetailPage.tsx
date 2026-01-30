@@ -979,8 +979,11 @@ const MemberDetailPage = () => {
 
     const handleEquipMouseLeave = () => {
       handleMouseLeave();
-      // 鼠标离开装备图标时，同时关闭详情弹窗
-      handleCloseModal();
+      // 鼠标离开装备图标时，同时关闭详情弹窗（仅桌面端）
+      // 触摸设备上不自动关闭，让用户通过点击遮罩层关闭
+      if (!isTouchDevice) {
+        handleCloseModal();
+      }
 
       // 清除悬浮定时器
       if (hoverTimerRef.current) {
@@ -1503,6 +1506,7 @@ const MemberDetailPage = () => {
         visible={modalState.visible}
         loading={modalState.loading}
         position={modalState.position}
+        onClose={handleCloseModal}
       />
 
       {/* 分享确认框 */}

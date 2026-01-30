@@ -21,6 +21,7 @@ interface EquipmentDetailModalProps {
   visible: boolean;
   loading?: boolean;
   position?: { x: number; y: number; equipRect?: EquipRect };
+  onClose?: () => void;  // 关闭回调，用于触摸设备点击遮罩关闭
 }
 
 const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
@@ -28,9 +29,13 @@ const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
   visible,
   loading = false,
   position,
+  onClose,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [adjustedPosition, setAdjustedPosition] = useState<{ left: number; top: number } | null>(null);
+
+  // 检测是否为触摸设备
+  const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
   // 智能计算弹窗位置 - 根据装备位置选择最佳显示方向
   useEffect(() => {
@@ -206,16 +211,22 @@ const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
   // 如果正在加载,显示加载动画
   if (loading) {
     return createPortal(
-      <div
-        ref={modalRef}
-        className="equipment-modal-content equipment-modal-content--loading"
-        style={getPositionStyle()}
-      >
-        <div className="equipment-modal__loading">
-          <div className="equipment-modal__spinner"></div>
-          <p>载入装备详情中...</p>
+      <>
+        {/* 触摸设备显示遮罩层 */}
+        {isTouchDevice && onClose && (
+          <div className="equipment-modal-overlay" onClick={onClose} />
+        )}
+        <div
+          ref={modalRef}
+          className="equipment-modal-content equipment-modal-content--loading"
+          style={getPositionStyle()}
+        >
+          <div className="equipment-modal__loading">
+            <div className="equipment-modal__spinner"></div>
+            <p>载入装备详情中...</p>
+          </div>
         </div>
-      </div>,
+      </>,
       document.body
     );
   }
@@ -225,11 +236,16 @@ const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
   const gradeColor = gradeColors[equipmentDetail.grade] || '#9d9d9d';
 
   return createPortal(
-    <div
-      ref={modalRef}
-      className="equipment-modal-content"
-      style={getPositionStyle()}
-    >
+    <>
+      {/* 触摸设备显示遮罩层 */}
+      {isTouchDevice && onClose && (
+        <div className="equipment-modal-overlay" onClick={onClose} />
+      )}
+      <div
+        ref={modalRef}
+        className="equipment-modal-content"
+        style={getPositionStyle()}
+      >
         {/* 装备头部 */}
         <div className="equipment-modal__header" style={{ borderColor: gradeColor }}>
           <div className="equipment-modal__header-left">
@@ -427,7 +443,8 @@ const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
             )}
           </div>
         </div>
-      </div>,
+      </div>
+    </>,
     document.body
   );
 };
