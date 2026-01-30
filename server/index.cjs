@@ -205,8 +205,8 @@ let isSyncing = false;
 app.use(cors());
 app.use(express.json());
 
-// 强制所有 JSON 响应使用 UTF-8 编码
-app.use((req, res, next) => {
+// 强制所有 API JSON 响应使用 UTF-8 编码 (只对 /api 路径生效)
+app.use('/api', (req, res, next) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   next();
 });

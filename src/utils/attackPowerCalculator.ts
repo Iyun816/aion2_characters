@@ -149,12 +149,12 @@ export function calculateAttackPower(
             // 副属性固定攻击力
             breakdown.equipmentFlat += value;
             console.log(`  [副属性] ${item.slotPosName || item.name} - 攻击力固定值: +${value}`);
-          } else if (stat.id === 'STR') {
-            // 威力属性: 1威力 = 0.1% 攻击力
-            const strPercent = value * 0.1;
-            breakdown.strength += strPercent;
-            console.log(`  [副属性] ${item.slotPosName || item.name} - 威力 ${value} = +${strPercent.toFixed(1)}% 攻击力`);
+          } else if (stat.id === 'DamageRatio' && isPercent(stat.value)) {
+            // S2新增: 副属性攻击力增加百分比
+            breakdown.equipmentPercent += value;
+            console.log(`  [副属性] ${item.slotPosName || item.name} - 攻击力增加: +${value}%`);
           }
+          // 注意: 威力(STR)不在这里计算，因为角色主要能力值中已包含所有威力的总效果
         }
       }
 
@@ -175,7 +175,6 @@ export function calculateAttackPower(
   console.log('[装备解析完成]', {
     装备固定攻击: breakdown.equipmentFlat,
     装备百分比: breakdown.equipmentPercent,
-    威力属性_装备副属性: breakdown.strength,
   });
 
   // ========== 2. 从角色主要能力值提取 ==========

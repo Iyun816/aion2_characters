@@ -67,26 +67,15 @@
   gap: 14px;
   padding: 14px 16px;
   background: #fff;
-  border: 1px solid #f0f0f0;
+  border: 1px solid color-mix(in srgb, var(--grade-color, #9d9d9d) 40%, transparent);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
 }
 
-.item-card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--grade-color, #9d9d9d);
-  border-radius: 12px 0 0 12px;
-}
-
 .item-card:hover {
-  border-color: #e5e7eb;
+  border-color: color-mix(in srgb, var(--grade-color, #9d9d9d) 60%, transparent);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   transform: translateY(-2px);
 }
