@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { CharacterInfo, SkillItem } from '../data/memberTypes';
+import type { CharacterInfo, SkillItem, CharacterEquipment } from '../data/memberTypes';
 import type { Rating } from '../types/admin';
 import { calculateAttackPower, type AttackPowerResult } from '../utils/attackPowerCalculator';
 import './CharacterCompareModal.css';
@@ -16,7 +16,7 @@ interface SkillCompareItem {
 // 对比数据类型
 interface CompareCharacterData {
   characterInfo: CharacterInfo;
-  equipmentData: any;
+  equipmentData: CharacterEquipment | null;
   rating: Rating | null;
   attackPower: AttackPowerResult | null;
 }

@@ -1,9 +1,27 @@
 // 数据同步服务 - 通过代理调用 AION2 API
 
-import type { MemberConfig } from '../types/admin';
+import type { MemberConfig, EquipmentDetail } from '../types/admin';
+import type { CharacterInfo, CharacterEquipment } from '../data/memberTypes';
 
 // 开发环境使用代理,生产环境需要后端支持
 const API_PROXY_PREFIX = '/api/aion2';
+
+// 同步结果类型
+interface SyncMemberResult {
+  success: boolean;
+  characterInfo?: CharacterInfo;
+  equipmentData?: CharacterEquipment;
+  equipmentDetails?: EquipmentDetail[];
+  error?: string;
+}
+
+// 批量同步结果类型
+interface SyncAllResult {
+  total: number;
+  success: number;
+  failed: number;
+  results: Map<string, SyncMemberResult>;
+}
 
 /**
  * 延迟函数
@@ -15,7 +33,7 @@ function delay(ms: number): Promise<void> {
 /**
  * 发送代理请求
  */
-async function fetchWithProxy(url: string): Promise<any> {
+async function fetchWithProxy<T = unknown>(url: string): Promise<T> {
   // 将完整 URL 转换为代理 URL
   // 例如: https://tw.ncsoft.com/aion2/api/character/info?lang=zh&characterId=...&serverId=...
   // 转换为: /api/aion2/character/info?lang=zh&characterId=...&serverId=...
@@ -48,7 +66,7 @@ async function fetchWithProxy(url: string): Promise<any> {
 /**
  * 获取角色信息
  */
-async function getCharacterInfo(member: MemberConfig): Promise<any> {
+async function getCharacterInfo(member: MemberConfig): Promise<CharacterInfo> {
   if (!member.characterId || !member.serverId) {
     throw new Error('未配置角色信息 (characterId 或 serverId)');
   }
@@ -68,14 +86,14 @@ async function getCharacterInfo(member: MemberConfig): Promise<any> {
 /**
  * 获取角色装备列表
  */
-async function getCharacterEquipment(member: MemberConfig): Promise<any> {
+async function getCharacterEquipment(member: MemberConfig): Promise<CharacterEquipment> {
   if (!member.characterId || !member.serverId) {
     throw new Error('未配置角色信息 (characterId 或 serverId)');
   }
 
   // 构建装备列表URL
   const url = `${API_PROXY_PREFIX}/character/equipment?lang=zh&characterId=${encodeURIComponent(member.characterId)}&serverId=${member.serverId}`;
-  return await fetchWithProxy(url);
+  return await fetchWithProxy<CharacterEquipment>(url);
 }
 
 /**
@@ -86,7 +104,7 @@ async function getEquipmentDetail(
   enchantLevel: number,
   slotPos: number,
   member: MemberConfig
-): Promise<any> {
+): Promise<EquipmentDetail> {
   if (!member.characterId || !member.serverId) {
     throw new Error('未配置角色信息 (characterId 或 serverId)');
   }
@@ -94,7 +112,7 @@ async function getEquipmentDetail(
   // 构建装备详情 URL
   const url = `/api/aion2/character/equipment/item?id=${itemId}&enchantLevel=${enchantLevel}&characterId=${encodeURIComponent(member.characterId)}&serverId=${member.serverId}&slotPos=${slotPos}&lang=zh`;
 
-  return await fetchWithProxy(url);
+  return await fetchWithProxy<EquipmentDetail>(url);
 }
 
 /**
@@ -103,13 +121,7 @@ async function getEquipmentDetail(
 export async function syncMemberData(
   member: MemberConfig,
   onProgress?: (message: string, type?: 'info' | 'success' | 'error') => void
-): Promise<{
-  success: boolean;
-  characterInfo?: any;
-  equipmentData?: any;
-  equipmentDetails?: any[];
-  error?: string;
-}> {
+): Promise<SyncMemberResult> {
   const log = (message: string, type: 'info' | 'success' | 'error' = 'info') => {
     onProgress?.(message, type);
   };
@@ -142,7 +154,7 @@ export async function syncMemberData(
 
     log(`步骤 3/3: 获取装备详情 (共 ${equipmentList.length} 件装备)...`, 'info');
 
-    const equipmentDetails: any[] = [];
+    const equipmentDetails: EquipmentDetail[] = [];
 
     for (const equip of equipmentList) {
       try {
@@ -157,7 +169,7 @@ export async function syncMemberData(
         );
 
         // 将原始装备的 slotPos 和 slotPosName 合并到详情中
-        const enrichedDetail = {
+        const enrichedDetail: EquipmentDetail = {
           ...detail,
           slotPos: equip.slotPos,
           slotPosName: equip.slotPosName
@@ -166,8 +178,9 @@ export async function syncMemberData(
         equipmentDetails.push(enrichedDetail);
         log(`✓ ${equip.slotPosName || equip.slotPos}: ${detail.name || equip.name}`, 'success');
         await delay(300);
-      } catch (error: any) {
-        log(`✗ ${equip.slotPosName || equip.slotPos}: ${error.message}`, 'error');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        log(`✗ ${equip.slotPosName || equip.slotPos}: ${errorMessage}`, 'error');
       }
     }
 
@@ -225,11 +238,12 @@ export async function syncMemberData(
       equipmentDetails,
     };
 
-  } catch (error: any) {
-    log(`✗ 同步失败: ${error.message}`, 'error');
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    log(`✗ 同步失败: ${errorMessage}`, 'error');
     return {
       success: false,
-      error: error.message,
+      error: errorMessage,
     };
   }
 }
@@ -240,13 +254,8 @@ export async function syncMemberData(
 export async function syncAllMembers(
   members: MemberConfig[],
   onProgress?: (message: string, type?: 'info' | 'success' | 'error') => void
-): Promise<{
-  total: number;
-  success: number;
-  failed: number;
-  results: Map<string, any>;
-}> {
-  const results = new Map<string, any>();
+): Promise<SyncAllResult> {
+  const results = new Map<string, SyncMemberResult>();
   let successCount = 0;
   let failedCount = 0;
 

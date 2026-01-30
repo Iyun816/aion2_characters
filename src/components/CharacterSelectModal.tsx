@@ -60,7 +60,13 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
         if (!localData.serverList || !Array.isArray(localData.serverList)) {
           throw new Error('服务器数据格式错误');
         }
-        const localServers = localData.serverList.map((server: any) => ({
+        // 服务器列表原始数据类型
+        interface ServerListItem {
+          serverId: number;
+          serverName: string;
+          raceId?: number;
+        }
+        const localServers = localData.serverList.map((server: ServerListItem) => ({
           id: server.serverId,
           name: server.serverName,
           label: server.serverName,

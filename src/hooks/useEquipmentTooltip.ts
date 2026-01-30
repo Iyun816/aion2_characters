@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { EquipmentDetail } from '../types/admin';
+import type { EquipmentItem } from '../data/memberTypes';
 import { getEquipmentCache } from '../services/dataService';
 
 interface TooltipState {
@@ -22,7 +23,7 @@ interface UseEquipmentTooltipReturn {
   handleMouseEnter: (event: React.MouseEvent, equipmentId: number) => void;
   handleMouseMove: (event: React.MouseEvent) => void;
   handleMouseLeave: () => void;
-  handleClick: (event: React.MouseEvent, equipmentId: number, equipmentItem?: any, charId?: string, srvId?: number) => void;
+  handleClick: (event: React.MouseEvent, equipmentId: number, equipmentItem?: EquipmentItem, charId?: string, srvId?: number) => void;
   handleCloseModal: () => void;
 }
 
@@ -31,7 +32,7 @@ interface UseEquipmentTooltipOptions {
   equipmentDetails?: Record<number, EquipmentDetail>;
   characterId?: string;
   serverId?: number;
-  equipmentList?: any[];
+  equipmentList?: EquipmentItem[];
 }
 
 export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string): UseEquipmentTooltipReturn {
@@ -164,7 +165,7 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
 
     // 先检查缓存中是否已有该装备详情
     // 对于有slotPos的装备(Ring1/Ring2等),使用复合key: id_slotPos
-    const actualEquipItem = equipmentItem || equipmentList?.find((item: any) => item.id === equipmentId);
+    const actualEquipItem = equipmentItem || equipmentList?.find((item) => item.id === equipmentId);
     const cacheKeyForMemory = actualEquipItem?.slotPos
       ? `${equipmentId}_${actualEquipItem.slotPos}`
       : String(equipmentId);
@@ -183,7 +184,7 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
       // 参数可以从函数参数传入，或者从 hook 配置中获取
       const actualCharId = charId || characterId;
       const actualSrvId = srvId || serverId;
-      const actualEquipItemInner = equipmentItem || equipmentList?.find((item: any) => item.id === equipmentId);
+      const actualEquipItemInner = equipmentItem || equipmentList?.find((item) => item.id === equipmentId);
 
       if (!memberId && actualCharId && actualSrvId && actualEquipItemInner) {
         // 检查浏览器缓存 - 使用包含slotPos的key
