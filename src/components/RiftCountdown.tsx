@@ -105,8 +105,7 @@ const RiftCountdown = () => {
       if (data.success && data.data) {
         setRiftInfo(data.data);
       }
-    } catch (error) {
-      console.error('加载裂缝倒计时失败,使用本地计算:', error);
+    } catch {
       // API失败时,尝试从配置文件获取时间
       try {
         const configResponse = await fetch('/data/tools_config.json');

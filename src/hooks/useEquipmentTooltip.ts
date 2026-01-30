@@ -58,29 +58,23 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
   useEffect(() => {
     // 如果直接传入了装备详情数据，直接使用
     if (equipmentDetails) {
-      console.log('[useEquipmentTooltip] 使用传入的装备详情数据');
       const cacheMap = new Map<string, EquipmentDetail>();
       Object.entries(equipmentDetails).forEach(([_id, detail]) => {
         // 使用 slotPos 作为唯一key,因为同一个装备ID可能在不同slotPos有不同属性
         const cacheKey = detail.slotPos ? `${detail.id}_${detail.slotPos}` : String(detail.id);
         cacheMap.set(cacheKey, detail);
       });
-      console.log('[useEquipmentTooltip] 装备详情 Map 大小:', cacheMap.size);
-      console.log('[useEquipmentTooltip] 装备缓存 keys:', Array.from(cacheMap.keys()));
       setEquipmentCache(cacheMap);
       return;
     }
 
     // 如果 memberId 为空,跳过加载缓存(用于非军团成员的角色查询)
     if (!memberId) {
-      console.log('[useEquipmentTooltip] memberId 为空且无装备详情,跳过加载装备缓存');
       return;
     }
 
     const loadCache = async () => {
-      console.log('[useEquipmentTooltip] 开始加载成员装备缓存:', memberId);
       const cache = await getEquipmentCache(memberId);
-      console.log('[useEquipmentTooltip] 装备缓存数据:', cache);
 
       if (cache && cache.details) {
         const cacheMap = new Map<string, EquipmentDetail>();
@@ -89,11 +83,7 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
           const cacheKey = detail.slotPos ? `${detail.id}_${detail.slotPos}` : String(detail.id);
           cacheMap.set(cacheKey, detail);
         });
-        console.log('[useEquipmentTooltip] 装备缓存 Map 大小:', cacheMap.size);
-        console.log('[useEquipmentTooltip] 装备缓存 keys:', Array.from(cacheMap.keys()));
         setEquipmentCache(cacheMap);
-      } else {
-        console.warn('[useEquipmentTooltip] 装备缓存为空');
       }
     };
 
@@ -171,14 +161,6 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
         height: rect.height,
       }
     };
-    console.log('[useEquipmentTooltip] handleClick 接收到的参数:', {
-      equipmentId,
-      equipmentItem,
-      charId,
-      srvId,
-      'hook中的characterId': characterId,
-      'hook中的serverId': serverId
-    });
 
     // 先检查缓存中是否已有该装备详情
     // 对于有slotPos的装备(Ring1/Ring2等),使用复合key: id_slotPos
@@ -188,9 +170,7 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
       : String(equipmentId);
     let detail = equipmentCache.get(cacheKeyForMemory);
 
-    if (detail) {
-      console.log('[useEquipmentTooltip] 从缓存获取装备详情, ID:', equipmentId);
-    } else {
+    if (!detail) {
       // 显示加载状态
       setModalState({
         equipmentDetail: null,
@@ -203,28 +183,13 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
       // 参数可以从函数参数传入，或者从 hook 配置中获取
       const actualCharId = charId || characterId;
       const actualSrvId = srvId || serverId;
-      const actualEquipItem = equipmentItem || equipmentList?.find((item: any) => item.id === equipmentId);
+      const actualEquipItemInner = equipmentItem || equipmentList?.find((item: any) => item.id === equipmentId);
 
-      console.log('[useEquipmentTooltip] 实际使用的参数:', {
-        actualCharId,
-        actualSrvId,
-        actualEquipItem,
-        memberId
-      });
-
-      if (!memberId && actualCharId && actualSrvId && actualEquipItem) {
-        console.log('[useEquipmentTooltip] 按需请求装备详情, ID:', equipmentId);
-        console.log('[useEquipmentTooltip] 使用参数:', {
-          characterId: actualCharId,
-          serverId: actualSrvId,
-          enchantLevel: actualEquipItem.enchantLevel,
-          slotPos: actualEquipItem.slotPos
-        });
-
+      if (!memberId && actualCharId && actualSrvId && actualEquipItemInner) {
         // 检查浏览器缓存 - 使用包含slotPos的key
         const CACHE_DURATION = 8 * 60 * 60 * 1000; // 8小时
-        const cacheKey = actualEquipItem.slotPos
-          ? `equipment_detail_${equipmentId}_${actualEquipItem.slotPos}`
+        const cacheKey = actualEquipItemInner.slotPos
+          ? `equipment_detail_${equipmentId}_${actualEquipItemInner.slotPos}`
           : `equipment_detail_${equipmentId}`;
         const cached = localStorage.getItem(cacheKey);
         const now = Date.now();
@@ -233,7 +198,6 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
           try {
             const cachedData = JSON.parse(cached);
             if (now - cachedData.timestamp < CACHE_DURATION) {
-              console.log('[useEquipmentTooltip] 使用浏览器缓存的装备详情');
               detail = cachedData.data;
               // 更新到内存缓存
               setEquipmentCache(prev => {
@@ -242,21 +206,19 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
                 return newCache;
               });
             }
-          } catch (e) {
-            console.error('[useEquipmentTooltip] 解析装备详情缓存失败:', e);
+          } catch {
+            // 解析缓存失败，忽略
           }
         }
 
         // 如果浏览器缓存也没有，从API请求
         if (!detail) {
           try {
-            const url = `/api/character/equipment-detail?itemId=${equipmentId}&enchantLevel=${actualEquipItem.enchantLevel}&characterId=${encodeURIComponent(actualCharId)}&serverId=${actualSrvId}&slotPos=${actualEquipItem.slotPos}`;
-            console.log('[useEquipmentTooltip] 请求装备详情:', url);
+            const url = `/api/character/equipment-detail?itemId=${equipmentId}&enchantLevel=${actualEquipItemInner.enchantLevel}&characterId=${encodeURIComponent(actualCharId)}&serverId=${actualSrvId}&slotPos=${actualEquipItemInner.slotPos}`;
 
             const response = await fetch(url);
             if (response.ok) {
               detail = await response.json();
-              console.log('[useEquipmentTooltip] 成功获取装备详情:', detail);
 
               // 保存到浏览器缓存
               localStorage.setItem(cacheKey, JSON.stringify({
@@ -270,21 +232,11 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
                 newCache.set(cacheKeyForMemory, detail!);
                 return newCache;
               });
-            } else {
-              console.error('[useEquipmentTooltip] 请求装备详情失败, status:', response.status);
             }
-          } catch (e) {
-            console.error('[useEquipmentTooltip] 请求装备详情异常:', e);
+          } catch {
+            // 请求失败，忽略
           }
         }
-      } else {
-        console.warn('[useEquipmentTooltip] 未找到装备详情, ID:', equipmentId);
-        console.warn('[useEquipmentTooltip] 参数状态:', {
-          memberId,
-          characterId: actualCharId,
-          serverId: actualSrvId,
-          hasEquipItem: !!actualEquipItem
-        });
       }
     }
 
@@ -300,7 +252,6 @@ export function useEquipmentTooltip(options: UseEquipmentTooltipOptions | string
         position: clickPosition,
       });
     } else {
-      console.warn('[useEquipmentTooltip] 无法获取装备详情, ID:', equipmentId);
       // 关闭加载状态
       setModalState({
         equipmentDetail: null,

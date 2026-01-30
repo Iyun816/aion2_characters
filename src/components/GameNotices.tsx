@@ -59,8 +59,8 @@ const GameNotices = () => {
           notices: sortedNotices
         });
       }
-    } catch (error) {
-      console.error('加载通知失败:', error);
+    } catch {
+      // 加载通知失败
     }
   };
 

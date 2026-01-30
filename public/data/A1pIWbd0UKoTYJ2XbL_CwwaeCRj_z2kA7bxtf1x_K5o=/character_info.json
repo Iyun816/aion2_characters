@@ -1,0 +1,441 @@
+{
+  "stat": {
+    "statList": [
+      {
+        "type": "STR",
+        "name": "威力",
+        "value": 169,
+        "statSecondList": [
+          "攻击力增加 +16.9%"
+        ]
+      },
+      {
+        "type": "DEX",
+        "name": "敏捷",
+        "value": 65,
+        "statSecondList": [
+          "回避增加 +6.5%",
+          "格挡增加 +6.5%",
+          "暴击抵抗增加 +6.5%"
+        ]
+      },
+      {
+        "type": "INT",
+        "name": "知识",
+        "value": 99,
+        "statSecondList": [
+          "异常状态击中 +9.9%"
+        ]
+      },
+      {
+        "type": "CON",
+        "name": "体力",
+        "value": 84,
+        "statSecondList": [
+          "生命力增加 +8.4%"
+        ]
+      },
+      {
+        "type": "AGI",
+        "name": "精确",
+        "value": 176,
+        "statSecondList": [
+          "命中增加 +17.6%",
+          "暴击增加 +17.6%"
+        ]
+      },
+      {
+        "type": "WIS",
+        "name": "意志",
+        "value": 89,
+        "statSecondList": [
+          "异常状态抵抗 +8.9%"
+        ]
+      },
+      {
+        "type": "Justice",
+        "name": "正义[奈萨肯]",
+        "value": 65,
+        "statSecondList": [
+          "防御力增加 +13%",
+          "完美 +13%"
+        ]
+      },
+      {
+        "type": "Freedom",
+        "name": "自由[白杰尔]",
+        "value": 65,
+        "statSecondList": [
+          "命中增加 +13%",
+          "回避增加 +13%"
+        ]
+      },
+      {
+        "type": "Illusion",
+        "name": "幻象[凯西内尔]",
+        "value": 60,
+        "statSecondList": [
+          "冷却时间 -12%",
+          "铁壁贯穿 +12%"
+        ]
+      },
+      {
+        "type": "Life",
+        "name": "生命[尤斯迪埃]",
+        "value": 63,
+        "statSecondList": [
+          "生命力增加 +12.6%",
+          "再生 +12.6%"
+        ]
+      },
+      {
+        "type": "Time",
+        "name": "时间[希埃尔]",
+        "value": 110,
+        "statSecondList": [
+          "战斗速度 +22%",
+          "强击抵抗 +22%"
+        ]
+      },
+      {
+        "type": "Destruction",
+        "name": "破坏[吉凯尔]",
+        "value": 88,
+        "statSecondList": [
+          "攻击力增加 +17.6%",
+          "完美抵抗 +17.6%"
+        ]
+      },
+      {
+        "type": "Death",
+        "name": "死亡[崔妮尔]",
+        "value": 62,
+        "statSecondList": [
+          "暴击增加 +12.4%",
+          "再生贯穿 +12.4%"
+        ]
+      },
+      {
+        "type": "Wisdom",
+        "name": "智慧[露梅尔]",
+        "value": 43,
+        "statSecondList": [
+          "精神力消耗量 -8.6%",
+          "强击 +8.6%"
+        ]
+      },
+      {
+        "type": "Destiny",
+        "name": "命运[玛尔库坦]",
+        "value": 46,
+        "statSecondList": [
+          "精神力增加 +9.2%",
+          "铁壁 +9.2%"
+        ]
+      },
+      {
+        "type": "Space",
+        "name": "空间[伊斯拉佩尔]",
+        "value": 72,
+        "statSecondList": [
+          "移动速度 +14.4%",
+          "格挡增加 +14.4%"
+        ]
+      },
+      {
+        "type": "ItemLevel",
+        "name": "아이템레벨",
+        "value": 3191,
+        "statSecondList": null
+      }
+    ]
+  },
+  "daevanion": {
+    "boardList": [
+      {
+        "id": 31,
+        "name": "奈萨肯",
+        "totalNodeCount": 88,
+        "openNodeCount": 79,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Weapon_Sword_1H.png",
+        "open": 1,
+        "openPercent": 90
+      },
+      {
+        "id": 32,
+        "name": "吉凯尔",
+        "totalNodeCount": 88,
+        "openNodeCount": 88,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Weapon_Mace.png",
+        "open": 1,
+        "openPercent": 100
+      },
+      {
+        "id": 33,
+        "name": "白杰尔",
+        "totalNodeCount": 88,
+        "openNodeCount": 87,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Weapon_Sword_1H.png",
+        "open": 1,
+        "openPercent": 99
+      },
+      {
+        "id": 34,
+        "name": "崔妮尔",
+        "totalNodeCount": 116,
+        "openNodeCount": 113,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Weapon_Mace.png",
+        "open": 1,
+        "openPercent": 97
+      },
+      {
+        "id": 35,
+        "name": "艾瑞尔",
+        "totalNodeCount": 152,
+        "openNodeCount": 74,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Weapon_Sword_1H.png",
+        "open": 1,
+        "openPercent": 49
+      },
+      {
+        "id": 36,
+        "name": "阿斯佩尔",
+        "totalNodeCount": 152,
+        "openNodeCount": 41,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Weapon_Mace.png",
+        "open": 1,
+        "openPercent": 27
+      }
+    ]
+  },
+  "ranking": {
+    "rankingList": [
+      {
+        "rankingContentsType": 1,
+        "rankingContentsName": "深渊",
+        "rankingType": 0,
+        "rank": 4449,
+        "characterId": null,
+        "characterName": "连麻Swimming",
+        "classId": 4,
+        "className": "Ranger",
+        "guildName": "椿夏",
+        "point": 198619,
+        "prevRank": 1424,
+        "rankChange": -15,
+        "gradeId": 18,
+        "gradeName": "9等兵",
+        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Ranking_Grade_Abyss_Solidier_09.png",
+        "profileImage": null,
+        "extraDataMap": null
+      },
+      {
+        "rankingContentsType": 3,
+        "rankingContentsName": "恶梦",
+        "rankingType": 0,
+        "rank": 22,
+        "characterId": null,
+        "characterName": "连麻Swimming",
+        "classId": 4,
+        "className": "Ranger",
+        "guildName": "椿夏",
+        "point": 254406,
+        "prevRank": 3722,
+        "rankChange": 0,
+        "gradeId": 7,
+        "gradeName": "白金",
+        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Platinum.png",
+        "profileImage": null,
+        "extraDataMap": null
+      },
+      {
+        "rankingContentsType": 4,
+        "rankingContentsName": "超越",
+        "rankingType": 0,
+        "rank": 730,
+        "characterId": null,
+        "characterName": "连麻Swimming",
+        "classId": 4,
+        "className": "Ranger",
+        "guildName": "椿夏",
+        "point": 125683,
+        "prevRank": 3090,
+        "rankChange": -1,
+        "gradeId": 9,
+        "gradeName": "银",
+        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Silver.png",
+        "profileImage": null,
+        "extraDataMap": null
+      },
+      {
+        "rankingContentsType": 5,
+        "rankingContentsName": "孤独竞技场",
+        "rankingType": 0,
+        "rank": 848,
+        "characterId": null,
+        "characterName": "连麻Swimming",
+        "classId": 4,
+        "className": "Ranger",
+        "guildName": "椿夏",
+        "point": 1470,
+        "prevRank": 0,
+        "rankChange": 1,
+        "gradeId": 10,
+        "gradeName": "铜",
+        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Bronze.png",
+        "profileImage": null,
+        "extraDataMap": null
+      },
+      {
+        "rankingContentsType": 6,
+        "rankingContentsName": "协力竞技场",
+        "rankingType": null,
+        "rank": null,
+        "characterId": null,
+        "characterName": null,
+        "classId": null,
+        "className": null,
+        "guildName": null,
+        "point": null,
+        "prevRank": null,
+        "rankChange": null,
+        "gradeId": null,
+        "gradeName": null,
+        "gradeIcon": null,
+        "profileImage": null,
+        "extraDataMap": null
+      },
+      {
+        "rankingContentsType": 20,
+        "rankingContentsName": "讨伐战",
+        "rankingType": 0,
+        "rank": 2902,
+        "characterId": null,
+        "characterName": "连麻Swimming",
+        "classId": 4,
+        "className": "Ranger",
+        "guildName": "椿夏",
+        "point": 20479,
+        "prevRank": 7121,
+        "rankChange": 0,
+        "gradeId": 10,
+        "gradeName": "铜",
+        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Bronze.png",
+        "profileImage": null,
+        "extraDataMap": null
+      },
+      {
+        "rankingContentsType": 21,
+        "rankingContentsName": "觉醒战",
+        "rankingType": 0,
+        "rank": 2736,
+        "characterId": null,
+        "characterName": "连麻Swimming",
+        "classId": 4,
+        "className": "Ranger",
+        "guildName": "椿夏",
+        "point": 29705,
+        "prevRank": 4515,
+        "rankChange": -3,
+        "gradeId": 10,
+        "gradeName": "铜",
+        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Bronze.png",
+        "profileImage": null,
+        "extraDataMap": null
+      }
+    ]
+  },
+  "profile": {
+    "characterId": "A1pIWbd0UKoTYJ2XbL_CwwaeCRj_z2kA7bxtf1x_K5o=",
+    "characterName": "连麻Swimming",
+    "serverId": 1001,
+    "serverName": "希埃尔",
+    "regionName": "椿夏",
+    "pcId": 14,
+    "className": "弓星",
+    "raceId": 1,
+    "raceName": "天族",
+    "gender": 2,
+    "genderName": "女性",
+    "characterLevel": 45,
+    "titleId": 0,
+    "titleName": "",
+    "titleGrade": "",
+    "profileImage": "https://profileimg.plaync.com/game_profile_images/aion2_tw/images?gameServerKey=1001&charKey=281756451687403455"
+  },
+  "title": {
+    "totalCount": 390,
+    "ownedCount": 250,
+    "titleList": [
+      {
+        "id": 12030002,
+        "equipCategory": "Attack",
+        "name": "斐尔特朗守护者",
+        "grade": "Legend",
+        "totalCount": 143,
+        "ownedCount": 84,
+        "ownedPercent": 59,
+        "statList": [
+          {
+            "desc": "PVE伤害增幅 +1%"
+          }
+        ],
+        "equipStatList": [
+          {
+            "desc": "PVE伤害增幅 +3.7%"
+          },
+          {
+            "desc": "强击 +2%"
+          }
+        ]
+      },
+      {
+        "id": 12030003,
+        "equipCategory": "Defense",
+        "name": "斐尔特朗圣者",
+        "grade": "Unique",
+        "totalCount": 122,
+        "ownedCount": 85,
+        "ownedPercent": 70,
+        "statList": [
+          {
+            "desc": "PVE伤害耐性 +1%"
+          }
+        ],
+        "equipStatList": [
+          {
+            "desc": "额外防御力 +300"
+          },
+          {
+            "desc": "伤害耐性 +5%"
+          },
+          {
+            "desc": "格挡 +110"
+          }
+        ]
+      },
+      {
+        "id": 13020030,
+        "equipCategory": "Etc",
+        "name": "军团长拉格塔处决者",
+        "grade": "Legend",
+        "totalCount": 125,
+        "ownedCount": 81,
+        "ownedPercent": 65,
+        "statList": [
+          {
+            "desc": "暴击 +10"
+          }
+        ],
+        "equipStatList": [
+          {
+            "desc": "战斗速度 +3.5%"
+          },
+          {
+            "desc": "移动速度 +3.5%"
+          }
+        ]
+      }
+    ]
+  }
+}

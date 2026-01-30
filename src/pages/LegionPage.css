@@ -501,50 +501,81 @@
   }
 
   .legion-members {
-    padding: var(--spacing-lg) var(--spacing-md);
+    padding: var(--spacing-lg) var(--spacing-sm);
   }
 
   .legion-members__grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-sm);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
 
   .legion-members__grid--leader,
   .legion-members__grid--elite {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* 只有一个成员时撑满宽度 */
+  .legion-members__grid--leader .legion-member-card:only-child,
+  .legion-members__grid--elite .legion-member-card:only-child {
+    grid-column: 1 / -1;
   }
 
   .legion-member-card {
-    padding: var(--spacing-sm);
+    padding: 10px 6px;
   }
 
   .legion-member-card__avatar {
-    width: 60px;
-    height: 60px;
-    margin-bottom: var(--spacing-xs);
+    width: 44px;
+    height: 44px;
+    margin-bottom: 6px;
   }
 
   .legion-members__grid--leader .legion-member-card__avatar {
-    width: 80px;
-    height: 80px;
+    width: 56px;
+    height: 56px;
+  }
+
+  .legion-members__grid--elite .legion-member-card__avatar {
+    width: 50px;
+    height: 50px;
   }
 
   .legion-member-card__name {
-    font-size: 0.9rem;
-  }
-
-  .legion-member-card__role {
-    font-size: 0.6rem;
-    padding: 2px 8px;
-  }
-
-  .legion-member-card__details {
     font-size: 0.75rem;
   }
 
+  .legion-members__grid--leader .legion-member-card__name {
+    font-size: 0.85rem;
+  }
+
+  .legion-member-card__role {
+    font-size: 0.55rem;
+    padding: 1px 6px;
+  }
+
+  .legion-member-card__details {
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .legion-member-card__class {
+    font-size: 0.65rem;
+    padding: 1px 6px;
+    gap: 3px;
+  }
+
   .legion-member-card__class-icon {
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
+  }
+
+  .legion-member-card__level {
+    font-size: 0.65rem;
+  }
+
+  .legion-member-card__join {
+    display: none;
   }
 
   .legion-tabs {
@@ -595,7 +626,66 @@
   }
 
   .legion-members__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .legion-members__grid--leader,
+  .legion-members__grid--elite {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* 只有一个成员时撑满宽度 */
+  .legion-members__grid--leader .legion-member-card:only-child,
+  .legion-members__grid--elite .legion-member-card:only-child {
+    grid-column: 1 / -1;
+  }
+
+  .legion-member-card {
+    padding: 8px 4px;
+  }
+
+  .legion-member-card__avatar {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 4px;
+  }
+
+  .legion-members__grid--leader .legion-member-card__avatar {
+    width: 50px;
+    height: 50px;
+  }
+
+  .legion-members__grid--elite .legion-member-card__avatar {
+    width: 46px;
+    height: 46px;
+  }
+
+  .legion-member-card__name {
+    font-size: 0.7rem;
+  }
+
+  .legion-members__grid--leader .legion-member-card__name {
+    font-size: 0.8rem;
+  }
+
+  .legion-member-card__role {
+    font-size: 0.5rem;
+    padding: 1px 5px;
+  }
+
+  .legion-member-card__class {
+    font-size: 0.6rem;
+    padding: 1px 5px;
+  }
+
+  .legion-member-card__class-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .legion-member-card__level {
+    font-size: 0.6rem;
   }
 
   .legion-tabs__btn {

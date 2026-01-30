@@ -25,8 +25,8 @@ const ItemsSyncManager = () => {
     try {
       const data = await fetchSyncStatus();
       setStatus(data);
-    } catch (error) {
-      console.error('获取同步状态失败:', error);
+    } catch {
+      // 获取同步状态失败
     } finally {
       setLoading(false);
     }
@@ -37,8 +37,8 @@ const ItemsSyncManager = () => {
     try {
       const filters = await fetchFilters();
       setCategories(filters.categories);
-    } catch (error) {
-      console.error('获取分类数据失败:', error);
+    } catch {
+      // 获取分类数据失败
     }
   }, []);
 

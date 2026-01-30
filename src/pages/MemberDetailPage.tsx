@@ -3,6 +3,7 @@ import { useParams, Link, useLocation } from 'react-router-dom';
 import { gradeColors, classIcons } from '../data/memberTypes';
 import type { CharacterInfo, CharacterEquipment, EquipmentItem, TitleItem } from '../data/memberTypes';
 import type { Rating } from '../types/admin';
+import type { SearchHistory } from '../types/character';
 import EquipmentTooltip from '../components/EquipmentTooltip';
 import EquipmentDetailModal from '../components/EquipmentDetailModal';
 import ExceedLevel from '../components/ExceedLevel';
@@ -32,20 +33,9 @@ const titleCategoryNames: Record<string, string> = {
   'Etc': '其他系列'
 };
 
-// 搜索历史记录常量和类型
+// 搜索历史记录常量
 const HISTORY_STORAGE_KEY = 'character_search_history';
 const MAX_HISTORY_ITEMS = 5;
-
-interface SearchHistory {
-  characterId: string;
-  characterName: string;
-  serverId: number;
-  serverLabel: string;
-  level?: number;
-  race?: number;
-  profileImage?: string;
-  timestamp: number;
-}
 
 // 称号分类图标
 const titleCategoryIcons: Record<string, string> = {
@@ -141,26 +131,16 @@ const MemberDetailPage = () => {
     }, {});
   }, [equipment]);
 
-  console.log('[MemberDetailPage] equipmentDetailsMap大小:', Object.keys(equipmentDetailsMap).length);
-  console.log('[MemberDetailPage] equipment数量:', equipment.length);
-
   // 使用 useMemo 稳定化 useEquipmentTooltip 的配置对象,避免无限循环
   const equipmentTooltipConfig = useMemo(() => {
     if (isFromCharacterBD || isFromShare) {
-      const config = {
+      return {
         characterId: isFromShare ? characterId : characterData?.info?.profile?.characterId,
         serverId: isFromShare ? Number(serverId) : characterData?.info?.profile?.serverId,
         equipmentList: equipment,
         // 只有在阶段2完成后才传递equipmentDetails,避免使用不完整的数据
         equipmentDetails: (stage2Complete && Object.keys(equipmentDetailsMap).length > 0) ? equipmentDetailsMap : undefined
       };
-      console.log('[MemberDetailPage] 传递给useEquipmentTooltip的配置:', {
-        ...config,
-        stage2Complete,
-        equipmentDetailsKeys: Object.keys(equipmentDetailsMap),
-        hasEquipmentDetails: !!config.equipmentDetails
-      });
-      return config;
     }
     return { memberId: id || '' };
   }, [isFromCharacterBD, isFromShare, characterId, serverId, characterData, equipment, stage2Complete, equipmentDetailsMap, id]);
@@ -221,7 +201,6 @@ const MemberDetailPage = () => {
               const eightHours = 8 * 60 * 60 * 1000; // 8小时的毫秒数
 
               if (now - cacheTime < eightHours) {
-                console.log('[完整数据] 使用缓存的角色完整数据,缓存时间:', new Date(cacheTime).toLocaleString());
                 if (!isMounted) return;
                 setCharInfo(cacheData.characterInfo);
                 setCharEquip(cacheData.equipmentData);
@@ -234,21 +213,14 @@ const MemberDetailPage = () => {
                 setStage2Complete(true);
                 setLoading(false);
                 return;
-              } else {
-                console.log('[完整数据] 缓存已过期,重新加载');
               }
-            } catch (e) {
-              console.log('[完整数据] 缓存数据解析失败,重新加载');
+            } catch {
+              // 缓存数据解析失败,重新加载
             }
-          } else {
-            console.log('[完整数据] 未找到缓存,重新加载');
           }
 
           // 缓存失效或不存在，分阶段加载数据
-          console.log('[完整数据] 开始请求角色完整数据...');
-
           // 阶段1: 快速加载基础数据（角色信息+装备列表）
-          console.log('[阶段1] 快速加载基础数据...');
           const basicInfoUrl = `/api/character/info?characterId=${characterId}&serverId=${serverId}`;
           const basicEquipUrl = `/api/character/equipment?characterId=${characterId}&serverId=${serverId}`;
 
@@ -263,14 +235,12 @@ const MemberDetailPage = () => {
           ]);
 
           // 立即显示页面
-          console.log('[阶段1] 基础数据加载完成,显示页面');
           if (!isMounted) return;
           setCharInfo(basicCharInfo);
           setCharEquip(basicEquipData);
           setLoading(false);
 
           // 阶段2: 后台加载完整数据（装备详情+评分+守护力）
-          console.log('[阶段2] 后台加载完整数据...');
           const completeUrl = `/api/character/complete?characterId=${characterId}&serverId=${serverId}`;
           const response = await fetch(completeUrl);
           const result = await response.json();
@@ -280,14 +250,6 @@ const MemberDetailPage = () => {
           }
 
           const { characterInfo, equipmentData, rating: ratingData, daevanionBoards } = result.data;
-
-          console.log('[阶段2] 完整数据获取成功,更新页面:', {
-            hasCharInfo: !!characterInfo,
-            hasEquipment: !!equipmentData,
-            hasRating: !!ratingData,
-            hasDaevanion: !!daevanionBoards,
-            equipmentCount: equipmentData?.equipment?.equipmentList?.length || 0
-          });
 
           // 更新为完整数据
           if (!isMounted) return;
@@ -311,9 +273,8 @@ const MemberDetailPage = () => {
           cachedCompleteDataRef.current = cacheData;
           // 标记阶段2已完成
           setStage2Complete(true);
-          console.log('[阶段2] 角色完整数据已缓存(包括守护力)');
-        } catch (e) {
-          console.error('[完整数据] 加载分享角色数据失败', e);
+        } catch {
+          // 加载分享角色数据失败
         }
         // setLoading(false); // 移除这里的setLoading,因为已经在阶段1设置了
       };
@@ -358,8 +319,8 @@ const MemberDetailPage = () => {
         if (equipRes.ok) {
           setCharEquip(await equipRes.json());
         }
-      } catch (e) {
-        console.error('加载角色数据失败', e);
+      } catch {
+        // 加载角色数据失败
       }
       if (!isMounted) return;
       setLoading(false);
@@ -385,7 +346,6 @@ const MemberDetailPage = () => {
 
       // 如果是分享链接且已经有评分数据(从完整API获取),则跳过
       if (isFromShare && rating) {
-        console.log('[评分] 已从完整数据API获取,跳过单独加载');
         ratingLoadedRef.current = true;
         return;
       }
@@ -406,8 +366,8 @@ const MemberDetailPage = () => {
               setRatingLoading(false);
               return;
             }
-          } catch (error) {
-            console.log('本地评分文件不存在,尝试从API获取');
+          } catch {
+            // 本地评分文件不存在,尝试从API获取
           }
         }
 
@@ -425,14 +385,13 @@ const MemberDetailPage = () => {
               const eightHours = 8 * 60 * 60 * 1000;
 
               if (now - cacheData.timestamp < eightHours) {
-                console.log('[评分缓存] 使用缓存数据');
                 setRating(cacheData.rating);
                 ratingLoadedRef.current = true;
                 setRatingLoading(false);
                 return;
               }
-            } catch (e) {
-              console.log('[评分缓存] 缓存解析失败');
+            } catch {
+              // 缓存解析失败
             }
           }
         }
@@ -454,11 +413,10 @@ const MemberDetailPage = () => {
               rating: data.rating,
               timestamp: Date.now()
             }));
-            console.log('[评分缓存] 已缓存评分数据');
           }
         }
-      } catch (error) {
-        console.error('加载PVE评分失败:', error);
+      } catch {
+        // 加载PVE评分失败
       } finally {
         setRatingLoading(false);
       }
@@ -476,7 +434,6 @@ const MemberDetailPage = () => {
 
       // 分享链接/角色查询: 等待阶段2完成后再计算攻击力(确保守护力数据已加载)
       if ((isFromShare || isFromCharacterBD) && !stage2Complete) {
-        console.log('[攻击力计算] 等待阶段2完整数据加载完成...');
         return;
       }
 
@@ -493,12 +450,9 @@ const MemberDetailPage = () => {
             const daevanionRes = await fetch(`/data/${id}/daevanion_boards.json?t=${timestamp}`);
             if (daevanionRes.ok) {
               daevanionBoardsData = await daevanionRes.json();
-              console.log('[攻击力计算] 成功加载守护力数据,面板数量:', daevanionBoardsData?.length || 0);
-            } else {
-              console.log('[攻击力计算] 守护力文件不存在');
             }
-          } catch (error) {
-            console.log('[攻击力计算] 守护力数据读取失败:', error);
+          } catch {
+            // 守护力数据读取失败
           }
         } else if (isFromShare) {
           // 分享链接: 从缓存的完整数据中获取守护力(已在阶段2加载)
@@ -511,33 +465,21 @@ const MemberDetailPage = () => {
               const cacheData = JSON.parse(cached);
               if (cacheData.daevanionBoards) {
                 daevanionBoardsData = cacheData.daevanionBoards;
-                console.log('[攻击力计算] 从缓存中获取守护力数据,面板数量:', daevanionBoardsData?.length || 0);
-              } else {
-                console.log('[攻击力计算] 缓存中没有守护力数据');
               }
-            } else {
-              console.log('[攻击力计算] 未找到缓存数据');
             }
-          } catch (error) {
-            console.log('[攻击力计算] 守护力数据获取失败:', error);
+          } catch {
+            // 守护力数据获取失败
           }
         } else if (isFromCharacterBD) {
           // 角色BD查询: 从characterData中获取守护力数据
           try {
             if (characterData?.daevanionBoards) {
               daevanionBoardsData = characterData.daevanionBoards;
-              console.log('[攻击力计算] 从characterData获取守护力数据,面板数量:', daevanionBoardsData?.length || 0);
-            } else {
-              console.log('[攻击力计算] characterData中没有守护力数据');
             }
-          } catch (error) {
-            console.log('[攻击力计算] 守护力数据获取失败:', error);
+          } catch {
+            // 守护力数据获取失败
           }
         }
-
-        console.log('[攻击力计算] 守护力数据:', daevanionBoardsData ? '已加载' : '未加载');
-        console.log('[攻击力计算] 装备数量:', equipment.length);
-        console.log('[攻击力计算] charInfo存在:', !!charInfo);
 
         // 准备计算数据 - 直接传入equipment数组
         const equipmentData = {
@@ -548,10 +490,9 @@ const MemberDetailPage = () => {
 
         // 计算攻击力
         const result = calculateAttackPower(equipmentData, charInfo, daevanionBoardsData);
-        console.log('[攻击力计算] 计算结果:', result);
         setAttackPower(result);
-      } catch (error) {
-        console.error('攻击力计算失败:', error);
+      } catch {
+        // 攻击力计算失败
       }
 
       setAttackPowerLoading(false);
@@ -589,9 +530,8 @@ const MemberDetailPage = () => {
       const updated = [newHistory, ...filtered].slice(0, MAX_HISTORY_ITEMS);
 
       localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
-      console.log('[查询历史] 已保存角色到查询历史');
-    } catch (error) {
-      console.error('保存查询历史失败:', error);
+    } catch {
+      // 保存查询历史失败
     }
   }, [charInfo, isFromCharacterBD, isFromShare]);
 
@@ -711,8 +651,6 @@ const MemberDetailPage = () => {
       // 根据来源执行不同的刷新逻辑
       if (isFromMember && id) {
         // 军团成员:调用后端API同步数据到文件
-        console.log('军团成员刷新:调用同步API保存数据到文件...');
-
         const syncResponse = await fetch('/api/sync/member', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -729,8 +667,6 @@ const MemberDetailPage = () => {
         if (!syncData.success) {
           throw new Error(syncData.error || '同步失败');
         }
-
-        console.log('数据同步成功,重新从文件加载...');
 
         // 同步成功后,重新从文件加载数据
         const timestamp = Date.now();
@@ -764,8 +700,6 @@ const MemberDetailPage = () => {
         setRatingLoading(false);
       } else {
         // 角色查询/分享链接:使用完整数据API刷新
-        console.log('[刷新] 角色查询刷新:使用完整数据API...');
-
         const completeUrl = `/api/character/complete?characterId=${targetCharacterId}&serverId=${targetServerId}`;
         const response = await fetch(completeUrl);
         const result = await response.json();
@@ -793,7 +727,6 @@ const MemberDetailPage = () => {
           timestamp: Date.now()
         };
         localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-        console.log('[刷新] 完整数据已更新并重新缓存');
       }
 
       // 刷新成功提示
@@ -801,7 +734,6 @@ const MemberDetailPage = () => {
       setRefreshDialogMessage('角色数据已更新');
       setShowRefreshDialog(true);
     } catch (error) {
-      console.error('刷新失败:', error);
       setRefreshDialogTitle('刷新失败');
       setRefreshDialogMessage(error instanceof Error ? error.message : '请稍后重试');
       setShowRefreshDialog(true);
@@ -825,23 +757,13 @@ const MemberDetailPage = () => {
       } else if (isFromShare || isFromCharacterBD) {
         // 分享链接/角色查询: 优先使用缓存的完整数据中的守护力
         if (cachedCompleteDataRef.current?.daevanionBoards) {
-          console.log('[守护力] 使用缓存的守护力数据,无需重新请求');
           boards = cachedCompleteDataRef.current.daevanionBoards;
         } else if (charInfo?.profile?.characterId && charInfo?.profile?.serverId) {
           // 缓存中没有,才从API加载
-          console.log('[守护力] 缓存中没有守护力数据,从API获取');
           const chineseClassName = charInfo.profile.className;
 
           if (chineseClassName) {
             const classId = await getClassIdByChineseName(chineseClassName);
-
-            console.log('[守护力] 准备加载守护力数据:', {
-              characterId: charInfo.profile.characterId,
-              serverId: charInfo.profile.serverId,
-              chineseClassName: chineseClassName,
-              mappedClassId: classId,
-              classIdType: typeof classId
-            });
 
             if (classId) {
               boards = await fetchDaevanionBoards(
@@ -849,12 +771,10 @@ const MemberDetailPage = () => {
                 charInfo.profile.serverId,
                 classId
               );
-              console.log('[守护力] fetchDaevanionBoards 返回结果:', boards);
 
               // 保存到缓存
               if (boards && cachedCompleteDataRef.current) {
                 cachedCompleteDataRef.current.daevanionBoards = boards;
-                console.log('[守护力] 守护力数据已保存到缓存');
 
                 // 同时更新 localStorage 缓存
                 if (isFromShare && serverId && characterId) {
@@ -867,15 +787,12 @@ const MemberDetailPage = () => {
                       cacheData.daevanionBoards = boards;
                       cacheData.timestamp = Date.now();
                       localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-                      console.log('[守护力] 守护力数据已更新到 localStorage');
-                    } catch (e) {
-                      console.error('[守护力] 更新缓存失败:', e);
+                    } catch {
+                      // 更新缓存失败
                     }
                   }
                 }
               }
-            } else {
-              console.error(`[守护力] 无法映射职业名称 "${chineseClassName}" 到 classId`);
             }
           }
         }
@@ -885,8 +802,8 @@ const MemberDetailPage = () => {
         const effects = mergeDaevanionEffects(boards);
         setDaevanionEffects(effects);
       }
-    } catch (error) {
-      console.error('加载守护力数据失败:', error);
+    } catch {
+      // 加载守护力数据失败
     } finally {
       setDaevanionLoading(false);
     }
@@ -932,21 +849,12 @@ const MemberDetailPage = () => {
   const brandSkills = skills.filter(s => s.category === 'Dp'); // 烙印技能（原DP技能）
 
   const renderEquipItem = (item: EquipmentItem) => {
-    console.log('[MemberDetailPage] renderEquipItem 渲染装备:', item.id, '当前 charInfo:', charInfo?.profile);
-
     // 获取对应的外观
     const skin = skinsBySlot[item.slotPosName];
 
     const handleEquipClick = (e: React.MouseEvent) => {
       // 移动端：点击触发详情
       if (isTouchDevice) {
-        console.log('[MemberDetailPage] 移动端点击事件:', {
-          equipmentId: item.id,
-          equipmentItem: item,
-          characterId: charInfo?.profile?.characterId,
-          serverId: charInfo?.profile?.serverId,
-          charInfo: charInfo
-        });
         handleClick(e, item.id, item, charInfo?.profile?.characterId, charInfo?.profile?.serverId);
       }
       // 桌面端：点击已由悬浮处理，这里不做额外操作
@@ -964,12 +872,6 @@ const MemberDetailPage = () => {
         // 保存元素引用，因为 setTimeout 中事件对象会被回收，currentTarget 会变成 null
         const targetElement = e.currentTarget as HTMLElement;
         hoverTimerRef.current = window.setTimeout(() => {
-          console.log('[MemberDetailPage] 桌面端悬浮触发详情:', {
-            equipmentId: item.id,
-            equipmentItem: item,
-            characterId: charInfo?.profile?.characterId,
-            serverId: charInfo?.profile?.serverId
-          });
           // 创建一个模拟事件对象，包含保存的元素引用
           const syntheticEvent = { currentTarget: targetElement } as unknown as React.MouseEvent;
           handleClick(syntheticEvent, item.id, item, charInfo?.profile?.characterId, charInfo?.profile?.serverId);

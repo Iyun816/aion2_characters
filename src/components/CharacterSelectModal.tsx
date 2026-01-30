@@ -1,14 +1,7 @@
 import { useState, useEffect } from 'react';
 import ServerSelector from './ServerSelector';
+import type { SearchHistory } from '../types/character';
 import './CharacterSelectModal.css';
-
-// 服务器类型
-interface Server {
-  id: number;
-  name: string;
-  label: string;
-  raceId?: number;
-}
 
 // 角色基础信息类型
 export interface CharacterBasicInfo {
@@ -23,29 +16,8 @@ export interface CharacterBasicInfo {
   profileImage?: string;
 }
 
-// 搜索历史记录类型
-interface SearchHistory {
-  characterId: string;
-  characterName: string;
-  serverId: number;
-  serverLabel: string;
-  level?: number;
-  race?: number;
-  profileImage?: string;
-  timestamp: number;
-}
-
-// 对比历史记录类型
-interface CompareHistory {
-  characterId: string;
-  characterName: string;
-  serverId: number;
-  serverLabel: string;
-  level?: number;
-  race?: number;
-  profileImage?: string;
-  timestamp: number;
-}
+// 对比历史记录类型（与搜索历史结构相同）
+type CompareHistory = SearchHistory;
 
 const HISTORY_STORAGE_KEY = 'character_search_history';
 const COMPARE_HISTORY_KEY = 'character_compare_history';
@@ -55,6 +27,13 @@ interface CharacterSelectModalProps {
   onClose: () => void;
   onSelect: (character: CharacterBasicInfo) => void;
   currentCharacterId?: string; // 当前角色ID，用于排除
+}
+
+interface Server {
+  id: number;
+  name: string;
+  label: string;
+  raceId?: number;
 }
 
 const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }: CharacterSelectModalProps) => {
@@ -88,8 +67,7 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
           raceId: server.raceId
         }));
         setServers(localServers);
-      } catch (error) {
-        console.error('加载服务器列表失败:', error);
+      } catch {
         setServers([
           { id: 1001, name: '希埃尔', label: '希埃尔', raceId: 1 },
           { id: 2001, name: '伊斯拉佩尔', label: '伊斯拉佩尔', raceId: 2 }
@@ -108,8 +86,8 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
             : history;
           setSearchHistory(filtered);
         }
-      } catch (error) {
-        console.error('加载搜索历史失败:', error);
+      } catch {
+        // 加载搜索历史失败
       }
     };
 
@@ -124,8 +102,8 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
             : history;
           setCompareHistory(filtered);
         }
-      } catch (error) {
-        console.error('加载对比历史失败:', error);
+      } catch {
+        // 加载对比历史失败
       }
     };
 
@@ -170,8 +148,7 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
         race: infoData.profile?.raceId || character.race,
         profileImage: infoData.profile?.profileImage
       };
-    } catch (error) {
-      console.error(`搜索服务器 ${serverLabel} 失败:`, error);
+    } catch {
       return null;
     }
   };
@@ -207,8 +184,7 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
 
       setSearchResults(validResults);
       setSearching(false);
-    } catch (error) {
-      console.error('搜索失败:', error);
+    } catch {
       setError('搜索失败，请稍后重试');
       setSearching(false);
     }
@@ -263,8 +239,8 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
       history = history.slice(0, 20);
 
       localStorage.setItem(COMPARE_HISTORY_KEY, JSON.stringify(history));
-    } catch (error) {
-      console.error('保存对比历史失败:', error);
+    } catch {
+      // 保存对比历史失败
     }
   };
 
@@ -283,8 +259,8 @@ const CharacterSelectModal = ({ visible, onClose, onSelect, currentCharacterId }
           : history;
         setCompareHistory(filtered);
       }
-    } catch (error) {
-      console.error('删除对比历史失败:', error);
+    } catch {
+      // 删除对比历史失败
     }
   };
 

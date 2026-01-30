@@ -45,8 +45,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
         return true;
       }
       return false;
-    } catch (error) {
-      console.error('登录请求失败:', error);
+    } catch {
       return false;
     }
   };
@@ -70,8 +69,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
         return { success: true };
       }
       return { success: false, error: data.error || '修改失败' };
-    } catch (error) {
-      console.error('修改密码请求失败:', error);
+    } catch {
       return { success: false, error: '网络请求失败' };
     }
   };

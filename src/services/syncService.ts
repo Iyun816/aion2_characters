@@ -36,9 +36,6 @@ async function fetchWithProxy(url: string): Promise<any> {
     proxyUrl = `${API_PROXY_PREFIX}${url}`;
   }
 
-  console.log('原始 URL:', url);
-  console.log('代理 URL:', proxyUrl);
-
   const response = await fetch(proxyUrl);
 
   if (!response.ok) {
@@ -55,8 +52,6 @@ async function getCharacterInfo(member: MemberConfig): Promise<any> {
   if (!member.characterId || !member.serverId) {
     throw new Error('未配置角色信息 (characterId 或 serverId)');
   }
-
-  console.log(`[${member.name}] 步骤 1/3: 请求角色信息...`);
 
   // 使用后端代理API
   const response = await fetch(
@@ -77,8 +72,6 @@ async function getCharacterEquipment(member: MemberConfig): Promise<any> {
   if (!member.characterId || !member.serverId) {
     throw new Error('未配置角色信息 (characterId 或 serverId)');
   }
-
-  console.log(`[${member.name}] 步骤 2/3: 请求装备列表...`);
 
   // 构建装备列表URL
   const url = `${API_PROXY_PREFIX}/character/equipment?lang=zh&characterId=${encodeURIComponent(member.characterId)}&serverId=${member.serverId}`;
@@ -101,7 +94,6 @@ async function getEquipmentDetail(
   // 构建装备详情 URL
   const url = `/api/aion2/character/equipment/item?id=${itemId}&enchantLevel=${enchantLevel}&characterId=${encodeURIComponent(member.characterId)}&serverId=${member.serverId}&slotPos=${slotPos}&lang=zh`;
 
-  console.log(`[${member.name}] 请求装备详情: itemId=${itemId}, slotPos=${slotPos}`);
   return await fetchWithProxy(url);
 }
 
@@ -119,7 +111,6 @@ export async function syncMemberData(
   error?: string;
 }> {
   const log = (message: string, type: 'info' | 'success' | 'error' = 'info') => {
-    console.log(`[${member.name}] ${message}`);
     onProgress?.(message, type);
   };
 
@@ -221,9 +212,8 @@ export async function syncMemberData(
       }
 
       log('✓ 数据已保存到服务器文件系统', 'success');
-    } catch (saveError: any) {
+    } catch {
       log('⚠ 保存到服务器失败,但数据已保存到本地存储', 'info');
-      console.warn('保存到服务器失败:', saveError.message);
     }
 
     log(`✓ 同步完成: ${member.name}`, 'success');

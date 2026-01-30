@@ -37,8 +37,8 @@ async function loadClassBoardConfig(): Promise<ClassBoardConfig> {
       cachedConfig = config;
       return cachedConfig;
     }
-  } catch (error) {
-    console.warn('[Daevanion] 加载职业面板映射配置失败:', error);
+  } catch {
+    // 加载配置失败，使用默认配置
   }
 
   // 返回默认配置(空类列表)
@@ -56,18 +56,8 @@ async function loadClassBoardConfig(): Promise<ClassBoardConfig> {
  */
 export async function getBoardIdsByClassName(classNameEn: string): Promise<number[]> {
   const config = await loadClassBoardConfig();
-  console.log(`[Daevanion] 查找职业配置: classNameEn=${classNameEn}`);
-  console.log(`[Daevanion] 可用的职业配置:`, config.classes.map(c => `${c.classNameEn}(${c.className})`));
-
   const classMapping = config.classes.find(c => c.classNameEn === classNameEn);
-
-  if (classMapping) {
-    console.log(`[Daevanion] 找到职业 ${classNameEn}(${classMapping.className}) 的配置:`, classMapping.boardIds);
-    return classMapping.boardIds;
-  } else {
-    console.warn(`[Daevanion] 未找到职业 ${classNameEn} 的配置,返回空数组`);
-    return [];
-  }
+  return classMapping ? classMapping.boardIds : [];
 }
 
 /**
@@ -77,20 +67,11 @@ export async function getBoardIdsByClassName(classNameEn: string): Promise<numbe
  */
 export async function getClassIdByChineseName(className: string): Promise<number | undefined> {
   const config = await loadClassBoardConfig();
-  console.log(`[Daevanion] 通过中文名查找classId: ${className}`);
-
   // 在配置中查找，支持繁体和简体匹配
   const classMapping = config.classes.find(c => {
     return c.className === className || c.classNameSimplified === className;
   });
-
-  if (classMapping) {
-    console.log(`[Daevanion] 找到职业 ${className} 的classId: ${classMapping.classId}`);
-    return classMapping.classId;
-  } else {
-    console.warn(`[Daevanion] 未找到职业 ${className} 的配置`);
-    return undefined;
-  }
+  return classMapping?.classId;
 }
 
 /**
@@ -100,18 +81,8 @@ export async function getClassIdByChineseName(className: string): Promise<number
  */
 export async function getBoardIdsByClassId(classId: number): Promise<number[]> {
   const config = await loadClassBoardConfig();
-  console.log(`[Daevanion] 查找职业配置: classId=${classId}`);
-  console.log(`[Daevanion] 可用的职业配置:`, config.classes.map(c => `id:${c.classId}(${c.className})`));
-
   const classMapping = config.classes.find(c => c.classId === classId);
-
-  if (classMapping) {
-    console.log(`[Daevanion] 找到职业ID ${classId}(${classMapping.className}) 的配置:`, classMapping.boardIds);
-    return classMapping.boardIds;
-  } else {
-    console.warn(`[Daevanion] 未找到职业ID ${classId} 的配置,返回空数组`);
-    return [];
-  }
+  return classMapping ? classMapping.boardIds : [];
 }
 
 export interface DaevanionEffect {
@@ -153,30 +124,16 @@ export interface AggregatedDaevanionEffects {
  * @returns 聚合后的属性效果和技能效果
  */
 export function mergeDaevanionEffects(boards: DaevanionBoards): AggregatedDaevanionEffects {
-  console.log('[Daevanion] 开始聚合守护力效果, boards数量:', boards.length);
-  console.log('[Daevanion] boards详情:', boards);
-
   const statMap = new Map<string, { value: number; isPercentage: boolean }>();  // 属性名 -> {累加值, 是否百分比}
   const skillMap = new Map<string, { value: number; isPercentage: boolean }>(); // 技能名 -> {累加等级, 是否百分比}
 
   // 遍历所有面板
   for (const board of boards) {
-    if (!board) {
-      console.log('[Daevanion] 跳过null面板');
-      continue;
-    }
-
-    console.log('[Daevanion] 处理面板:', {
-      hasOpenStatEffectList: !!board.openStatEffectList,
-      hasOpenSkillEffectList: !!board.openSkillEffectList,
-      statCount: board.openStatEffectList?.length || 0,
-      skillCount: board.openSkillEffectList?.length || 0
-    });
+    if (!board) continue;
 
     // 聚合属性效果
     if (board.openStatEffectList) {
       for (const effect of board.openStatEffectList) {
-        console.log('[Daevanion] 聚合属性效果:', effect.desc);
         aggregateEffect(effect.desc, statMap);
       }
     }
@@ -184,14 +141,10 @@ export function mergeDaevanionEffects(boards: DaevanionBoards): AggregatedDaevan
     // 聚合技能效果
     if (board.openSkillEffectList) {
       for (const effect of board.openSkillEffectList) {
-        console.log('[Daevanion] 聚合技能效果:', effect.desc);
         aggregateEffect(effect.desc, skillMap);
       }
     }
   }
-
-  console.log('[Daevanion] 聚合后的statMap:', statMap);
-  console.log('[Daevanion] 聚合后的skillMap:', skillMap);
 
   // 转换为数组，根据是否百分比添加正确的符号
   const statEffects = Array.from(statMap.entries()).map(([name, data]) => {
@@ -203,9 +156,6 @@ export function mergeDaevanionEffects(boards: DaevanionBoards): AggregatedDaevan
     const valueStr = data.value > 0 ? `+${data.value}` : `${data.value}`;
     return data.isPercentage ? `${name} ${valueStr}%` : `${name} ${valueStr}`;
   });
-
-  console.log('[Daevanion] 最终statEffects:', statEffects);
-  console.log('[Daevanion] 最终skillEffects:', skillEffects);
 
   return {
     statEffects,
@@ -264,8 +214,7 @@ export async function loadMemberDaevanion(memberId: string): Promise<DaevanionBo
       return null;
     }
     return await response.json();
-  } catch (error) {
-    console.warn(`加载成员 ${memberId} 的守护力数据失败:`, error);
+  } catch {
     return null;
   }
 }
@@ -283,24 +232,14 @@ export async function fetchDaevanionBoards(
   classId?: number
 ): Promise<DaevanionBoards | null> {
   try {
-    console.log(`[Daevanion] fetchDaevanionBoards 被调用:`, {
-      characterId,
-      serverId,
-      classId,
-      classIdType: typeof classId
-    });
-
     if (!classId) {
-      console.error(`[Daevanion] classId 未提供或为空: ${classId}`);
       return null;
     }
 
     // 根据职业ID获取对应的面板ID列表
     const boardIds = await getBoardIdsByClassId(classId);
-    console.log(`[Daevanion] 职业ID: ${classId}, 使用面板ID:`, boardIds);
 
     if (boardIds.length === 0) {
-      console.error(`[Daevanion] 未找到职业ID ${classId} 的面板配置,无法获取守护力数据`);
       return null;
     }
 
@@ -313,38 +252,21 @@ export async function fetchDaevanionBoards(
 
         if (response.ok) {
           const result = await response.json();
-          console.log(`[Daevanion] 面板 ${boardId} API响应:`, result);
-
           // 检查数据结构
           if (result.success && result.data) {
-            console.log(`[Daevanion] 面板 ${boardId} 数据结构:`, {
-              hasNodeList: !!result.data.nodeList,
-              hasOpenStatEffectList: !!result.data.openStatEffectList,
-              hasOpenSkillEffectList: !!result.data.openSkillEffectList,
-              statCount: result.data.openStatEffectList?.length || 0,
-              skillCount: result.data.openSkillEffectList?.length || 0
-            });
             return result.data;
-          } else {
-            console.warn(`[Daevanion] 面板 ${boardId} 数据格式不正确:`, result);
-            return null;
           }
-        } else {
-          console.warn(`[Daevanion] 获取守护力面板 ${boardId} 失败: HTTP ${response.status}`);
           return null;
         }
-      } catch (error) {
-        console.warn(`[Daevanion] 获取守护力面板 ${boardId} 失败:`, error);
+        return null;
+      } catch {
         return null;
       }
     });
 
     // 等待所有请求完成
-    const boards = await Promise.all(promises);
-    console.log(`[Daevanion] 所有面板数据:`, boards);
-    return boards;
-  } catch (error) {
-    console.warn('[Daevanion] 获取守护力数据失败:', error);
+    return await Promise.all(promises);
+  } catch {
     return null;
   }
 }

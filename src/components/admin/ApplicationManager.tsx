@@ -59,8 +59,8 @@ const ApplicationManager: React.FC = () => {
       ]);
       setApplications(appsData);
       setMembers(membersData);
-    } catch (error) {
-      console.error('加载数据失败:', error);
+    } catch {
+      // 加载数据失败
     } finally {
       setLoading(false);
     }
@@ -113,14 +113,8 @@ const ApplicationManager: React.FC = () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(fullMemberData)
-          }).then(response => {
-            if (response.ok) {
-              console.log(`成员 ${application.characterName} 的角色数据同步成功`);
-            } else {
-              console.warn(`成员 ${application.characterName} 的角色数据同步失败`);
-            }
-          }).catch(error => {
-            console.error(`成员 ${application.characterName} 的角色数据同步失败:`, error);
+          }).catch(() => {
+            // 角色数据同步失败
           });
 
           // 立即显示成功提示

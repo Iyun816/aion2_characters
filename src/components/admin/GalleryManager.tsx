@@ -42,8 +42,8 @@ const GalleryManager = () => {
       if (data.success) {
         setGalleryImages(data.data);
       }
-    } catch (error) {
-      console.error('加载相册失败:', error);
+    } catch {
+      // 加载相册失败
     } finally {
       setLoading(false);
     }
@@ -68,14 +68,11 @@ const GalleryManager = () => {
         const data = await response.json();
 
         if (data.success) {
-          console.log('上传成功:', data.data);
           // 重新加载图片列表
           loadGalleryImages();
-        } else {
-          console.error('上传失败:', data.error);
         }
-      } catch (error) {
-        console.error('上传错误:', error);
+      } catch {
+        // 上传错误
       }
     }
 
@@ -101,11 +98,9 @@ const GalleryManager = () => {
             img.id === id ? { ...img, showOnHome: !img.showOnHome } : img
           )
         );
-      } else {
-        console.error('设置失败:', data.error);
       }
-    } catch (error) {
-      console.error('设置失败:', error);
+    } catch {
+      // 设置失败
     }
   };
 
@@ -125,11 +120,9 @@ const GalleryManager = () => {
             img.id === id ? { ...img, approved: true } : img
           )
         );
-      } else {
-        console.error('审核失败:', data.error);
       }
-    } catch (error) {
-      console.error('审核失败:', error);
+    } catch {
+      // 审核失败
     }
   };
 
@@ -170,11 +163,9 @@ const GalleryManager = () => {
       if (data.success) {
         // 从本地状态移除
         setGalleryImages(prev => prev.filter(img => img.id !== imageId));
-      } else {
-        console.error('删除失败:', data.error);
       }
-    } catch (error) {
-      console.error('删除失败:', error);
+    } catch {
+      // 删除失败
     }
   };
 

@@ -1,15 +1,9 @@
 import { useState } from 'react';
+import type { ServerOption } from '../types/character';
 import './ServerSelector.css';
 
-interface Server {
-  id: number;
-  name: string;
-  label: string;
-  raceId?: number; // 1=天族, 2=魔族
-}
-
 interface ServerSelectorProps {
-  servers: Server[];
+  servers: ServerOption[];
   selectedServer: number | null;
   onSelectServer: (serverId: number | null) => void;
 }

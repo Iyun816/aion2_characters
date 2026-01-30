@@ -6,7 +6,6 @@
 export function registerServiceWorker(): void {
   // 检查浏览器是否支持 Service Worker
   if (!('serviceWorker' in navigator)) {
-    console.warn('[SW] 浏览器不支持 Service Worker');
     return;
   }
 
@@ -17,8 +16,6 @@ export function registerServiceWorker(): void {
         scope: '/'
       });
 
-      console.log('[SW] Service Worker 注册成功:', registration.scope);
-
       // 监听更新
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
@@ -26,13 +23,12 @@ export function registerServiceWorker(): void {
 
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('[SW] 新版本可用,建议刷新页面');
-            // 可选:提示用户刷新页面
+            // 新版本可用,可选:提示用户刷新页面
           }
         });
       });
-    } catch (error) {
-      console.error('[SW] Service Worker 注册失败:', error);
+    } catch {
+      // Service Worker 注册失败
     }
   });
 }
@@ -49,12 +45,10 @@ export async function unregisterServiceWorker(): Promise<boolean> {
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       const success = await registration.unregister();
-      console.log('[SW] Service Worker 注销:', success ? '成功' : '失败');
       return success;
     }
     return false;
-  } catch (error) {
-    console.error('[SW] Service Worker 注销失败:', error);
+  } catch {
     return false;
   }
 }
@@ -64,14 +58,12 @@ export async function unregisterServiceWorker(): Promise<boolean> {
  */
 export async function clearImageCache(): Promise<boolean> {
   if (!('serviceWorker' in navigator)) {
-    console.warn('[SW] 浏览器不支持 Service Worker');
     return false;
   }
 
   try {
     const registration = await navigator.serviceWorker.getRegistration();
     if (!registration || !registration.active) {
-      console.warn('[SW] Service Worker 未激活');
       return false;
     }
 
@@ -93,8 +85,7 @@ export async function clearImageCache(): Promise<boolean> {
       // 超时处理
       setTimeout(() => resolve(false), 5000);
     });
-  } catch (error) {
-    console.error('[SW] 清除缓存失败:', error);
+  } catch {
     return false;
   }
 }
@@ -119,8 +110,7 @@ export async function checkServiceWorkerStatus(): Promise<{
     const active = !!(registration && registration.active);
 
     return { supported, registered, active };
-  } catch (error) {
-    console.error('[SW] 检查状态失败:', error);
+  } catch {
     return { supported, registered: false, active: false };
   }
 }

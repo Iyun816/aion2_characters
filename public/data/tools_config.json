@@ -5,7 +5,16 @@
     "intervalHours": 3,
     "durationMinutes": 60,
     "doorOpenMinutes": 5,
-    "openTimes": ["02:00", "05:00", "08:00", "11:00", "14:00", "17:00", "20:00", "23:00"]
+    "openTimes": [
+      "02:00",
+      "05:00",
+      "08:00",
+      "11:00",
+      "14:00",
+      "17:00",
+      "20:00",
+      "23:00"
+    ]
   },
   "tools": [
     {
@@ -13,12 +22,6 @@
       "name": "角色BD构筑",
       "description": "在线角色构筑工具,模拟技能、装备搭配",
       "url": "https://questlog.gg/aion-2/zh/character-builder"
-    },
-    {
-      "id": "game-database",
-      "name": "游戏数据库",
-      "description": "查询游戏物品、装备、技能等详细信息",
-      "url": "https://questlog.gg/aion-2/zh/db/items"
     },
     {
       "id": "data-analysis",

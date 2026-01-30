@@ -1,0 +1,16 @@
+{
+  "id": "697c27f3137fbd2f80ae46b8",
+  "scores": {
+    "score": 14420.037757184835
+  },
+  "modelType": "PVE",
+  "modelVersion": "PvE-1.2",
+  "ratedAt": "2026-01-30T03:39:31.447Z",
+  "percentile": {
+    "itemScoreRange": "3000-3300",
+    "itemScoreRangePercentile": 36.06,
+    "serverPercentile": 34.05,
+    "classPercentile": 41.29,
+    "allDataPercentile": 31.72
+  }
+}

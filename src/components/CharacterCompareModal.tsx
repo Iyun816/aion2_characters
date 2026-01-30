@@ -262,14 +262,13 @@ const CharacterCompareModal = ({ visible, onClose, currentCharacter, compareChar
             daevanionBoards,
             timestamp: now
           }));
-        } catch (e) {
-          console.warn('缓存存储失败:', e);
+        } catch {
+          // 缓存存储失败
         }
 
         setCompareData(data);
         setAttackPowerLoading(false);
       } catch (err) {
-        console.error('加载对比角色数据失败:', err);
         if (isMounted) {
           setError(err instanceof Error ? err.message : '加载失败');
           setLoading(false);

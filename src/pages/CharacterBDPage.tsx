@@ -1,15 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ServerSelector from '../components/ServerSelector';
+import type { ServerOption, SearchHistory } from '../types/character';
 import './CharacterBDPage.css';
-
-// 服务器类型(从 API 获取)
-interface Server {
-  id: number;
-  name: string;
-  label: string;
-  raceId?: number; // 1=天族, 2=魔族
-}
 
 // 角色基础信息类型
 interface CharacterBasicInfo {
@@ -22,18 +15,6 @@ interface CharacterBasicInfo {
   race: number;
   pcId?: number;
   profileImage?: string;
-}
-
-// 搜索历史记录类型
-interface SearchHistory {
-  characterId: string;
-  characterName: string;
-  serverId: number;
-  serverLabel: string;
-  level?: number;
-  race?: number;
-  profileImage?: string;
-  timestamp: number;
 }
 
 const HISTORY_STORAGE_KEY = 'character_search_history';
@@ -141,7 +122,7 @@ const SearchResultCard = ({ result, onClick }: SearchResultCardProps) => {
 const CharacterBDPage = () => {
   const navigate = useNavigate();
   const [characterName, setCharacterName] = useState('');
-  const [servers, setServers] = useState<Server[]>([]);
+  const [servers, setServers] = useState<ServerOption[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<CharacterBasicInfo[]>([]);
   const [error, setError] = useState('');
@@ -170,8 +151,7 @@ const CharacterBDPage = () => {
           raceId: server.raceId
         }));
         setServers(localServers);
-      } catch (error) {
-        console.error('加载服务器列表失败:', error);
+      } catch {
         // 设置默认服务器作为后备
         setServers([
           { id: 1001, name: '希埃尔', label: '希埃尔' },
@@ -187,8 +167,8 @@ const CharacterBDPage = () => {
           const history = JSON.parse(stored);
           setSearchHistory(history);
         }
-      } catch (error) {
-        console.error('加载搜索历史失败:', error);
+      } catch {
+        // 加载搜索历史失败
       }
     };
 
@@ -218,8 +198,8 @@ const CharacterBDPage = () => {
 
       setSearchHistory(updated);
       localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
-    } catch (error) {
-      console.error('保存搜索历史失败:', error);
+    } catch {
+      // 保存搜索历史失败
     }
   };
 
@@ -264,8 +244,7 @@ const CharacterBDPage = () => {
         race: infoData.profile?.raceId || character.race,
         profileImage: infoData.profile?.profileImage
       };
-    } catch (error) {
-      console.error(`搜索服务器 ${serverLabel} 失败:`, error);
+    } catch {
       return null;
     }
   };
@@ -298,8 +277,7 @@ const CharacterBDPage = () => {
 
       setSearchResults(validResults);
       setSearching(false);
-    } catch (error) {
-      console.error('搜索失败:', error);
+    } catch {
       setError('搜索失败,请稍后重试');
       setSearching(false);
     }

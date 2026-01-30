@@ -42,8 +42,8 @@ const JoinLegionPage = () => {
         const elites = members.filter(m => m.role === 'elite');
         elites.forEach(elite => contactList.push({ role: '军团精英', name: elite.name }));
         setContacts(contactList);
-      } catch (error) {
-        console.error('加载联系人失败:', error);
+      } catch {
+        // 加载联系人失败
       }
     };
     loadContacts();
@@ -58,8 +58,8 @@ const JoinLegionPage = () => {
         if (data.success) {
           setGalleryImages(data.data);
         }
-      } catch (error) {
-        console.error('加载相册失败:', error);
+      } catch {
+        // 加载相册失败
       }
     };
     loadGalleryImages();
@@ -113,7 +113,6 @@ const JoinLegionPage = () => {
       setShowConfirm(true);
     } catch (error: any) {
       clearTimeout(timeoutId);
-      console.error('验证角色失败:', error);
 
       if (error.name === 'AbortError') {
         setNameError('❌ 验证超时(10秒),请检查网络连接后重试');
@@ -151,13 +150,11 @@ const JoinLegionPage = () => {
         characterUrl: characterUrl
       });
 
-      console.log('申请已提交:', parsedCharacter);
       setSubmitted(true);
 
       // 滚动到顶部
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
-      console.error('提交申请失败:', error);
+    } catch {
       alert('提交失败,请稍后重试');
     }
   };

@@ -93,8 +93,7 @@ const ItemDetailModal = ({ itemId, onClose }: ItemDetailModalProps) => {
       // 缓存等级0的属性
       setStatsCache({ 0: { mainStats: data.mainStats || [], subStats: data.subStats || [] } });
       setError(null);
-    } catch (err) {
-      console.error('加载物品详情失败:', err);
+    } catch {
       setError('加载失败，请重试');
     } finally {
       setLoading(false);
@@ -123,8 +122,8 @@ const ItemDetailModal = ({ itemId, onClose }: ItemDetailModalProps) => {
           mainStats: data.mainStats || [],
           subStats: data.subStats || [],
         };
-      } catch (err) {
-        console.error(`预加载等级 ${level} 失败:`, err);
+      } catch {
+        // 预加载等级失败
       }
     }
 

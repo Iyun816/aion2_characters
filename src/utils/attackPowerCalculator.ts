@@ -116,8 +116,6 @@ export function calculateAttackPower(
     wingBoss: 0,
   };
 
-  console.log('[攻击力计算] 开始计算...');
-
   // ========== 1. 从装备中提取 ==========
   if (equipmentData?.equipment?.equipmentList) {
     for (const item of equipmentData.equipment.equipmentList) {
@@ -130,12 +128,10 @@ export function calculateAttackPower(
           // 武器固定攻击力: 基础值 + 强化值
           if (stat.id === 'WeaponFixingDamage') {
             breakdown.equipmentFlat += value + extra;
-            console.log(`  [主属性] ${item.slotPosName || item.name} - 攻击力固定值: ${value + extra} (${value} + ${extra})`);
           }
           // 装备百分比攻击力增加
           else if (stat.id === 'DamageRatio' && isPercent(stat.extra)) {
             breakdown.equipmentPercent += extra;
-            console.log(`  [主属性] ${item.slotPosName || item.name} - 攻击力百分比: +${extra}%`);
           }
         }
       }
@@ -148,11 +144,9 @@ export function calculateAttackPower(
           if (stat.id === 'WeaponFixingDamage') {
             // 副属性固定攻击力
             breakdown.equipmentFlat += value;
-            console.log(`  [副属性] ${item.slotPosName || item.name} - 攻击力固定值: +${value}`);
           } else if (stat.id === 'DamageRatio' && isPercent(stat.value)) {
             // S2新增: 副属性攻击力增加百分比
             breakdown.equipmentPercent += value;
-            console.log(`  [副属性] ${item.slotPosName || item.name} - 攻击力增加: +${value}%`);
           }
           // 注意: 威力(STR)不在这里计算，因为角色主要能力值中已包含所有威力的总效果
         }
@@ -165,66 +159,43 @@ export function calculateAttackPower(
 
           if (stone.id === 'WeaponFixingDamage') {
             breakdown.equipmentFlat += value;
-            console.log(`  [魔石] ${item.slotPosName || item.name} - 攻击力固定值: +${value}`);
           }
         }
       }
     }
   }
 
-  console.log('[装备解析完成]', {
-    装备固定攻击: breakdown.equipmentFlat,
-    装备百分比: breakdown.equipmentPercent,
-  });
-
   // ========== 2. 从角色主要能力值提取 ==========
-  console.log('[开始解析角色主要能力值]');
-  console.log('  characterInfo:', characterInfo ? '存在' : '不存在');
-  console.log('  statList:', characterInfo?.stat?.statList?.length || 0, '个属性');
-
   if (characterInfo?.stat?.statList) {
     for (const stat of characterInfo.stat.statList) {
       if (!stat.statSecondList) continue;
 
       // 威力 (STR)
       if (stat.type === 'STR') {
-        console.log(`  找到威力(STR)属性: 数值=${stat.value}, 二级属性=`, stat.statSecondList);
         for (const desc of stat.statSecondList) {
           // 兼容简体和繁体: 攻击力/攻擊力
           const match = desc.match(/攻[击擊]力增加\s*\+?(\d+(?:\.\d+)?)%/);
           if (match) {
-            const beforeAdd = breakdown.strength;
             breakdown.strength += parseFloat(match[1]);
-            console.log(`  [主要能力值] 威力 ${stat.value} = +${match[1]}% 攻击力 (累加前=${beforeAdd.toFixed(1)}%, 累加后=${breakdown.strength.toFixed(1)}%)`);
           }
         }
       }
 
       // 破坏 (Destruction)
       if (stat.type === 'Destruction') {
-        console.log(`  找到破坏(Destruction)属性: 数值=${stat.value}, 二级属性=`, stat.statSecondList);
         for (const desc of stat.statSecondList) {
           // 兼容简体和繁体: 攻击力/攻擊力
           const match = desc.match(/攻[击擊]力增加\s*\+?(\d+(?:\.\d+)?)%/);
           if (match) {
-            const beforeAdd = breakdown.destruction;
             breakdown.destruction += parseFloat(match[1]);
-            console.log(`  [主要能力值] 破坏 ${stat.value} = +${match[1]}% 攻击力 (累加前=${beforeAdd.toFixed(1)}%, 累加后=${breakdown.destruction.toFixed(1)}%)`);
           }
         }
       }
     }
   }
 
-  console.log('[主要能力值解析完成]', {
-    威力: breakdown.strength,
-    破坏: breakdown.destruction,
-  });
-
   // ========== 3. 从守护力面板提取 ==========
   if (daevanionBoards && typeof daevanionBoards === 'object') {
-    console.log('[守护力面板解析] 面板数量:', Array.isArray(daevanionBoards) ? daevanionBoards.length : Object.keys(daevanionBoards).length);
-
     // 支持数组格式和对象格式
     const boardsArray = Array.isArray(daevanionBoards)
       ? daevanionBoards
@@ -235,8 +206,6 @@ export function calculateAttackPower(
 
       // 使用已聚合的 openStatEffectList
       if (board.openStatEffectList && Array.isArray(board.openStatEffectList)) {
-        console.log(`  [守护力] 该面板有 ${board.openStatEffectList.length} 个属性效果`);
-
         for (const effect of board.openStatEffectList) {
           const desc = effect.desc;
 
@@ -245,7 +214,6 @@ export function calculateAttackPower(
           if (extraAtkMatch) {
             const value = parseFloat(extraAtkMatch[1]);
             breakdown.daevanionFlat += value;
-            console.log(`  [守护力] 额外攻击力: +${value}`);
             continue;
           }
 
@@ -254,7 +222,6 @@ export function calculateAttackPower(
           if (pveAtkMatch) {
             const value = parseFloat(pveAtkMatch[1]);
             breakdown.daevanionFlat += value;
-            console.log(`  [守护力] PVE攻击力: +${value}`);
             continue;
           }
 
@@ -263,7 +230,6 @@ export function calculateAttackPower(
           if (atkPercentMatch) {
             const value = parseFloat(atkPercentMatch[1]);
             breakdown.equipmentPercent += value;
-            console.log(`  [守护力] 攻击力增加: +${value}%`);
             continue;
           }
         }
@@ -271,24 +237,12 @@ export function calculateAttackPower(
     }
   }
 
-  console.log('[守护力面板解析完成]', {
-    守护力固定攻击: breakdown.daevanionFlat,
-    装备百分比更新: breakdown.equipmentPercent,
-  });
-
   // ========== 4. 计算最终攻击力 ==========
   const totalFlat = breakdown.equipmentFlat + breakdown.daevanionFlat;
   const totalPercent = breakdown.equipmentPercent + breakdown.destruction + breakdown.strength;
 
   // 新算法: Attack Power = Flat Attack × (1 + Attack%/100)
   const finalPower = totalFlat * (1 + totalPercent / 100);
-
-  console.log('[计算完成]', {
-    总固定值: totalFlat,
-    总百分比: totalPercent,
-    最终攻击力: Math.round(finalPower),
-    算法: `${totalFlat} × (1 + ${totalPercent}/100) = ${Math.round(finalPower)}`
-  });
 
   return {
     breakdown,
@@ -305,8 +259,6 @@ export async function loadAndCalculateAttackPower(
   memberId: string
 ): Promise<AttackPowerResult | null> {
   try {
-    console.log(`[攻击力计算] 加载成员 ${memberId} 数据...`);
-
     const [equipRes, charRes, daevanionRes] = await Promise.all([
       fetch(`/data/${memberId}/equipment_details.json`),
       fetch(`/data/${memberId}/character_info.json`),
@@ -314,7 +266,6 @@ export async function loadAndCalculateAttackPower(
     ]);
 
     if (!equipRes.ok || !charRes.ok) {
-      console.warn('[攻击力计算] 数据加载失败');
       return null;
     }
 
@@ -323,8 +274,7 @@ export async function loadAndCalculateAttackPower(
     const daevanionBoards = daevanionRes?.ok ? await daevanionRes.json() : null;
 
     return calculateAttackPower(equipmentData, characterInfo, daevanionBoards);
-  } catch (error) {
-    console.error('[攻击力计算] 计算失败:', error);
+  } catch {
     return null;
   }
 }

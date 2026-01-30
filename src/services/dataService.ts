@@ -19,17 +19,15 @@ const STORAGE_KEYS = {
  */
 export async function loadMembers(): Promise<MemberConfig[]> {
   try {
-    console.log('从后端 API 加载成员列表...');
     const response = await fetch('/api/members');
     if (response.ok) {
       const result = await response.json();
       if (result.success) {
-        console.log('成功加载成员列表:', result.data.length, '名成员');
         return result.data;
       }
     }
-  } catch (e) {
-    console.error('从后端加载成员列表失败:', e);
+  } catch {
+    // 加载失败，返回空数组
   }
 
   return [];
@@ -49,15 +47,8 @@ export async function saveMembers(members: MemberConfig[]): Promise<boolean> {
     });
 
     const result = await response.json();
-    if (result.success) {
-      console.log('成员列表保存成功');
-      return true;
-    } else {
-      console.error('保存失败:', result.error);
-      return false;
-    }
-  } catch (e) {
-    console.error('保存成员列表失败:', e);
+    return result.success === true;
+  } catch {
     return false;
   }
 }
@@ -94,36 +85,28 @@ export async function updateMember(members: MemberConfig[], updatedMember: Membe
  * 先调用后端 DELETE API 删除成员数据文件夹,然后更新 members.json
  */
 export async function deleteMember(members: MemberConfig[], memberId: string): Promise<MemberConfig[]> {
-  try {
-    // 1. 调用后端 DELETE API 删除成员数据文件夹
-    console.log(`正在删除成员: ${memberId}`);
-    const response = await fetch(`/api/members/${encodeURIComponent(memberId)}`, {
-      method: 'DELETE',
-    });
+  // 1. 调用后端 DELETE API 删除成员数据文件夹
+  const response = await fetch(`/api/members/${encodeURIComponent(memberId)}`, {
+    method: 'DELETE',
+  });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: '未知错误' }));
-      throw new Error(errorData.error || `HTTP ${response.status}`);
-    }
-
-    const result = await response.json();
-    if (!result.success) {
-      throw new Error(result.error || '删除失败');
-    }
-
-    console.log(`✓ 成员 ${memberId} 删除成功`);
-
-    // 2. 更新本地成员列表(从数组中移除)
-    const updated = members.filter(m => m.id !== memberId);
-
-    // 3. 保存更新后的列表到后端
-    await saveMembers(updated);
-
-    return updated;
-  } catch (error: any) {
-    console.error(`删除成员 ${memberId} 失败:`, error);
-    throw new Error(`删除失败: ${error.message}`);
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: '未知错误' }));
+    throw new Error(errorData.error || `HTTP ${response.status}`);
   }
+
+  const result = await response.json();
+  if (!result.success) {
+    throw new Error(result.error || '删除失败');
+  }
+
+  // 2. 更新本地成员列表(从数组中移除)
+  const updated = members.filter(m => m.id !== memberId);
+
+  // 3. 保存更新后的列表到后端
+  await saveMembers(updated);
+
+  return updated;
 }
 
 /**
@@ -142,17 +125,15 @@ export function exportMembersToFile(members: MemberConfig[]): void {
  */
 export async function loadApplications(): Promise<JoinApplication[]> {
   try {
-    console.log('从后端 API 加载申请列表...');
     const response = await fetch('/api/applications');
     if (response.ok) {
       const result = await response.json();
       if (result.success) {
-        console.log('成功加载申请列表:', result.data.length, '条申请');
         return result.data;
       }
     }
-  } catch (e) {
-    console.error('从后端加载申请列表失败:', e);
+  } catch {
+    // 加载失败，返回空数组
   }
 
   return [];
@@ -164,25 +145,19 @@ export async function loadApplications(): Promise<JoinApplication[]> {
 export async function addApplication(
   newApp: Omit<JoinApplication, 'id' | 'submittedAt' | 'status'>
 ): Promise<JoinApplication> {
-  try {
-    const response = await fetch('/api/applications', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newApp),
-    });
+  const response = await fetch('/api/applications', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(newApp),
+  });
 
-    const result = await response.json();
-    if (result.success) {
-      console.log('申请提交成功');
-      return result.data;
-    } else {
-      throw new Error(result.error || '提交失败');
-    }
-  } catch (e) {
-    console.error('提交申请失败:', e);
-    throw e;
+  const result = await response.json();
+  if (result.success) {
+    return result.data;
+  } else {
+    throw new Error(result.error || '提交失败');
   }
 }
 
@@ -194,25 +169,19 @@ export async function reviewApplication(
   status: 'approved' | 'rejected',
   reviewNote?: string
 ): Promise<JoinApplication> {
-  try {
-    const response = await fetch(`/api/applications/${applicationId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ status, reviewNote }),
-    });
+  const response = await fetch(`/api/applications/${applicationId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ status, reviewNote }),
+  });
 
-    const result = await response.json();
-    if (result.success) {
-      console.log('申请审核成功');
-      return result.data;
-    } else {
-      throw new Error(result.error || '审核失败');
-    }
-  } catch (e) {
-    console.error('审核申请失败:', e);
-    throw e;
+  const result = await response.json();
+  if (result.success) {
+    return result.data;
+  } else {
+    throw new Error(result.error || '审核失败');
   }
 }
 
@@ -220,21 +189,15 @@ export async function reviewApplication(
  * 删除申请
  */
 export async function deleteApplication(applicationId: string): Promise<boolean> {
-  try {
-    const response = await fetch(`/api/applications/${applicationId}`, {
-      method: 'DELETE',
-    });
+  const response = await fetch(`/api/applications/${applicationId}`, {
+    method: 'DELETE',
+  });
 
-    const result = await response.json();
-    if (result.success) {
-      console.log('申请删除成功');
-      return true;
-    } else {
-      throw new Error(result.error || '删除失败');
-    }
-  } catch (e) {
-    console.error('删除申请失败:', e);
-    throw e;
+  const result = await response.json();
+  if (result.success) {
+    return true;
+  } else {
+    throw new Error(result.error || '删除失败');
   }
 }
 
@@ -323,8 +286,8 @@ export async function getEquipmentCache(memberId: string): Promise<EquipmentDeta
         return data;
       }
     }
-  } catch (e) {
-    console.warn(`加载成员 ${memberId} 的装备缓存失败`, e);
+  } catch {
+    // 从服务器加载失败，尝试 localStorage
   }
 
   // 尝试从 localStorage
@@ -334,7 +297,7 @@ export async function getEquipmentCache(memberId: string): Promise<EquipmentDeta
     try {
       return JSON.parse(stored);
     } catch {
-      console.error('解析装备缓存失败');
+      // 解析失败，返回 null
     }
   }
 
@@ -385,7 +348,7 @@ export function importJsonFile<T>(file: File): Promise<T> {
         const content = e.target?.result as string;
         const data = JSON.parse(content);
         resolve(data);
-      } catch (err) {
+      } catch {
         reject(new Error('JSON 解析失败'));
       }
     };

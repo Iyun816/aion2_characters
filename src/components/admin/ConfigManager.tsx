@@ -88,8 +88,7 @@ const ConfigManager: React.FC = () => {
       if (data.success) {
         setConfig(data.data);
       }
-    } catch (error) {
-      console.error('加载配置失败:', error);
+    } catch {
       showMessage('error', '加载配置失败');
     } finally {
       setLoading(false);
@@ -115,8 +114,7 @@ const ConfigManager: React.FC = () => {
       } else {
         showMessage('error', data.error || '保存失败');
       }
-    } catch (error) {
-      console.error('保存配置失败:', error);
+    } catch {
       showMessage('error', '保存失败，请稍后重试');
     } finally {
       setSaving(false);
@@ -152,8 +150,8 @@ const ConfigManager: React.FC = () => {
         setSyncStatus(data.data);
         setSyncIntervalInput(data.data.intervalHours);
       }
-    } catch (error) {
-      console.error('加载同步状态失败:', error);
+    } catch {
+      // 加载同步状态失败
     }
   };
 
@@ -180,8 +178,7 @@ const ConfigManager: React.FC = () => {
         showMessage('error', data.error || '启动失败');
         addLog('error', `启动失败: ${data.error}`);
       }
-    } catch (error) {
-      console.error('启动同步失败:', error);
+    } catch {
       showMessage('error', '启动失败');
       addLog('error', '启动失败，网络错误');
     }
@@ -203,8 +200,7 @@ const ConfigManager: React.FC = () => {
         showMessage('error', data.message || '停止失败');
         addLog('error', `停止失败: ${data.message}`);
       }
-    } catch (error) {
-      console.error('停止同步失败:', error);
+    } catch {
       showMessage('error', '停止失败');
       addLog('error', '停止失败，网络错误');
     }
@@ -232,8 +228,7 @@ const ConfigManager: React.FC = () => {
         showMessage('error', data.message || '同步失败');
         addLog('error', `同步失败: ${data.message}`);
       }
-    } catch (error) {
-      console.error('启动同步失败:', error);
+    } catch {
       showMessage('error', '启动同步失败');
       addLog('error', '启动同步失败，网络错误');
     }
@@ -262,8 +257,7 @@ const ConfigManager: React.FC = () => {
         const data: ClassBoardConfig = await response.json();
         setDaevanionConfig(data);
       }
-    } catch (error) {
-      console.error('加载守护力配置失败:', error);
+    } catch {
       showMessage('error', '加载守护力配置失败');
     } finally {
       setDaevanionLoading(false);
@@ -289,8 +283,7 @@ const ConfigManager: React.FC = () => {
       } else {
         showMessage('error', data.error || '保存失败');
       }
-    } catch (error) {
-      console.error('保存守护力配置失败:', error);
+    } catch {
       showMessage('error', '保存失败，请稍后重试');
     } finally {
       setDaevanionSaving(false);

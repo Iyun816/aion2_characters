@@ -1,234 +1,4 @@
 {
-  "ranking": {
-    "rankingList": [
-      {
-        "rankingContentsType": 1,
-        "rankingContentsName": "深渊",
-        "rankingType": 0,
-        "rank": 4966,
-        "characterId": null,
-        "characterName": "梧",
-        "classId": 4,
-        "className": "Ranger",
-        "guildName": "椿夏",
-        "point": 164019,
-        "prevRank": 4326,
-        "rankChange": -13,
-        "gradeId": 18,
-        "gradeName": "9等兵",
-        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Ranking_Grade_Abyss_Solidier_09.png",
-        "profileImage": null,
-        "extraDataMap": null
-      },
-      {
-        "rankingContentsType": 3,
-        "rankingContentsName": "恶梦",
-        "rankingType": 0,
-        "rank": 3808,
-        "characterId": null,
-        "characterName": "梧",
-        "classId": 4,
-        "className": "Ranger",
-        "guildName": "椿夏",
-        "point": 262564,
-        "prevRank": 3549,
-        "rankChange": -1,
-        "gradeId": 10,
-        "gradeName": "铜",
-        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Bronze.png",
-        "profileImage": null,
-        "extraDataMap": null
-      },
-      {
-        "rankingContentsType": 4,
-        "rankingContentsName": "超越",
-        "rankingType": 0,
-        "rank": 5228,
-        "characterId": null,
-        "characterName": "梧",
-        "classId": 4,
-        "className": "Ranger",
-        "guildName": "椿夏",
-        "point": 181296,
-        "prevRank": 3677,
-        "rankChange": -2,
-        "gradeId": 10,
-        "gradeName": "铜",
-        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Bronze.png",
-        "profileImage": null,
-        "extraDataMap": null
-      },
-      {
-        "rankingContentsType": 5,
-        "rankingContentsName": "孤独竞技场",
-        "rankingType": null,
-        "rank": null,
-        "characterId": null,
-        "characterName": null,
-        "classId": null,
-        "className": null,
-        "guildName": null,
-        "point": null,
-        "prevRank": null,
-        "rankChange": null,
-        "gradeId": null,
-        "gradeName": null,
-        "gradeIcon": null,
-        "profileImage": null,
-        "extraDataMap": null
-      },
-      {
-        "rankingContentsType": 6,
-        "rankingContentsName": "协力竞技场",
-        "rankingType": null,
-        "rank": null,
-        "characterId": null,
-        "characterName": null,
-        "classId": null,
-        "className": null,
-        "guildName": null,
-        "point": null,
-        "prevRank": null,
-        "rankChange": null,
-        "gradeId": null,
-        "gradeName": null,
-        "gradeIcon": null,
-        "profileImage": null,
-        "extraDataMap": null
-      },
-      {
-        "rankingContentsType": 20,
-        "rankingContentsName": "讨伐战",
-        "rankingType": 0,
-        "rank": 2882,
-        "characterId": null,
-        "characterName": "梧",
-        "classId": 4,
-        "className": "Ranger",
-        "guildName": "椿夏",
-        "point": 32128,
-        "prevRank": 0,
-        "rankChange": -1,
-        "gradeId": 10,
-        "gradeName": "铜",
-        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Bronze.png",
-        "profileImage": null,
-        "extraDataMap": null
-      },
-      {
-        "rankingContentsType": 21,
-        "rankingContentsName": "觉醒战",
-        "rankingType": 0,
-        "rank": 2970,
-        "characterId": null,
-        "characterName": "梧",
-        "classId": 4,
-        "className": "Ranger",
-        "guildName": "椿夏",
-        "point": 86180,
-        "prevRank": 397,
-        "rankChange": 0,
-        "gradeId": 10,
-        "gradeName": "铜",
-        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Bronze.png",
-        "profileImage": null,
-        "extraDataMap": null
-      }
-    ]
-  },
-  "profile": {
-    "characterId": "A1pIWbd0UKoTYJ2XbL_Cwys5RleNG3EVrZKBibx7Dto=",
-    "characterName": "梧",
-    "serverId": 1001,
-    "serverName": "希埃尔",
-    "regionName": "椿夏",
-    "pcId": 14,
-    "className": "弓星",
-    "raceId": 1,
-    "raceName": "天族",
-    "gender": 2,
-    "genderName": "女性",
-    "characterLevel": 45,
-    "titleId": 0,
-    "titleName": "",
-    "titleGrade": "",
-    "profileImage": "https://profileimg.plaync.com/game_profile_images/aion2_tw/images?gameServerKey=1001&charKey=281756451687374794"
-  },
-  "title": {
-    "totalCount": 390,
-    "ownedCount": 237,
-    "titleList": [
-      {
-        "id": 11020040,
-        "equipCategory": "Etc",
-        "name": "事必归正",
-        "grade": "Legend",
-        "totalCount": 125,
-        "ownedCount": 80,
-        "ownedPercent": 64,
-        "statList": [
-          {
-            "desc": "额外防御力 +20"
-          }
-        ],
-        "equipStatList": [
-          {
-            "desc": "战斗速度 +3.9%"
-          },
-          {
-            "desc": "行动力 +170"
-          }
-        ]
-      },
-      {
-        "id": 12030002,
-        "equipCategory": "Attack",
-        "name": "斐尔特朗守护者",
-        "grade": "Legend",
-        "totalCount": 143,
-        "ownedCount": 80,
-        "ownedPercent": 56,
-        "statList": [
-          {
-            "desc": "PVE伤害增幅 +1%"
-          }
-        ],
-        "equipStatList": [
-          {
-            "desc": "PVE伤害增幅 +3.7%"
-          },
-          {
-            "desc": "强击 +2%"
-          }
-        ]
-      },
-      {
-        "id": 12030003,
-        "equipCategory": "Defense",
-        "name": "斐尔特朗圣者",
-        "grade": "Unique",
-        "totalCount": 122,
-        "ownedCount": 77,
-        "ownedPercent": 63,
-        "statList": [
-          {
-            "desc": "PVE伤害耐性 +1%"
-          }
-        ],
-        "equipStatList": [
-          {
-            "desc": "额外防御力 +300"
-          },
-          {
-            "desc": "伤害耐性 +5%"
-          },
-          {
-            "desc": "格挡 +110"
-          }
-        ]
-      }
-    ]
-  },
   "stat": {
     "statList": [
       {
@@ -377,6 +147,236 @@
         "name": "아이템레벨",
         "value": 3120,
         "statSecondList": null
+      }
+    ]
+  },
+  "title": {
+    "totalCount": 390,
+    "ownedCount": 237,
+    "titleList": [
+      {
+        "id": 11020040,
+        "equipCategory": "Etc",
+        "name": "事必归正",
+        "grade": "Legend",
+        "totalCount": 125,
+        "ownedCount": 80,
+        "ownedPercent": 64,
+        "statList": [
+          {
+            "desc": "额外防御力 +20"
+          }
+        ],
+        "equipStatList": [
+          {
+            "desc": "战斗速度 +3.9%"
+          },
+          {
+            "desc": "行动力 +170"
+          }
+        ]
+      },
+      {
+        "id": 12030002,
+        "equipCategory": "Attack",
+        "name": "斐尔特朗守护者",
+        "grade": "Legend",
+        "totalCount": 143,
+        "ownedCount": 80,
+        "ownedPercent": 56,
+        "statList": [
+          {
+            "desc": "PVE伤害增幅 +1%"
+          }
+        ],
+        "equipStatList": [
+          {
+            "desc": "PVE伤害增幅 +3.7%"
+          },
+          {
+            "desc": "强击 +2%"
+          }
+        ]
+      },
+      {
+        "id": 12030003,
+        "equipCategory": "Defense",
+        "name": "斐尔特朗圣者",
+        "grade": "Unique",
+        "totalCount": 122,
+        "ownedCount": 77,
+        "ownedPercent": 63,
+        "statList": [
+          {
+            "desc": "PVE伤害耐性 +1%"
+          }
+        ],
+        "equipStatList": [
+          {
+            "desc": "额外防御力 +300"
+          },
+          {
+            "desc": "伤害耐性 +5%"
+          },
+          {
+            "desc": "格挡 +110"
+          }
+        ]
+      }
+    ]
+  },
+  "profile": {
+    "characterId": "A1pIWbd0UKoTYJ2XbL_Cwys5RleNG3EVrZKBibx7Dto=",
+    "characterName": "梧",
+    "serverId": 1001,
+    "serverName": "希埃尔",
+    "regionName": "椿夏",
+    "pcId": 14,
+    "className": "弓星",
+    "raceId": 1,
+    "raceName": "天族",
+    "gender": 2,
+    "genderName": "女性",
+    "characterLevel": 45,
+    "titleId": 0,
+    "titleName": "",
+    "titleGrade": "",
+    "profileImage": "https://profileimg.plaync.com/game_profile_images/aion2_tw/images?gameServerKey=1001&charKey=281756451687374794"
+  },
+  "ranking": {
+    "rankingList": [
+      {
+        "rankingContentsType": 1,
+        "rankingContentsName": "深渊",
+        "rankingType": 0,
+        "rank": 5012,
+        "characterId": null,
+        "characterName": "梧",
+        "classId": 4,
+        "className": "Ranger",
+        "guildName": "椿夏",
+        "point": 164019,
+        "prevRank": 4326,
+        "rankChange": -26,
+        "gradeId": 18,
+        "gradeName": "9等兵",
+        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Ranking_Grade_Abyss_Solidier_09.png",
+        "profileImage": null,
+        "extraDataMap": null
+      },
+      {
+        "rankingContentsType": 3,
+        "rankingContentsName": "恶梦",
+        "rankingType": 0,
+        "rank": 3812,
+        "characterId": null,
+        "characterName": "梧",
+        "classId": 4,
+        "className": "Ranger",
+        "guildName": "椿夏",
+        "point": 262564,
+        "prevRank": 3549,
+        "rankChange": -3,
+        "gradeId": 10,
+        "gradeName": "铜",
+        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Bronze.png",
+        "profileImage": null,
+        "extraDataMap": null
+      },
+      {
+        "rankingContentsType": 4,
+        "rankingContentsName": "超越",
+        "rankingType": 0,
+        "rank": 5235,
+        "characterId": null,
+        "characterName": "梧",
+        "classId": 4,
+        "className": "Ranger",
+        "guildName": "椿夏",
+        "point": 181296,
+        "prevRank": 3677,
+        "rankChange": -4,
+        "gradeId": 10,
+        "gradeName": "铜",
+        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Bronze.png",
+        "profileImage": null,
+        "extraDataMap": null
+      },
+      {
+        "rankingContentsType": 5,
+        "rankingContentsName": "孤独竞技场",
+        "rankingType": null,
+        "rank": null,
+        "characterId": null,
+        "characterName": null,
+        "classId": null,
+        "className": null,
+        "guildName": null,
+        "point": null,
+        "prevRank": null,
+        "rankChange": null,
+        "gradeId": null,
+        "gradeName": null,
+        "gradeIcon": null,
+        "profileImage": null,
+        "extraDataMap": null
+      },
+      {
+        "rankingContentsType": 6,
+        "rankingContentsName": "协力竞技场",
+        "rankingType": null,
+        "rank": null,
+        "characterId": null,
+        "characterName": null,
+        "classId": null,
+        "className": null,
+        "guildName": null,
+        "point": null,
+        "prevRank": null,
+        "rankChange": null,
+        "gradeId": null,
+        "gradeName": null,
+        "gradeIcon": null,
+        "profileImage": null,
+        "extraDataMap": null
+      },
+      {
+        "rankingContentsType": 20,
+        "rankingContentsName": "讨伐战",
+        "rankingType": 0,
+        "rank": 2882,
+        "characterId": null,
+        "characterName": "梧",
+        "classId": 4,
+        "className": "Ranger",
+        "guildName": "椿夏",
+        "point": 32128,
+        "prevRank": 0,
+        "rankChange": 0,
+        "gradeId": 10,
+        "gradeName": "铜",
+        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Bronze.png",
+        "profileImage": null,
+        "extraDataMap": null
+      },
+      {
+        "rankingContentsType": 21,
+        "rankingContentsName": "觉醒战",
+        "rankingType": 0,
+        "rank": 2976,
+        "characterId": null,
+        "characterName": "梧",
+        "classId": 4,
+        "className": "Ranger",
+        "guildName": "椿夏",
+        "point": 86180,
+        "prevRank": 397,
+        "rankChange": -3,
+        "gradeId": 10,
+        "gradeName": "铜",
+        "gradeIcon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Arena_Ranking_Grade_Bronze.png",
+        "profileImage": null,
+        "extraDataMap": null
       }
     ]
   },

@@ -30,8 +30,8 @@ const ItemsPage = () => {
       try {
         const data = await fetchFilters();
         setFilterOptions(data);
-      } catch (error) {
-        console.error('加载筛选选项失败:', error);
+      } catch {
+        // 加载筛选选项失败
       }
     };
     loadFilters();
@@ -44,8 +44,8 @@ const ItemsPage = () => {
       const data = await fetchItemsList(filters);
       setItems(data.contents);
       setPagination(data.pagination);
-    } catch (error) {
-      console.error('加载物品列表失败:', error);
+    } catch {
+      // 加载物品列表失败
     } finally {
       setLoading(false);
     }

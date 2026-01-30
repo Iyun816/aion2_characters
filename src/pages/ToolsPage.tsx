@@ -21,8 +21,8 @@ const ToolsPage = () => {
         if (data.success && data.tools && data.tools.length > 0) {
           setTools(data.tools);
         }
-      } catch (error) {
-        console.error('加载工具列表失败:', error);
+      } catch {
+        // 加载工具列表失败
       }
     };
 

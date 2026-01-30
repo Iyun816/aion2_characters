@@ -1,370 +1,4 @@
 {
-  "skill": {
-    "skillList": [
-      {
-        "id": 14020000,
-        "name": "狙击",
-        "needLevel": 1,
-        "skillLevel": 21,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_001.png",
-        "category": "Active",
-        "acquired": 1,
-        "equip": 1
-      },
-      {
-        "id": 14340000,
-        "name": "速射",
-        "needLevel": 1,
-        "skillLevel": 20,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_034.png",
-        "category": "Active",
-        "acquired": 1,
-        "equip": 1
-      },
-      {
-        "id": 14130000,
-        "name": "套索箭",
-        "needLevel": 1,
-        "skillLevel": 15,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_013.png",
-        "category": "Active",
-        "acquired": 1,
-        "equip": 1
-      },
-      {
-        "id": 14090000,
-        "name": "目标箭",
-        "needLevel": 3,
-        "skillLevel": 14,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_031.png",
-        "category": "Active",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14050000,
-        "name": "利锥箭",
-        "needLevel": 4,
-        "skillLevel": 17,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_005.png",
-        "category": "Active",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14330000,
-        "name": "箭矢扫射",
-        "needLevel": 5,
-        "skillLevel": 16,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_033.png",
-        "category": "Active",
-        "acquired": 1,
-        "equip": 1
-      },
-      {
-        "id": 14110000,
-        "name": "狂风箭",
-        "needLevel": 7,
-        "skillLevel": 14,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_011.png",
-        "category": "Active",
-        "acquired": 1,
-        "equip": 1
-      },
-      {
-        "id": 14170000,
-        "name": "爆炸圈套",
-        "needLevel": 8,
-        "skillLevel": 8,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_017.png",
-        "category": "Active",
-        "acquired": 1,
-        "equip": 1
-      },
-      {
-        "id": 14080000,
-        "name": "破裂箭",
-        "needLevel": 10,
-        "skillLevel": 17,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_008.png",
-        "category": "Active",
-        "acquired": 1,
-        "equip": 1
-      },
-      {
-        "id": 14070000,
-        "name": "压制箭",
-        "needLevel": 12,
-        "skillLevel": 6,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_007.png",
-        "category": "Active",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14010000,
-        "name": "瞄准箭",
-        "needLevel": 14,
-        "skillLevel": 20,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_002.png",
-        "category": "Active",
-        "acquired": 1,
-        "equip": 1
-      },
-      {
-        "id": 14260000,
-        "name": "冲击解除",
-        "needLevel": 16,
-        "skillLevel": 12,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_002.png",
-        "category": "Active",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14710000,
-        "name": "警戒之眼",
-        "needLevel": 1,
-        "skillLevel": 19,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_004.png",
-        "category": "Passive",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14720000,
-        "name": "集中砲火",
-        "needLevel": 6,
-        "skillLevel": 17,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_003.png",
-        "category": "Passive",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14730000,
-        "name": "风之活力",
-        "needLevel": 9,
-        "skillLevel": 5,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_006.png",
-        "category": "Passive",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14740000,
-        "name": "集中之眼",
-        "needLevel": 11,
-        "skillLevel": 20,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_001.png",
-        "category": "Passive",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14750000,
-        "name": "猎人决心",
-        "needLevel": 13,
-        "skillLevel": 22,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_011.png",
-        "category": "Passive",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14760000,
-        "name": "抵抗决心",
-        "needLevel": 15,
-        "skillLevel": 11,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_012.png",
-        "category": "Passive",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14770000,
-        "name": "束缚之眼",
-        "needLevel": 17,
-        "skillLevel": 20,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_008.png",
-        "category": "Passive",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14780000,
-        "name": "近距离射击",
-        "needLevel": 21,
-        "skillLevel": 17,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_013.png",
-        "category": "Passive",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14790000,
-        "name": "回生契约",
-        "needLevel": 23,
-        "skillLevel": 9,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_009.png",
-        "category": "Passive",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14800000,
-        "name": "猎人之魂",
-        "needLevel": 25,
-        "skillLevel": 21,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_007.png",
-        "category": "Passive",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14270000,
-        "name": "箭矢暴风",
-        "needLevel": 22,
-        "skillLevel": 1,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_026.png",
-        "category": "Dp",
-        "acquired": 1,
-        "equip": 1
-      },
-      {
-        "id": 14310000,
-        "name": "白杰尔权能",
-        "needLevel": 22,
-        "skillLevel": 13,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_022.png",
-        "category": "Dp",
-        "acquired": 1,
-        "equip": 1
-      },
-      {
-        "id": 14220000,
-        "name": "祝福之弓",
-        "needLevel": 22,
-        "skillLevel": 15,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_030.png",
-        "category": "Dp",
-        "acquired": 1,
-        "equip": 1
-      },
-      {
-        "id": 14120000,
-        "name": "突袭踢",
-        "needLevel": 22,
-        "skillLevel": 0,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_012.png",
-        "category": "Dp",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14180000,
-        "name": "结缚圈套",
-        "needLevel": 22,
-        "skillLevel": 0,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_018.png",
-        "category": "Dp",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14150000,
-        "name": "睡眠箭",
-        "needLevel": 22,
-        "skillLevel": 0,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_015.png",
-        "category": "Dp",
-        "acquired": 0,
-        "equip": 0
-      },
-      {
-        "id": 14190000,
-        "name": "隐身",
-        "needLevel": 22,
-        "skillLevel": 1,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_019.png",
-        "category": "Dp",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14160000,
-        "name": "封印箭",
-        "needLevel": 22,
-        "skillLevel": 0,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_016.png",
-        "category": "Dp",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14350000,
-        "name": "大自然吐息",
-        "needLevel": 22,
-        "skillLevel": 0,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_035.png",
-        "category": "Dp",
-        "acquired": 0,
-        "equip": 0
-      },
-      {
-        "id": 14060000,
-        "name": "葛利芬箭",
-        "needLevel": 22,
-        "skillLevel": 0,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_006.png",
-        "category": "Dp",
-        "acquired": 1,
-        "equip": 0
-      },
-      {
-        "id": 14360000,
-        "name": "爆炸箭",
-        "needLevel": 22,
-        "skillLevel": 5,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_023.png",
-        "category": "Dp",
-        "acquired": 1,
-        "equip": 1
-      },
-      {
-        "id": 14700000,
-        "name": "强袭强击",
-        "needLevel": 22,
-        "skillLevel": 0,
-        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_003.png",
-        "category": "Dp",
-        "acquired": 1,
-        "equip": 0
-      }
-    ]
-  },
-  "petwing": {
-    "pet": {
-      "id": 1066,
-      "name": "帕皮斯",
-      "level": 5,
-      "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Papis_01.png"
-    },
-    "wing": {
-      "id": 30200701,
-      "name": "德拉玛塔巢穴翅膀",
-      "enchantLevel": 0,
-      "grade": "Unique",
-      "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_WingB_007A.png"
-    },
-    "wingSkin": {
-      "id": 30600100,
-      "name": "妖精之梦翅膀",
-      "enchantLevel": 0,
-      "grade": "Rare",
-      "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_WingF_001.png"
-    }
-  },
   "equipment": {
     "equipmentList": [
       {
@@ -3650,6 +3284,372 @@
         "slotPos": 1,
         "slotPosName": "Helmet",
         "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Equip_AR_L_Priest_01_Helmet.png"
+      }
+    ]
+  },
+  "petwing": {
+    "pet": {
+      "id": 1066,
+      "name": "帕皮斯",
+      "level": 5,
+      "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Papis_01.png"
+    },
+    "wing": {
+      "id": 30200701,
+      "name": "德拉玛塔巢穴翅膀",
+      "enchantLevel": 0,
+      "grade": "Unique",
+      "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_WingB_007A.png"
+    },
+    "wingSkin": {
+      "id": 30600100,
+      "name": "妖精之梦翅膀",
+      "enchantLevel": 0,
+      "grade": "Rare",
+      "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_WingF_001.png"
+    }
+  },
+  "skill": {
+    "skillList": [
+      {
+        "id": 14020000,
+        "name": "狙击",
+        "needLevel": 1,
+        "skillLevel": 21,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_001.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 14340000,
+        "name": "速射",
+        "needLevel": 1,
+        "skillLevel": 20,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_034.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 14130000,
+        "name": "套索箭",
+        "needLevel": 1,
+        "skillLevel": 15,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_013.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 14090000,
+        "name": "目标箭",
+        "needLevel": 3,
+        "skillLevel": 14,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_031.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14050000,
+        "name": "利锥箭",
+        "needLevel": 4,
+        "skillLevel": 17,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_005.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14330000,
+        "name": "箭矢扫射",
+        "needLevel": 5,
+        "skillLevel": 16,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_033.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 14110000,
+        "name": "狂风箭",
+        "needLevel": 7,
+        "skillLevel": 14,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_011.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 14170000,
+        "name": "爆炸圈套",
+        "needLevel": 8,
+        "skillLevel": 8,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_017.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 14080000,
+        "name": "破裂箭",
+        "needLevel": 10,
+        "skillLevel": 17,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_008.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 14070000,
+        "name": "压制箭",
+        "needLevel": 12,
+        "skillLevel": 6,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_007.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14010000,
+        "name": "瞄准箭",
+        "needLevel": 14,
+        "skillLevel": 20,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_002.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 14260000,
+        "name": "冲击解除",
+        "needLevel": 16,
+        "skillLevel": 12,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_002.png",
+        "category": "Active",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14710000,
+        "name": "警戒之眼",
+        "needLevel": 1,
+        "skillLevel": 19,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_004.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14720000,
+        "name": "集中砲火",
+        "needLevel": 6,
+        "skillLevel": 17,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_003.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14730000,
+        "name": "风之活力",
+        "needLevel": 9,
+        "skillLevel": 5,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_006.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14740000,
+        "name": "集中之眼",
+        "needLevel": 11,
+        "skillLevel": 20,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_001.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14750000,
+        "name": "猎人决心",
+        "needLevel": 13,
+        "skillLevel": 22,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_011.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14760000,
+        "name": "抵抗决心",
+        "needLevel": 15,
+        "skillLevel": 11,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_012.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14770000,
+        "name": "束缚之眼",
+        "needLevel": 17,
+        "skillLevel": 20,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_008.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14780000,
+        "name": "近距离射击",
+        "needLevel": 21,
+        "skillLevel": 17,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_013.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14790000,
+        "name": "回生契约",
+        "needLevel": 23,
+        "skillLevel": 9,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_009.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14800000,
+        "name": "猎人之魂",
+        "needLevel": 25,
+        "skillLevel": 21,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_Passive_007.png",
+        "category": "Passive",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14270000,
+        "name": "箭矢暴风",
+        "needLevel": 22,
+        "skillLevel": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_026.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 14310000,
+        "name": "白杰尔权能",
+        "needLevel": 22,
+        "skillLevel": 13,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_022.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 14220000,
+        "name": "祝福之弓",
+        "needLevel": 22,
+        "skillLevel": 15,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_030.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 14120000,
+        "name": "突袭踢",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_012.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14180000,
+        "name": "结缚圈套",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_018.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14150000,
+        "name": "睡眠箭",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_015.png",
+        "category": "Dp",
+        "acquired": 0,
+        "equip": 0
+      },
+      {
+        "id": 14190000,
+        "name": "隐身",
+        "needLevel": 22,
+        "skillLevel": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_019.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14160000,
+        "name": "封印箭",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_016.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14350000,
+        "name": "大自然吐息",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_035.png",
+        "category": "Dp",
+        "acquired": 0,
+        "equip": 0
+      },
+      {
+        "id": 14060000,
+        "name": "葛利芬箭",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_006.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 0
+      },
+      {
+        "id": 14360000,
+        "name": "爆炸箭",
+        "needLevel": 22,
+        "skillLevel": 5,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_RA_SKILL_023.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 1
+      },
+      {
+        "id": 14700000,
+        "name": "强袭强击",
+        "needLevel": 22,
+        "skillLevel": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_003.png",
+        "category": "Dp",
+        "acquired": 1,
+        "equip": 0
       }
     ]
   }

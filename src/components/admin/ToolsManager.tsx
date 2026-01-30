@@ -49,8 +49,7 @@ const ToolsManager: React.FC = () => {
       } else {
         showMessage('error', '加载配置失败');
       }
-    } catch (error) {
-      console.error('加载配置失败:', error);
+    } catch {
       showMessage('error', '加载配置失败');
     } finally {
       setLoading(false);
@@ -74,8 +73,7 @@ const ToolsManager: React.FC = () => {
         showMessage('error', data.error || '保存失败');
         return false;
       }
-    } catch (error) {
-      console.error('保存配置失败:', error);
+    } catch {
       showMessage('error', '保存配置失败');
       return false;
     } finally {

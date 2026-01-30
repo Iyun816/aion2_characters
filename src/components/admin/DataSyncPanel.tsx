@@ -31,8 +31,8 @@ const DataSyncPanel: React.FC = () => {
     try {
       const data = await loadMembers();
       setMembers(data);
-    } catch (error) {
-      console.error('加载成员列表失败:', error);
+    } catch {
+      // 加载成员列表失败
     }
   };
 

@@ -39,8 +39,8 @@ const MemberManager: React.FC = () => {
     try {
       const data = await loadMembers();
       setMembers(data);
-    } catch (error) {
-      console.error('加载成员列表失败:', error);
+    } catch {
+      // 加载成员列表失败
     } finally {
       setLoading(false);
     }
@@ -76,14 +76,8 @@ const MemberManager: React.FC = () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(memberData)
-        }).then(response => {
-          if (response.ok) {
-            console.log(`成员 ${memberData.name} 的角色数据同步成功`);
-          } else {
-            console.warn(`成员 ${memberData.name} 的角色数据同步失败`);
-          }
-        }).catch(error => {
-          console.error(`成员 ${memberData.name} 的角色数据同步失败:`, error);
+        }).catch(() => {
+          // 角色数据同步失败
         });
       } else {
         const updated = await updateMember(members, memberData);

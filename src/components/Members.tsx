@@ -27,8 +27,8 @@ const Members = () => {
       if (data.success) {
         setGalleryImages(data.data);
       }
-    } catch (error) {
-      console.error('加载首页相册失败:', error);
+    } catch {
+      // 加载首页相册失败
     }
   };
 

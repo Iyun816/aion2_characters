@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import type { MemberConfig } from '../../types/admin';
+import type { Server } from '../../data/serverList';
 import ServerSelect from '../ServerSelect';
 import './MemberEditModal.css';
 
@@ -20,11 +21,7 @@ const MemberEditModal: React.FC<MemberEditModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<MemberConfig>(member);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [serverList, setServerList] = useState<Array<{
-    serverId: number;
-    serverName: string;
-    raceId: number;
-  }>>([]);
+  const [serverList, setServerList] = useState<Server[]>([]);
 
   useEffect(() => {
     setFormData(member);
@@ -37,8 +34,8 @@ const MemberEditModal: React.FC<MemberEditModalProps> = ({
         const response = await fetch(`/data/serverId.json?t=${Date.now()}`);
         const data = await response.json();
         setServerList(data.serverList || []);
-      } catch (error) {
-        console.error('加载服务器列表失败:', error);
+      } catch {
+        // 加载服务器列表失败
       }
     };
     loadServers();

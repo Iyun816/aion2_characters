@@ -1,11 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import type { Server } from '../data/serverList';
 import './ServerSelect.css';
-
-interface Server {
-  serverId: number;
-  serverName: string;
-  raceId: number;
-}
 
 interface ServerSelectProps {
   value: string;

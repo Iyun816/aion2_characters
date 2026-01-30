@@ -106,8 +106,8 @@ const LegionPage = () => {
               const data: CharacterInfo = await res.json();
               return { ...config, profile: data.profile };
             }
-          } catch (error) {
-            console.warn(`成员 ${config.name} 的详细数据加载失败,将只显示基本信息`);
+          } catch {
+            // 成员详细数据加载失败,将只显示基本信息
           }
           return config;
         })
@@ -116,8 +116,8 @@ const LegionPage = () => {
       setMembersData(loaded);
       localStorage.setItem(MEMBERS_CACHE_KEY, JSON.stringify(loaded));
       localStorage.setItem(MEMBERS_CACHE_TIME_KEY, Date.now().toString());
-    } catch (e) {
-      console.error('加载成员数据失败', e);
+    } catch {
+      // 加载成员数据失败
     } finally {
       setLoading(false);
     }
@@ -152,16 +152,16 @@ const LegionPage = () => {
             setCopySuccess(true);
             setTimeout(() => setCopySuccess(false), 2000);
           } else {
-            console.error('复制命令执行失败');
+            // 复制命令执行失败
           }
-        } catch (err) {
-          console.error('复制失败:', err);
+        } catch {
+          // 复制失败
         } finally {
           document.body.removeChild(textArea);
         }
       }
-    } catch (error) {
-      console.error('复制失败:', error);
+    } catch {
+      // 复制失败
     }
   };
 
@@ -174,8 +174,8 @@ const LegionPage = () => {
         if (data.success) {
           setVoiceConfig(data.data);
         }
-      } catch (error) {
-        console.error('加载语音配置失败:', error);
+      } catch {
+        // 加载语音配置失败
       }
     };
     loadVoiceConfig();
@@ -196,8 +196,8 @@ const LegionPage = () => {
       if (data.success) {
         setGalleryImages(data.data);
       }
-    } catch (error) {
-      console.error('加载相册失败:', error);
+    } catch {
+      // 加载相册失败
     }
   };
 
@@ -222,12 +222,12 @@ const LegionPage = () => {
         const data = await response.json();
 
         if (data.success) {
-          console.log('上传成功:', data.data);
+          // 上传成功,重新加载图片列表
         } else {
-          console.error('上传失败:', data.error);
+          // 上传失败
         }
-      } catch (error) {
-        console.error('上传错误:', error);
+      } catch {
+        // 上传错误
       }
     }
 
